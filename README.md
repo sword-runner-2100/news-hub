@@ -27,8 +27,10 @@ GitHub Actions 定时触发（每天 UTC 01:00 / 13:00，即北京 09:00 / 21:00
 
 - **不用 Google News 的链接做直链**：它是加密的 protobuf 中转地址（`news.google.com/rss/articles/CBMi...`），只能逆向 Google 内部接口解码，太脆弱。浏览器点击仍能跳转原文。
 - **Bing 只抓英文**：实测 `setmkt=zh-CN` 时 Bing 返回 HTML 而非 RSS。
-- **摘要不靠 AI 编造**：全部来自 Bing 的正文片段。抓到英文后，用 GitHub Models **翻译**成中文——翻译是保真操作，不改变事实，也不补充原文没有的信息。没有 `GITHUB_TOKEN` 时自动降级为保留英文。
-- **垃圾过滤**：博彩/SEO 站会把广告词混进 Google News，脚本内置关键词与来源黑名单，自动丢弃。
+- **摘要不靠 AI 编造**：全部来自 Bing 的正文片段，不做任何推测或补充。
+- **中文优先**：排序时中文标题 +200 分、有摘要 +100 分、正规媒体 +50 分。实测每个话题 8 条里通常 7 条以上是中文标题，其余是带真实英文摘要的条目。
+- **没有 AI 翻译**：原本打算用 GitHub Models 把英文摘要译成中文，但它已按计划退役，服务端直接返回 `410 github_models_retirement_brownout`。`--translate` 参数保留着，将来有替代推理服务时可直接启用。
+- **垃圾过滤**（必须做）：博彩/SEO 站会把广告词混进 Google News 中文源，实测「育碧」24 条里能有 15 条是这类垃圾。脚本内置关键词黑名单、来源黑名单，以及标题竖线数判定，自动丢弃。
 
 ### Steam 在线人数
 
@@ -89,19 +91,29 @@ python3 scripts/fetch_steam.py               # 刷新 Steam 数据
 
 ## 部署步骤
 
+已部署完成，当前线上：
+
+- **网址**：https://sword-runner-2100.github.io/news-hub/
+- **仓库**：https://github.com/sword-runner-2100/news-hub
+- **Pages 来源**：main 分支根目录
+
+若要在别处重新部署：
+
 1. 在 GitHub 上新建一个**空仓库**（不要勾选 README / .gitignore）
-2. 把本目录推上去：
+2. 在本目录执行 `bash setup.sh`，会自动完成登录、建仓、推送、开启 Pages
+3. 或手动：
    ```bash
-   git remote add origin git@github.com:<用户名>/<仓库名>.git
+   git remote add origin https://github.com/<用户名>/<仓库名>.git
    git branch -M main
    git push -u origin main
    ```
-3. 进入仓库 **Settings → Pages**，Source 选 `Deploy from a branch`，Branch 选 `main`、目录选 `/ (root)`，保存
-4. 等 1–2 分钟，访问 `https://<用户名>.github.io/<仓库名>/`
+   然后到 **Settings → Pages**，Source 选 `Deploy from a branch`，Branch 选 `main`、目录选 `/ (root)`
 
-想立刻验证的话，到 **Actions** 标签页手动点一次 `刷新新闻汇总台`（workflow_dispatch 已开启）。
+想立刻验证，到 **Actions** 标签页手动点一次 `刷新新闻汇总台`（`workflow_dispatch` 已开启）。
 
-## 关于 GitHub Models 翻译
+## 已知限制
 
-workflow 里已声明 `models: read` 权限，`secrets.GITHUB_TOKEN` 会自动注入，**不需要额外配置任何 API key**。
-如果不想用翻译，把 workflow 里 `fetch_news.py` 那一步加上 `--no-translate` 即可。
+- **新闻链接**：Google 源的条目是 `news.google.com` 中转地址，浏览器点击会自动跳转到原文，但不是原文直链。Bing 源的条目已解析成真实直链。
+- **无 AI 翻译**：GitHub Models 退役后，英文条目保留英文原文。中文标题由 Google 中文源直接提供。
+- **摘要覆盖率**：只有 Bing 源给摘要，所以约一半条目有摘要，其余只有标题。
+- **Actions 推送冲突**：如果本地也改了 `index.html`，推送前记得先 `git pull --rebase`，因为 Actions 会往同一个分支提交。
