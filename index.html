@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-view="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B0E14">
+<title>每日新闻汇总台 · 育碧 / Temu</title>
+<!-- 本工作台通过 WorkBuddy 资料库能力（library skill）搭建、存储和部署 -->
+<script>
+(function(){
+  try{
+    var v = localStorage.getItem('wb_newshub_view_v1') || 'auto';
+    var w = window.innerWidth;
+    var isMobile = (v === 'mobile') || (v === 'auto' && w <= 768);
+    document.documentElement.setAttribute('data-view', v);
+    if(isMobile){ document.documentElement.classList.add('is-mobile'); }
+  }catch(e){}
+})();
+</script>
+<style>
+:root{
+  --bg:#0B0E14;
+  --bg2:#0F131C;
+  --panel:#141926;
+  --panel2:#1A2030;
+  --border:#232B3D;
+  --border2:#2E384E;
+  --t1:#E8ECF5;
+  --t2:#9AA5BC;
+  --t3:#68738C;
+  --acc1:#7E8CFF;
+  --acc2:#A66BFF;
+  --grad:linear-gradient(135deg,#7E8CFF 0%,#A66BFF 100%);
+  --emerald:#34D399;
+  --emerald-dim:rgba(52,211,153,.14);
+  --red:#FF5C6C;
+  --red-dim:rgba(255,92,108,.13);
+  --amber:#F5A524;
+  --amber-dim:rgba(245,165,36,.13);
+  --ubi:#7E8CFF;
+  --ubi-dim:rgba(126,140,255,.14);
+  --temu:#34D399;
+  --temu-dim:rgba(52,211,153,.13);
+  --r:14px;
+  --r-s:10px;
+  --shadow:0 8px 28px rgba(0,0,0,.42);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1100px 520px at 12% -8%, rgba(126,140,255,.11), transparent 60%),
+    radial-gradient(900px 460px at 92% 4%, rgba(166,107,255,.09), transparent 62%),
+    var(--bg);
+  color:var(--t1);
+  font-family:var(--font);
+  font-size:15px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2A3346;border-radius:9px}
+::-webkit-scrollbar-thumb:hover{background:#3A465E}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  position:sticky;top:0;z-index:60;
+  background:rgba(11,14,20,.82);
+  backdrop-filter:saturate(180%) blur(18px);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-in{
+  max-width:1500px;margin:0 auto;padding:12px 22px;
+  display:flex;align-items:center;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{
+  width:38px;height:38px;border-radius:11px;flex:none;
+  background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 5px 18px rgba(126,140,255,.34);
+}
+.logo svg{width:21px;height:21px;display:block}
+.brand-txt{min-width:0}
+.brand-txt h1{
+  margin:0;font-size:17px;font-weight:700;letter-spacing:.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.brand-txt p{margin:1px 0 0;font-size:11.5px;color:var(--t3);letter-spacing:.4px}
+.spacer{flex:1}
+
+.sync{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 12px;border-radius:999px;
+  background:var(--emerald-dim);border:1px solid rgba(52,211,153,.28);
+  font-size:12px;color:var(--emerald);white-space:nowrap;
+}
+.sync .dot{width:7px;height:7px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite}
+.sync.off{background:var(--amber-dim);border-color:rgba(245,165,36,.3);color:var(--amber)}
+.sync.off .dot{background:var(--amber)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+
+.iconbtn{
+  width:38px;height:38px;border-radius:10px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--panel);border:1px solid var(--border);
+  color:var(--t2);transition:.18s;
+}
+.iconbtn:hover{background:var(--panel2);color:var(--t1);border-color:var(--border2)}
+.iconbtn svg{width:17px;height:17px}
+.iconbtn.on{background:var(--grad);color:#fff;border-color:transparent}
+
+.viewswitch{
+  display:flex;gap:2px;padding:3px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--border);
+}
+.viewswitch button{
+  padding:6px 11px;border-radius:8px;font-size:12px;color:var(--t3);
+  display:flex;align-items:center;gap:5px;transition:.16s;white-space:nowrap;
+}
+.viewswitch button svg{width:14px;height:14px}
+.viewswitch button.on{background:var(--grad);color:#fff}
+.viewswitch button:not(.on):hover{color:var(--t1)}
+
+.menuwrap{position:relative}
+.menu{
+  position:absolute;right:0;top:46px;z-index:80;
+  width:214px;padding:7px;border-radius:13px;
+  background:var(--panel2);border:1px solid var(--border2);
+  box-shadow:var(--shadow);display:none;
+}
+.menu.open{display:block}
+.menu button{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:10px 11px;border-radius:9px;font-size:13.5px;color:var(--t2);
+  text-align:left;transition:.14s;
+}
+.menu button svg{width:16px;height:16px;flex:none}
+.menu button:hover{background:#222A3C;color:var(--t1)}
+.menu button.danger:hover{background:var(--red-dim);color:var(--red)}
+.menu hr{border:none;border-top:1px solid var(--border);margin:6px 4px}
+
+/* ---------- 主体框架 ---------- */
+.wrap{max-width:1500px;margin:0 auto;padding:20px 22px 60px}
+.layout{display:grid;grid-template-columns:288px minmax(0,1fr);gap:22px;align-items:start}
+
+.btn{
+  padding:8px 15px;border-radius:9px;font-size:13px;font-weight:600;
+  background:var(--panel2);border:1px solid var(--border);color:var(--t2);transition:.16s;
+  display:inline-flex;align-items:center;gap:7px;
+}
+.btn svg{width:15px;height:15px}
+.btn:hover{border-color:var(--acc1);color:var(--t1)}
+.btn.primary{background:var(--grad);color:#fff;border-color:transparent}
+.btn.primary:hover{filter:brightness(1.1)}
+
+/* ---------- 侧栏 ---------- */
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:82px}
+.card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r);padding:15px 16px;
+}
+.card h3{
+  margin:0 0 12px;font-size:12px;font-weight:700;color:var(--t3);
+  letter-spacing:1.1px;text-transform:uppercase;
+  display:flex;align-items:center;gap:7px;
+}
+.card h3 svg{width:14px;height:14px}
+.filters{display:flex;flex-direction:column;gap:7px}
+.filt{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:10px 12px;border-radius:var(--r-s);font-size:13.5px;color:var(--t2);
+  border:1px solid transparent;transition:.16s;text-align:left;
+}
+.filt .sw{width:8px;height:8px;border-radius:50%;flex:none}
+.filt .cnt{margin-left:auto;font-size:11.5px;color:var(--t3);font-variant-numeric:tabular-nums}
+.filt:hover{background:var(--panel2);color:var(--t1)}
+.filt.on{background:var(--panel2);border-color:var(--border2);color:var(--t1);font-weight:600}
+.filt.on .cnt{color:var(--acc1)}
+.filt svg{width:15px;height:15px;flex:none}
+
+.searchbox{position:relative;margin-bottom:0}
+.searchbox svg{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;color:var(--t3);pointer-events:none;
+}
+.searchbox input{
+  width:100%;padding:11px 13px 11px 35px;border-radius:var(--r-s);
+  background:var(--bg2);border:1px solid var(--border);color:var(--t1);
+  font-size:16px;outline:none;transition:.16s;
+}
+.searchbox input:focus{border-color:var(--acc1);background:var(--panel)}
+.searchbox input::placeholder{color:var(--t3);font-size:13.5px}
+
+.chart{margin-top:2px}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.legend{display:flex;gap:14px;margin-top:10px;font-size:11.5px;color:var(--t3)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:3px;display:block}
+
+.acts{display:flex;flex-direction:column;gap:7px}
+.acts .btn{width:100%;justify-content:center}
+.note{font-size:11.5px;color:var(--t3);line-height:1.6;margin-top:4px}
+
+.backup-tip{
+  display:none;align-items:center;gap:10px;
+  padding:11px 14px;border-radius:var(--r-s);margin-bottom:16px;
+  background:var(--amber-dim);border:1px solid rgba(245,165,36,.3);
+  color:#FFD083;font-size:13px;
+}
+.backup-tip.show{display:flex}
+.backup-tip svg{width:16px;height:16px;flex:none}
+.backup-tip button{margin-left:auto;flex:none;padding:5px 11px;border-radius:8px;background:rgba(245,165,36,.2);color:#FFD083;font-size:12px;font-weight:600}
+
+/* ---------- 时间线 ---------- */
+.tl-head{
+  display:flex;align-items:baseline;gap:11px;margin:0 0 15px;flex-wrap:wrap;
+}
+.tl-head h2{margin:0;font-size:16px;font-weight:700}
+.tl-head .sub{font-size:12.5px;color:var(--t3)}
+.daygroup{margin-bottom:26px}
+.daybar{
+  position:sticky;top:70px;z-index:30;
+  display:flex;align-items:center;gap:11px;
+  padding:7px 0 9px;margin-bottom:11px;
+  background:linear-gradient(180deg,var(--bg) 62%,rgba(11,14,20,0));
+}
+.daybar .d{
+  font-size:13px;font-weight:700;letter-spacing:.4px;
+  padding:4px 11px;border-radius:8px;background:var(--panel);border:1px solid var(--border);
+  font-variant-numeric:tabular-nums;
+}
+.daybar .d.today{background:var(--grad);border-color:transparent;color:#fff}
+.daybar .rel{font-size:11.5px;color:var(--t3)}
+.daybar .n{font-size:11.5px;color:var(--t3);margin-left:auto;font-variant-numeric:tabular-nums}
+.daybar .line{flex:1;height:1px;background:var(--border);min-width:20px}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+
+.item{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  padding:15px 16px;position:relative;transition:.2s;display:flex;flex-direction:column;
+  border-left:3px solid var(--border2);
+}
+.item:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.item.t-ubisoft{border-left-color:var(--ubi)}
+.item.t-temu{border-left-color:var(--temu)}
+.item.read{opacity:.52}
+.item.read:hover{opacity:.82}
+.item.starred{border-color:rgba(245,165,36,.42)}
+
+.item-top{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+.badge{
+  font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:6px;letter-spacing:.3px;flex:none;
+}
+.badge.b-ubisoft{background:var(--ubi-dim);color:var(--ubi)}
+.badge.b-temu{background:var(--temu-dim);color:var(--temu)}
+.cat{font-size:10.5px;color:var(--t3);padding:3px 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);flex:none}
+.item-acts{margin-left:auto;display:flex;gap:3px;flex:none}
+.mini{
+  width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  color:var(--t3);transition:.15s;
+}
+.mini svg{width:15px;height:15px}
+.mini:hover{background:var(--panel2);color:var(--t1)}
+.mini.on{color:var(--amber)}
+.mini.done{color:var(--emerald)}
+
+.item h4{
+  margin:0 0 8px;font-size:14.5px;font-weight:650;line-height:1.55;color:var(--t1);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.item.read h4{font-weight:500}
+.item p{
+  margin:0 0 12px;font-size:12.8px;color:var(--t2);line-height:1.68;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+}
+.meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;color:var(--t3);margin-top:auto;padding-top:11px;border-top:1px solid var(--border)}
+.meta .src{
+  color:var(--t2);font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.meta .sep{width:3px;height:3px;border-radius:50%;background:var(--t3);flex:none}
+.meta .time{font-variant-numeric:tabular-nums}
+.linkbtn{
+  margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;
+  padding:5px 11px;border-radius:8px;font-size:11.5px;font-weight:600;
+  background:var(--bg2);border:1px solid var(--border);color:var(--t2);transition:.16s;
+}
+.linkbtn svg{width:12px;height:12px}
+.linkbtn:hover{background:var(--grad);color:#fff;border-color:transparent}
+
+.empty{
+  text-align:center;padding:64px 20px;color:var(--t3);
+}
+.empty svg{width:46px;height:46px;opacity:.35;margin-bottom:14px}
+.empty p{margin:0;font-size:14px}
+
+/* ---------- 移动端 ---------- */
+html.is-mobile .wrap{padding:14px 14px calc(84px + env(safe-area-inset-bottom))}
+html.is-mobile .topbar-in{padding:10px 14px;gap:10px}
+html.is-mobile .brand-txt h1{font-size:15.5px}
+html.is-mobile .brand-txt p{display:none}
+html.is-mobile .logo{width:34px;height:34px;border-radius:10px}
+html.is-mobile .sync span{display:none}
+html.is-mobile .sync{padding:8px 10px}
+html.is-mobile .layout{display:flex;flex-direction:column;gap:14px}
+html.is-mobile .side{position:static;gap:12px;order:1}
+html.is-mobile .main{order:2}
+html.is-mobile .grid{grid-template-columns:1fr;gap:11px}
+html.is-mobile .daybar{top:58px;padding:6px 0 8px}
+html.is-mobile .filters{
+  flex-direction:row;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  padding-bottom:2px;scrollbar-width:none;
+}
+html.is-mobile .filters::-webkit-scrollbar{display:none}
+html.is-mobile .filt{
+  flex:none;width:auto;padding:9px 14px;border-radius:999px;
+  background:var(--bg2);border:1px solid var(--border);min-height:40px;
+}
+html.is-mobile .filt .cnt{display:none}
+html.is-mobile .filt.on{background:var(--grad);border-color:transparent;color:#fff}
+html.is-mobile .filt.on .cnt{display:inline;color:rgba(255,255,255,.75)}
+html.is-mobile .searchbox input{font-size:16px;padding:12px 13px 12px 35px}
+html.is-mobile .acts{flex-direction:row;flex-wrap:wrap}
+html.is-mobile .acts .btn{width:auto;flex:1 1 46%;min-height:44px;justify-content:center}
+html.is-mobile .card{padding:13px 14px}
+html.is-mobile .item{padding:14px 14px}
+html.is-mobile .item h4{font-size:15px;-webkit-line-clamp:4}
+html.is-mobile .item p{font-size:13px;-webkit-line-clamp:5}
+html.is-mobile .mini{width:36px;height:36px}
+html.is-mobile .mini svg{width:17px;height:17px}
+html.is-mobile .linkbtn{padding:8px 13px;font-size:12.5px;min-height:36px}
+html.is-mobile .meta .src{max-width:110px}
+html.is-mobile .tl-head h2{font-size:15px}
+html.is-mobile .note{display:none}
+html.is-mobile .chart svg{height:110px}
+
+/* ---------- Steam 在线人数 ---------- */
+.steam-panel{
+  background:linear-gradient(150deg,rgba(52,211,153,.08),rgba(126,140,255,.05) 55%,transparent);
+  border:1px solid rgba(52,211,153,.2);
+  border-radius:var(--r);padding:18px 20px;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.steam-panel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#34D399,#7E8CFF)}
+.steam-head{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:14px}
+.steam-head h2{margin:0;font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.steam-head h2 svg{width:17px;height:17px;color:var(--emerald)}
+.steam-head .upd{margin-left:auto;font-size:12px;color:var(--t3);font-variant-numeric:tabular-nums}
+.steam-head .upd b{color:var(--t2);font-weight:600}
+
+/* 每个游戏一个独立区块：头部指标 + 自己的折线图 + 自己的日度表 */
+.gpanels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.gpanel{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;
+}
+.gpanel .gp-head{display:flex;align-items:flex-start;gap:10px;padding:13px 15px;border-bottom:1px solid var(--border)}
+.gpanel .gp-bar{height:3px;flex:none}
+.gavatar{
+  width:34px;height:34px;border-radius:9px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:#fff;
+}
+.gtitle{min-width:0;flex:1}
+.gtitle .n{font-size:14px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gtitle .s{font-size:11px;color:var(--t3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gkpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 15px 0}
+.gkpi{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+.gkpi .n{font-size:17px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.gkpi .l{font-size:10.5px;color:var(--t3);margin-top:1px;white-space:nowrap}
+.gkpi.live .n{color:var(--emerald)}
+.gkpi.d24 .n{color:var(--amber)}
+.gkpi.atp .n{color:var(--acc1)}
+.livedot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--emerald);margin-right:5px;vertical-align:middle;animation:pulse 2s infinite}
+
+.gp-chart{padding:13px 12px 4px;position:relative}
+.gp-chart svg{width:100%;height:auto;display:block;overflow:visible}
+.gp-chart circle[data-d]{cursor:pointer}
+.gp-chart circle[data-d]:hover{stroke-width:3}
+.gp-note{font-size:11px;color:var(--t3);padding:2px 15px 12px;display:flex;gap:5px;flex-wrap:wrap}
+
+/* 悬浮数据气泡 */
+.gtip{
+  position:absolute;z-index:20;left:0;top:0;
+  transform:translate(-50%,-100%) translateY(-10px);
+  background:rgba(16,21,32,.97);border:1px solid var(--border2);
+  border-radius:10px;padding:8px 11px;pointer-events:none;
+  box-shadow:0 10px 26px rgba(0,0,0,.5);
+  opacity:0;transition:opacity .13s;white-space:nowrap;
+}
+.gtip.on{opacity:1}
+.gtip .gt-d{font-size:11.5px;font-weight:700;color:var(--t1);margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.gtip .gt-d span{color:var(--t3);font-weight:400;margin-left:5px}
+.gtip .gt-r{display:flex;align-items:center;gap:14px;font-size:11.5px;line-height:1.7}
+.gtip .gt-r span{color:var(--t3)}
+.gtip .gt-r b{margin-left:auto;color:var(--t1);font-variant-numeric:tabular-nums}
+.gtip .gt-r b.hl{color:var(--acc1)}
+.gtip::after{
+  content:"";position:absolute;left:50%;bottom:-5px;width:9px;height:9px;
+  transform:translateX(-50%) rotate(45deg);
+  background:rgba(16,21,32,.97);
+  border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);
+}
+.srcnote{font-size:11.5px;color:var(--t3);margin-top:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.srcnote a{color:var(--t2);text-decoration:underline;text-decoration-color:var(--border2)}
+.srcnote a:hover{color:var(--acc1)}
+
+html.is-mobile .steam-panel{padding:15px 14px;margin-bottom:14px}
+html.is-mobile .gpanels{grid-template-columns:1fr;gap:11px}
+html.is-mobile .gkpi .n{font-size:16px}
+
+/* 底部 Tab（移动端） */
+.tabbar{display:none}
+html.is-mobile .tabbar{
+  display:flex;position:fixed;left:0;right:0;bottom:0;z-index:70;
+  background:rgba(15,19,28,.94);
+  backdrop-filter:saturate(180%) blur(18px);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  border-top:1px solid var(--border);
+  padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+}
+html.is-mobile .tabbar button{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:7px 2px;border-radius:10px;font-size:10.5px;color:var(--t3);min-height:50px;
+  transition:.15s;
+}
+html.is-mobile .tabbar button svg{width:20px;height:20px}
+html.is-mobile .tabbar button.on{color:var(--acc1);background:rgba(126,140,255,.1)}
+
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);
+  z-index:200;padding:11px 20px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--border2);box-shadow:var(--shadow);
+  font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* 顶栏布局切换：宽屏用三档开关，窄屏收成一个单键切换 */
+.viewtoggle{display:none;position:relative}
+.viewtoggle .auto-dot{
+  position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;
+  background:var(--acc1);box-shadow:0 0 0 2px var(--panel);display:none;
+}
+.viewtoggle.auto .auto-dot{display:block}
+
+@media (max-width:1180px){
+  .grid{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  .viewswitch{display:none}
+  .viewtoggle{display:flex}
+}
+@media (max-width:900px) and (min-width:769px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static}
+  .filters{flex-direction:row;flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h11a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M18 8h2a2 2 0 0 1 2 2v10a2 2 0 0 0-2-2"/>
+        </svg>
+      </div>
+      <div class="brand-txt">
+        <h1>每日新闻汇总台</h1>
+        <p>UBISOFT · TEMU 每日 24H 自动抓取</p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="sync" id="sync">
+      <span class="dot"></span><span id="syncTxt">已同步</span>
+    </div>
+    <div class="viewswitch" id="viewswitch">
+      <button data-v="auto" class="on">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>自动
+      </button>
+      <button data-v="desktop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>电脑
+      </button>
+      <button data-v="mobile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>手机
+      </button>
+    </div>
+    <button class="iconbtn viewtoggle" id="viewToggle" aria-label="切换布局">
+      <span class="auto-dot"></span>
+    </button>
+    <div class="menuwrap">
+      <button class="iconbtn" id="menuBtn" aria-label="更多">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+      </button>
+      <div class="menu" id="menu">
+        <button data-act="export-json">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>导出 JSON 备份
+        </button>
+        <button data-act="export-csv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>导出 CSV 表格
+        </button>
+        <button data-act="import">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 8l5-5 5 5M12 3v12"/></svg>导入恢复
+        </button>
+        <hr>
+        <button data-act="readall">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>全部标记已读
+        </button>
+        <button data-act="readnone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>全部标记未读
+        </button>
+        <hr>
+        <button data-act="clear" class="danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>清空全部数据
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="backup-tip" id="backupTip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+    <span id="backupTipTxt"></span>
+    <button data-act="export-json">立即导出</button>
+  </div>
+
+  <section class="steam-panel">
+    <div class="steam-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        Steam 玩家在线人数
+      </h2>
+      <span class="upd" id="steamUpd"></span>
+    </div>
+    <div class="gpanels" id="gpanels"></div>
+    <div class="srcnote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+      数据来源
+      <a href="https://steamcharts.com/app/2507950" target="_blank" rel="noopener noreferrer">SteamCharts · 三角洲行动</a>
+      <a href="https://steamcharts.com/app/2073620" target="_blank" rel="noopener noreferrer">SteamCharts · 暗区突围：无限</a>
+      <span>· 每日峰值 = 当天最高同时在线，均值 = 当天 24 次采样的平均；按 UTC 日期分日</span>
+    </div>
+  </section>
+
+  <div class="layout">
+    <aside class="side">
+      <div class="card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          话题筛选
+        </h3>
+        <div class="filters" id="filters"></div>
+      </div>
+
+      <div class="card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          全文搜索
+        </h3>
+        <div class="searchbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="q" placeholder="搜索标题 / 摘要 / 来源…">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+          近 7 日抓取量
+        </h3>
+        <div class="chart" id="chart"></div>
+        <div class="legend">
+          <span><i style="background:#7E8CFF"></i>育碧</span>
+          <span><i style="background:#34D399"></i>Temu</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>
+          <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M7 8l5-5 5 5"/></svg>
+          数据操作
+        </h3>
+        <div class="acts">
+          <button class="btn" data-act="export-json">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>导出 JSON
+          </button>
+          <button class="btn" data-act="import">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 8l5-5 5 5M12 3v12"/></svg>导入恢复
+          </button>
+          <button class="btn" data-act="readall">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>全部已读
+          </button>
+        </div>
+        <p class="note">数据每 24 小时自动抓取一次并写入本页，最新一天永远置顶。当前为本地存储模式，清理浏览器缓存前请先导出备份。</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="tl-head">
+        <h2>新闻时间线</h2>
+        <span class="sub" id="tlSub"></span>
+      </div>
+      <div id="timeline"></div>
+    </main>
+  </div>
+</div>
+
+<nav class="tabbar" id="tabbar">
+  <button data-topic="all" class="on">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>全部
+  </button>
+  <button data-topic="ubisoft">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><rect x="2" y="6" width="20" height="12" rx="4"/></svg>育碧
+  </button>
+  <button data-topic="temu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Temu
+  </button>
+  <button data-topic="star">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>星标
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" accept=".json,application/json" style="display:none">
+
+<script>
+/* <<<SEED_DATA_START>>> */
+const SEED_DATA = [
+  {
+    "id": "ubisoft-20260830-https-news-ubisoft-com-en-us-article-5z4bnrnll55b7suu55e1sm-",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "产品",
+    "title": "《彩虹六号：围攻》社区沟通会：扩展宇宙、新干员 Noor 深度解析，并预告将有可玩干员死亡",
+    "summary": "育碧在 gamescom 期间发布社区沟通会，透露围攻宇宙将持续扩展，未来赛季会推出新功能、新剧情与新干员。团队正在重做人质模式，并计划继续推进 1v1 与 3v3 街机模式；最引人注目的是官方预告未来将有可玩干员死亡。",
+    "source": "Ubisoft News",
+    "url": "https://news.ubisoft.com/en-us/article/5z4BNRNLL55B7SuU55e1Sm/rainbow-six-siege-community-checkpoint-expanding-the-siege-universe-noor-deep-dive-and-a-glimpse-into-the-future",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "ubisoft-20260830-https-www-gameforceasia-com-news-ubisoft-confirms-multiple-a",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "战略",
+    "title": "育碧 CEO 确认多个《刺客信条》重制版正在开发中",
+    "summary": "Yves Guillemot 正式确认公司正在开发多款刺客信条重制版，将其定位为用现代 Anvil 引擎能力、翻新玩法与更高环境保真度重现历史场景的长期战略，而非一次性尝试。业内长期盛传《刺客信条IV：黑旗》正在做彻底重制，但育碧未单独确认具体作品与发售窗口。",
+    "source": "GameForceAsia",
+    "url": "https://www.gameforceasia.com/news/ubisoft-confirms-multiple-assassins-creed-remakes-are-in-development",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "ubisoft-20260830-https-www-gameforceasia-com-news-the-division-2-heads-back-t",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "产品",
+    "title": "《全境封锁 2》将重返纽约，推出中央公园资料片",
+    "summary": "育碧在 gamescom 周公布全境封锁 2 新章节，特工将重返纽约市中央公园。地图融合开阔的秋日植被、失控的民用休闲区与重兵设防的军事检查站、战壕和隔离区。这款 2019 年上线的长线射击游戏再获大投入，但具体发售日期与任务数量尚未公布。",
+    "source": "GameForceAsia",
+    "url": "https://www.gameforceasia.com/news/the-division-2-heads-back-to-new-york-with-central-park-expansion",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "ubisoft-20260830-https-m-thepaper-cn-newsdetail-forward-33974909",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "产品",
+    "title": "育碧成都联手上海主导《魔法门之英雄无敌 III 重制版》，基于 Snowdrop 引擎全 3D 重构",
+    "summary": "科隆展开幕夜直播上正式公布，这款 1999 年的经典回合策略 IP 将基于 Snowdrop 引擎完成全 3D 化重构，完整收录原版及《末日之刃》《死亡阴影》两大资料片，并兼容过去 25 年间玩家社区的数千张自制地图。预计 2027 年登陆多平台，提供完整简体中文字幕与全程中文配音。",
+    "source": "澎湃新闻",
+    "url": "https://m.thepaper.cn/newsDetail_forward_33974909",
+    "pubDate": ""
+  },
+  {
+    "id": "ubisoft-20260830-https-www-msn-com-en-us-news-other-no-microtransations-and-f",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "监管",
+    "title": "No Microtransations and Fully Single-Player: Rainbow Six Tactics is Ubisoft Back at its Finest",
+    "summary": "Rainbow Six Tactics reactions from Gamescom are buoying fan expectations of Ubisoft.",
+    "source": "Bing News",
+    "url": "https://www.msn.com/en-us/news/other/no-microtransations-and-fully-single-player-rainbow-six-tactics-is-ubisoft-back-at-its-finest/ar-AA2b5or8?ocid=BingNewsVerp",
+    "pubDate": "2026-08-27"
+  },
+  {
+    "id": "ubisoft-20260830-http-www-bing-com-news-apiclick-aspx-ref-fexrss-aid-tid-6a93",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "战略",
+    "title": "Ubisoft Sold A Game But Forgot To Include The Literal Game Part",
+    "summary": "Ubisoft will get a chance to redeem itself when it releases its full Heroes of Might and Magic 3 Remake next year. The remake will include updated 4K visuals, the original campaign, and both of the game’s two expansions to tell “one unified story, enhanced with a new prologue, epilogue, and cinematic scenes.”",
+    "source": "Bing News",
+    "url": "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a93dbd97ed84d8dbc1796ff65a39eb7&url=https%3a%2f%2fwww.gamespot.com%2farticles%2fubisoft-sold-a-game-but-forgot-to-include-the-literal-game-part%2f&c=5812093206084278072&mkt=en-us",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "ubisoft-20260830-https-news-google-com-rss-articles-cbmixkfvx3lxte9nam0wovzto",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "产品",
+    "title": "大厂3A项目、国产单机新作，“成都高新造” 游戏集群出海",
+    "summary": "",
+    "source": "thepaper.cn",
+    "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE9Nam0wOVZtOVZLZEtvSmRPQ2hCVG5uOFRyZkMtYXZxLThZQXlnTFAtQjg0TEtCY2N6WjNjRmhLSWhHckMzcTFoT055NUtXcDIwUGhQTFRqQXBfSG1Ha0E?oc=5",
+    "pubDate": "2026-08-30"
+  },
+  {
+    "id": "ubisoft-20260830-https-news-google-com-rss-articles-cbmihajbvv95cuxqz0n0rtn4b",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "战略",
+    "title": "Rainbow Six Siege Community Checkpoint: Expanding the Siege Universe, Noor Deep Dive, and a Glimpse Into the Future",
+    "summary": "",
+    "source": "Ubisoft",
+    "url": "https://news.google.com/rss/articles/CBMihAJBVV95cUxQZ0N0RTN4blpmWVlPdmVrSzBBMHN5ZEo2X3NsMEtKcmdlYWhwbHlEWVB6YVBRYlRxV0Ytc0tPZmVRT29hVjNxbFBDUjBpOERGem5jT3h5VlhqeUlfb0pQZDhYWjY5U3Rmc3lxekdZSGtGNUdvdUxCUnRnd2xaZjJMSm9EZ0VBRDZDVnZjbFBEZHlDYlhiZU0wMFprYUZjR1Q3SGgzQVRmZkJfWlR4eWVOSlRpMnk3Y01Uc3FtdHVxa3l4ZkdKMlpLanA0S1lBdEk1ZUNsYm5uWVVSRWZ6MmlNbkRWamE0bHl1MW92WEoxN2ZFeElXRUw2TXRoRFp3M3h3dDA4OQ?oc=5",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "ubisoft-20260830-https-news-google-com-rss-articles-cbmiugfbvv95cuxoemoxdflav",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "其他",
+    "title": "Skull and Bones: Y3S2 Smuggler Pass Trailer",
+    "summary": "",
+    "source": "Ubisoft",
+    "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxOemoxdFlaVk1IM0hHZHRlU3V2N2hMX3RPVFUya2NaSGE0RFc2WEtaeWtvalJZSS1xOTl5QTJ2VTBMdkIweXFqR3VYZ2xKUWNHQm9BWFNRU2RMMTk4c2lxMVc0WnBSRUl4cS13dFVZN28wNjEyQm9Rbk9hUUF3eTdYMVZsZlJKNmlGaWZrOE0zY1hRUl9TMUtxdjVfTFJoRzlkVlZjbkFhZmpoMEpNa1I2X19qcXlnaDU3Tmc?oc=5",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "ubisoft-20260830-https-news-google-com-rss-articles-cbmix0fvx3lxte5rq0vlbhbzd",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "其他",
+    "title": "electrostreet's Library",
+    "summary": "",
+    "source": "IGN",
+    "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE5RQ0VLbHBZdTdGUzZoOGhvbENNQ0lhcU9ZdGJiUC1udWpFelJsbmNaUngzTG8ybEJ2QnItSV9PUjEybkh5bFplbW9Fd0hxVC1qcHRKT21idDctMGdMMlhR?oc=5",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "ubisoft-20260830-https-news-google-com-rss-articles-cbmiqwfbvv95cuxqou5ja0ywq",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "其他",
+    "title": "Rainbow Six Tactics Revealed: A Turn-Based Tactical Experience",
+    "summary": "",
+    "source": "Ubisoft",
+    "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxQOU5ja0YwQWIzQ2xTMXUzaXYtNDc5UG4yeXBCNm9WY2plTy1ZVWZpZjgwZkVlcVJmWnk3ZkdSaFh4aC1lV28yRlZlN1VyZ1ZsV3ZfdXhCSXFQYk9ZcHR0NlAtdVBObVBfVW9xMG9jN2RXMlBtejRyZjJWWm5GR0ZYbG0yYm9FMGltMTNLeWsweW5zV2tiTVdjOVFoZ2F0aVRjbE5sZTZfVDd0VzA?oc=5",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "ubisoft-20260830-https-news-google-com-rss-articles-cbmimwfbvv95cuxoam5ootf1c",
+    "date": "2026-08-30",
+    "topic": "ubisoft",
+    "cat": "其他",
+    "title": "Broken Rain Incursion: Everything You Need To Know",
+    "summary": "",
+    "source": "Ubisoft",
+    "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxOam5OOTF1cUxUdDZlSkdUb1VacnZDNlo2WWFRXzBQU1pxMDhMNnNhWVBmZENfbHkwdUxVSG5jQzJ1cGlwbkltalc4SHRuT0t1cVRGUUxSUHhhZjV2NkxmYWVXRnBQNmFxLWVEYUdOdHhTeFhWMDJYeDJHbDJDOU9JSWFEYTZsbHVEWGhNWkZQM3JreEhVUUZOZGhqcw?oc=5",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "temu-20260830-https-view-inews-qq-com-a-20260829a0agmv00",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "监管",
+    "title": "Temu 伦敦高等法院版权侵权诉讼一审全胜，历时三年纠纷终结",
+    "summary": "英国伦敦高等法院就某快时尚平台起诉 Temu 版权侵权一案作出一审判决，驳回起诉方全部诉讼主张。这场历时 3 年的跨境知识产权诉讼以 Temu 全胜告终。管理层在财报电话会强调今年全球监管与合规格局生变，平台已构建系统化知产保护能力。",
+    "source": "腾讯新闻 · 吴怼怼",
+    "url": "https://view.inews.qq.com/a/20260829A0AGMV00",
+    "pubDate": "2026-08-29"
+  },
+  {
+    "id": "temu-20260830-https-www-futunn-com-stock-pdd-us-news-lang-zh-hk",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "监管",
+    "title": "欧盟 3 欧元小包裹税生效首月：Temu 欧洲销量下滑 50%，速卖通下滑 37%",
+    "summary": "据连线 Insight 报道，欧盟对低值包裹征收 3 欧元固定关税生效首月，Temu 欧洲销量下滑约 50%，速卖通下滑 37%。陈磊称短期承压但不会改变全球化长期战略，中长期转向加码本地化履约。同期美银证券维持拼多多持有评级、目标价 117 美元。",
+    "source": "连线 Insight / 富途牛牛",
+    "url": "https://www.futunn.com/stock/PDD-US/news?lang=zh-hk",
+    "pubDate": "2026-08-27"
+  },
+  {
+    "id": "temu-20260830-https-www-sohu-com-a-1069065471-122014422",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "战略",
+    "title": "Q2 研发投入 43 亿元同比增 40%，拼多多以短期利润换供应链长期能力",
+    "summary": "财报显示 Non-GAAP 研发投入 43 亿元、同比大增 40%，GAAP 研发费用 45.67 亿元、增长约 27%。公司在雄安成立专项公司并购置办公楼，全职员工数月内突破 4000 人。陈磊表示将继续重仓供应链，推进「新拼姆」自营品牌，首期注资 150 亿元、三年累计投入 1000 亿元。",
+    "source": "搜狐财经",
+    "url": "https://www.sohu.com/a/1069065471_122014422",
+    "pubDate": "2026-08-27"
+  },
+  {
+    "id": "temu-20260830-https-view-inews-qq-com-a-20260828a052ya00",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "品牌",
+    "title": "胡润中国品牌榜：拼多多以 1250 亿元品牌价值跻身总榜前十",
+    "summary": "胡润研究院 8 月 24 日发布《2026 胡润中国品牌榜》，502 个上榜品牌中中国品牌占比 76%。总榜前十为苹果、贵州茅台、微信、抖音、特斯拉、中华、拼多多、中国平安、华为、中国移动，拼多多成为唯二进入前十的电商零售品牌。",
+    "source": "蓝鲨消费",
+    "url": "https://view.inews.qq.com/a/20260828A052YA00",
+    "pubDate": "2026-08-28"
+  },
+  {
+    "id": "temu-20260830-https-view-inews-qq-com-a-20260828a0aykj00",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "企业",
+    "title": "拼多多紧急捐赠 1000 万元驰援西藏吉隆口岸灾情",
+    "summary": "8 月 26 日西藏日喀则吉隆口岸因尼泊尔侧泥石流发生重大灾情，拼多多通过中华慈善总会向受灾地区捐赠现金 1000 万元，用于采购救灾物资设备、安置群众及灾后重建。公司表示将持续关注灾情进展并配合一线救援需求。",
+    "source": "封面新闻",
+    "url": "https://view.inews.qq.com/a/20260828A0AYKJ00",
+    "pubDate": "2026-08-28"
+  },
+  {
+    "id": "temu-20260830-https-view-inews-qq-com-a-20260828a0bxxm00",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "企业",
+    "title": "拼多多 6 月在雄安、上海接连购置办公楼",
+    "summary": "经济观察报梳理科技企业拿地买楼动向，披露拼多多于 6 月在雄安和上海接连购置办公楼，与京东、抖音、小米等一同出现在 2026 年密集置业的互联网企业名单中，反映业务扩张与地方政府留税政策支持。",
+    "source": "经济观察报",
+    "url": "https://view.inews.qq.com/a/20260828A0BXXM00",
+    "pubDate": "2026-08-28"
+  },
+  {
+    "id": "temu-20260830-https-www-yahoo-com-news-world-articles-eu-adds-3-euro-fee-0",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "监管",
+    "title": "After EU adds 3-euro fee to Temu and Shein orders, 46% of Dutch say they have moved on",
+    "summary": "After the European Union began charging 3 euros (about $3.50) on many low-value parcels entering the bloc, nearly half of Dutch consumers surveyed said they were ordering less often from ultra-cheap ...",
+    "source": "Bing News",
+    "url": "https://www.yahoo.com/news/world/articles/eu-adds-3-euro-fee-053000476.html",
+    "pubDate": "2026-08-27"
+  },
+  {
+    "id": "temu-20260830-https-www-msn-com-en-us-news-other-trump-is-importing-temu-b",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "其他",
+    "title": "Trump is importing 'Temu beef' to lower grocery prices — here’s what to know if you eat ground beef",
+    "summary": "Economists and food safety experts break down what American carnivores need to know.",
+    "source": "Bing News",
+    "url": "https://www.msn.com/en-us/news/other/trump-is-importing-temu-beef-to-lower-grocery-prices-here-s-what-to-know-if-you-eat-ground-beef/ar-AA2b4iLH",
+    "pubDate": "2026-08-27"
+  },
+  {
+    "id": "temu-20260830-https-www-drapersonline-com-news-temu-owner-profits-slip",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "财报",
+    "title": "Temu owner profits slip",
+    "summary": "Owner of Chinese shopping app Temu PDD Holdings reported pre-tax profit fell during the three months to 30 June 2026, although operating profit rose.",
+    "source": "Bing News",
+    "url": "https://www.drapersonline.com/news/temu-owner-profits-slip",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "temu-20260830-https-insideretail-com-au-business-why-chinas-marketplace-gi",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "其他",
+    "title": "Why China’s marketplace giant PDD Holdings is spending beyond the marketplace",
+    "summary": "The domestic programme PDD keeps returning to is a three-year commitment it describes as building another PDD, funded by an RMB100 billion support scheme.",
+    "source": "Bing News",
+    "url": "https://insideretail.com.au/business/why-chinas-marketplace-giant-pdd-holdings-is-spending-beyond-the-marketplace-202608",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "temu-20260830-https-seekingalpha-com-article-4940306-pdd-holdings-downgrad",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "财报",
+    "title": "PDD Holdings: Core Ad Deceleration And 1P Pivot Cloud Risk-Reward (Rating Downgrade)",
+    "summary": "PDD Holdings is downgraded to Hold after the Q2 miss; ad growth slows, and costs and regulatory risks rise as Temu expands. Click for this PDD stock update.",
+    "source": "Bing News",
+    "url": "https://seekingalpha.com/article/4940306-pdd-holdings-downgrade-to-hold-core-ad-deceleration-and-1p-pivot-cloud-risk-reward",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "temu-20260830-http-www-bing-com-news-apiclick-aspx-ref-fexrss-aid-tid-6a93",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "资本市场",
+    "title": "Temu To Strengthen Governance, Upgrade Supply Chains As Trade Rules Shift",
+    "summary": "Temu sits at an \"unique\" intersection of global trade, touching the daily lives of billions of people around the world, said Lei Chen, co-chairman and co-chief executive officer of PDD Holdings.",
+    "source": "Bing News",
+    "url": "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a93dbdd2eb3490a81f83af78062e971&url=https%3a%2f%2fwww.ibtimes.com%2ftemu-strengthen-governance-upgrade-supply-chains-trade-rules-shift-3806781&c=15722909399941164268&mkt=en-us",
+    "pubDate": "2026-08-25"
+  },
+  {
+    "id": "temu-20260830-https-www-msn-com-en-us-money-markets-temu-owner-pdd-revenue",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "财报",
+    "title": "Temu-owner PDD revenue misses estimates, profit falls on 'intense' China competition",
+    "summary": "By Harshita Mary Varghese and Casey Hall Aug 24 (Reuters) - Chinese e-commerce discounter PDD Holdings reported a fall in second-quarter profit on Monday and revenue that missed market estimates as ...",
+    "source": "Bing News",
+    "url": "https://www.msn.com/en-us/money/markets/temu-owner-pdd-revenue-misses-estimates-profit-falls-on-intense-china-competition/ar-AA2aPq4A",
+    "pubDate": "2026-08-24"
+  },
+  {
+    "id": "temu-20260830-http-www-bing-com-news-apiclick-aspx-ref-fexrss-aid-tid-6a93",
+    "date": "2026-08-30",
+    "topic": "temu",
+    "cat": "财报",
+    "title": "Temu owner’s shares rise as results beat estimates despite tumbling profits",
+    "summary": "PDD Holdings reported a 12% decline in net profits in the three months ended June 30, surpassing Wall Street consensus.",
+    "source": "Bing News",
+    "url": "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a93dbdbec1244e890f2086d31644c77&url=https%3a%2f%2fwww.marketwatch.com%2fstory%2ftemu-owners-shares-rise-as-results-beat-estimates-despite-tumbling-profits-18cf74ea&c=7957358697944079610&mkt=en-us",
+    "pubDate": "2026-08-24"
+  },
+  {
+    "id": "ubi-20260829-gamescom",
+    "date": "2026-08-29",
+    "topic": "ubisoft",
+    "cat": "展会",
+    "title": "育碧公布 gamescom 2026 完整直播阵容：雷曼、彩虹六号、全境封锁、纪元117 齐上阵",
+    "summary": "科隆游戏展 8 月 25-30 日举办，育碧安排多场开发访谈与发布会，覆盖《雷曼传奇：重制》《彩虹六号：围攻》《纪元117：罗马治世》《Morbid Metal》等。所有线下场次同步在 Twitch 与 YouTube 直播，8 月 29 日压轴为《刺客信条：影》与《彩虹六号：围攻》社区沟通会。",
+    "source": "Ubisoft 官网",
+    "url": "https://ubisoft.com/r/Ubisoft_gamescom26_lineup",
+    "pubDate": "2026-08-25"
+  },
+  {
+    "id": "ubi-20260829-player-council",
+    "date": "2026-08-29",
+    "topic": "ubisoft",
+    "cat": "平台",
+    "title": "育碧「玩家委员会」The Player Council 在 PC 端开启试运营",
+    "summary": "玩家可免费注册并签署保密协议后，参与《极限国度》《Atomega》以及代号 Split Point、Rook 等原型项目的测试反馈，按游玩与反馈量解锁 Member / Insider / Shaper 三个等级。秋季还将加入 Codename Decagon 与 Codename Harlequin，平台由 Ubisoft Connect 与 Games2Gether 提供支撑。",
+    "source": "Ubisoft News",
+    "url": "https://news.ubisoft.com/en-us/article/5je4IbarSid2bQcLUjDI1J/the-player-council-soft-launches-today-on-pc-participate-in-the-game-development-process",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "ubi-20260829-ac-crossover",
+    "date": "2026-08-29",
+    "topic": "ubisoft",
+    "cat": "联动",
+    "title": "《刺客信条》×《境界守望者》联动上线，并与飞利浦 Ambilight 达成欧洲合作",
+    "summary": "8 月起艾吉奥、卡珊德拉、艾沃尔、巴耶克与伊薇五位传奇角色进入《境界守望者》的暗奇幻大陆泰亚，含全新剧情与潜行刺杀玩法，原配音演员 Roger Craig Smith 与 Melissanthi Mahut 回归。同期飞利浦 Ambilight 显示器成为《刺客信条》欧洲区沉浸式游戏合作伙伴，合作持续至 2027 年底。",
+    "source": "Ubisoft News",
+    "url": "https://news.ubisoft.com/en-us/article/6f7cLCO9WLoUtwIHk3Jdj7/assassins-creed-watcher-of-realms-crossover-philips-ambilight-tv-partnership-echoes-of-history-ama-and-more",
+    "pubDate": "2026-08-27"
+  },
+  {
+    "id": "ubi-20260829-stock",
+    "date": "2026-08-29",
+    "topic": "ubisoft",
+    "cat": "资本市场",
+    "title": "育碧美股 OTC 报 1.25 美元，市值约 8.6 亿美元，下次财报定于 10 月 22 日",
+    "summary": "UBSFY 收报 1.25 美元（+2.46%），52 周区间 0.87—2.40 美元，近一年跌幅近 39%。账面现金约 13.5 亿美元、总债务 18 亿美元，市净率 0.33、市销率 0.34，市场普遍等待 10 月 22 日财报验证重组成效。",
+    "source": "TipRanks",
+    "url": "https://www.tipranks.com/stocks/UBSFY",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "ubi-20260829-restructure",
+    "date": "2026-08-29",
+    "topic": "ubisoft",
+    "cat": "战略",
+    "title": "重组进入深水区：育碧靠削减固定成本与 IP 长线运营争取 FY28-FY29 转正",
+    "summary": "多头观点认为净债务大幅下降、约 13.5 亿欧元现金缓解再融资压力，头部长线 IP 提供稳定变现。空头则指出营收大幅下滑、FY27 自由现金流仍为负、且存在到期债务与可转债回售带来的再融资与摊薄风险，5 年股价累计跌幅达 88.6%。",
+    "source": "Yahoo Finance / TipRanks",
+    "url": "https://finance.yahoo.com/quote/UBSFF/research-reports",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "temu-20260829-q2",
+    "date": "2026-08-29",
+    "topic": "temu",
+    "cat": "财报",
+    "title": "拼多多 Q2 营收 1123.6 亿元不及预期，净利下滑 12%，Temu 海外承压",
+    "summary": "截至 6 月底的季度营收同比增 8% 至 1123.6 亿元人民币，低于分析师均值 1163.5 亿；归母净利同比降 12% 至 272 亿元。交易服务收入增 13% 至 547 亿元成为主引擎，经营净现金流 257 亿元同比增 19%，现金及短期投资合计约 4564 亿元。",
+    "source": "时代财智 / Fortune Times",
+    "url": "https://www.fortunetimes.sg/cn?p=60770",
+    "pubDate": "2026-08-25"
+  },
+  {
+    "id": "temu-20260829-beat",
+    "date": "2026-08-29",
+    "topic": "temu",
+    "cat": "财报",
+    "title": "利润超预期推动 PDD 盘前涨 3.5%，但营收逊于共识",
+    "summary": "Q2 调整后每 ADS 收益 19.33 元人民币，高于 Visible Alpha 共识的 18.44 元；营收 1124 亿元同比增 8%，低于共识 1153 亿元。管理层称合规是基本优先级，德银则提示基本面尚未见底、股东回报不足与信息披露透明度不够。",
+    "source": "Investopedia",
+    "url": "https://www.investopedia.com/stock-market-today-dow-jones-s-and-p-500-08242026-12066087",
+    "pubDate": "2026-08-24"
+  },
+  {
+    "id": "temu-20260829-dsa-appeal",
+    "date": "2026-08-29",
+    "topic": "temu",
+    "cat": "监管",
+    "title": "Temu 就欧盟 2 亿欧元 DSA 罚单提起上诉，整改大限 8 月 28 日",
+    "summary": "PDD Holdings 与欧洲实体 Whaleco Technology 于 8 月 18 日向欧盟普通法院上诉，请求撤销或变更欧委会 5 月 28 日开出的 2 亿欧元罚单——这是 DSA 框架下针对实物电商平台的首笔重大处罚。上诉不中止整改义务，若整改不达标，最高可追加全球年营收 6% 的罚款。",
+    "source": "网经社 / MLex",
+    "url": "https://www.100ec.cn/detail--6663078.html",
+    "pubDate": "2026-08-19"
+  },
+  {
+    "id": "temu-20260829-dsa-detail",
+    "date": "2026-08-29",
+    "topic": "temu",
+    "cat": "监管",
+    "title": "2 亿欧元罚的是什么：风险评估抄模板、低估违禁品命中率、未评估算法放大效应",
+    "summary": "欧委会指控三点：风险评估报告套用行业通用数据而非平台自身抽检与算法日志；神秘顾客抽检发现大量充电器未通过基础电气安全测试、婴童玩具化学物质超标或存在小部件窒息风险；未评估推荐流、游戏化与网红推广对风险的放大作用。整改要求核心为算法推荐隔离机制与 2 小时内处理侵权举报。",
+    "source": "AMZDH 跨境电商",
+    "url": "https://www.amzdh.com/kjtt/10315.html",
+    "pubDate": "2026-08-18"
+  },
+  {
+    "id": "temu-20260829-local",
+    "date": "2026-08-29",
+    "topic": "temu",
+    "cat": "战略",
+    "title": "Temu 转向本地商家 + 本地仓配，复刻亚马逊 FBA 式履约基建",
+    "summary": "联席 CEO 陈磊在 Q2 财报同日公布五步战略：扩大本地商家入驻、提升本地供货占比、加速本地仓储与履约基建、扩大本地履约地理覆盖、在部分海外市场择机运营中转仓。背景是 6 月 24 日美国 CBP 将 800 美元以下小额包裹免税待遇的暂停转为永久性法规，已征收关税超 10 亿美元。",
+    "source": "EcomCrew",
+    "url": "https://www.ecomcrew.com/temu-is-building-the-same-fulfillment-infrastructure-that-made-amazon-amazon",
+    "pubDate": "2026-08-26"
+  },
+  {
+    "id": "temu-20260829-france",
+    "date": "2026-08-29",
+    "topic": "temu",
+    "cat": "监管",
+    "title": "法国《反超快时尚法》叠加欧盟 3 欧元包裹关税，中国跨境平台遇系统性围堵",
+    "summary": "法国以「年上新超 1.5 万款、单价低于 5 欧元、寿命少于 30 次洗涤」三条标准精准锁定平台，2026 年起每件罚 0.25—6 欧元，2030 年最高升至 20 欧元；欧盟自 7 月 1 日起取消 150 欧元以下包裹关税豁免，统一征收每件 3 欧元。中国商务部已就该法案表达严正关切。",
+    "source": "中国新闻周刊",
+    "url": "https://m.chinanews.com.cn/wap/detail/chs/zw/10673390.shtml",
+    "pubDate": "2026-08-10"
+  }
+];
+const DATA_VERSION = "2026-08-30T15:29";
+/* <<<SEED_DATA_END>>> */
+
+/* <<<STEAM_DATA_START>>> */
+const STEAM_DATA = {
+  "updatedAt": "2026-08-30T15:29",
+  "window": "过去 7 天",
+  "games": [
+    {
+      "appId": "2507950",
+      "name": "Delta Force",
+      "nameCn": "三角洲行动",
+      "abbr": "DF",
+      "dev": "Team Jade / TiMi Studio Group",
+      "current": 85979,
+      "peak24h": 113319,
+      "allTimePeak": 246418,
+      "allTimePeakDate": "2025-09",
+      "daily": [
+        {
+          "date": "2026-08-24",
+          "peak": 107766,
+          "avg": 55981,
+          "n": 24
+        },
+        {
+          "date": "2026-08-25",
+          "peak": 107302,
+          "avg": 55756,
+          "n": 24
+        },
+        {
+          "date": "2026-08-26",
+          "peak": 105605,
+          "avg": 55135,
+          "n": 24
+        },
+        {
+          "date": "2026-08-27",
+          "peak": 108459,
+          "avg": 56180,
+          "n": 24
+        },
+        {
+          "date": "2026-08-28",
+          "peak": 112001,
+          "avg": 59319,
+          "n": 24
+        },
+        {
+          "date": "2026-08-29",
+          "peak": 113319,
+          "avg": 64640,
+          "n": 24
+        },
+        {
+          "date": "2026-08-30",
+          "peak": 85979,
+          "avg": 56960,
+          "n": 8
+        }
+      ]
+    },
+    {
+      "appId": "2073620",
+      "name": "Arena Breakout: Infinite",
+      "nameCn": "暗区突围：无限",
+      "abbr": "ABI",
+      "dev": "Morefun Studios",
+      "current": 19643,
+      "peak24h": 35262,
+      "allTimePeak": 65944,
+      "allTimePeakDate": "2025-09",
+      "daily": [
+        {
+          "date": "2026-08-24",
+          "peak": 33326,
+          "avg": 22574,
+          "n": 24
+        },
+        {
+          "date": "2026-08-25",
+          "peak": 32508,
+          "avg": 22342,
+          "n": 24
+        },
+        {
+          "date": "2026-08-26",
+          "peak": 32256,
+          "avg": 22107,
+          "n": 24
+        },
+        {
+          "date": "2026-08-27",
+          "peak": 32358,
+          "avg": 22127,
+          "n": 24
+        },
+        {
+          "date": "2026-08-28",
+          "peak": 32427,
+          "avg": 22888,
+          "n": 24
+        },
+        {
+          "date": "2026-08-29",
+          "peak": 35262,
+          "avg": 25741,
+          "n": 24
+        },
+        {
+          "date": "2026-08-30",
+          "peak": 21590,
+          "avg": 19832,
+          "n": 8
+        }
+      ]
+    }
+  ]
+};
+/* <<<STEAM_DATA_END>>> */
+
+const TOPICS = {
+  ubisoft: {name:"育碧 Ubisoft", short:"育碧", color:"#7E8CFF"},
+  temu:    {name:"拼多多 Temu",  short:"Temu", color:"#34D399"}
+};
+const GCOLORS = ["#7E8CFF", "#34D399"];
+const K = {items:"wb_newshub_items_v1", state:"wb_newshub_state_v1", view:"wb_newshub_view_v1"};
+
+/* ---------------- 数据层 ---------------- */
+function readJSON(k, fb){ try{ const s=localStorage.getItem(k); return s?JSON.parse(s):fb; }catch(e){ return fb; } }
+function writeJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+
+function loadItems(){
+  const stored = readJSON(K.items, null);
+  if(!stored || !Array.isArray(stored.items)){
+    writeJSON(K.items, {version:DATA_VERSION, items:SEED_DATA});
+    return SEED_DATA.slice();
+  }
+  if(String(DATA_VERSION) > String(stored.version || "")){
+    const map = new Map();
+    (stored.items||[]).forEach(i=>{ if(i && i.id) map.set(i.id, i); });
+    let added = 0;
+    SEED_DATA.forEach(i=>{ if(i && i.id && !map.has(i.id)){ map.set(i.id, i); added++; } });
+    const merged = Array.from(map.values());
+    writeJSON(K.items, {version:DATA_VERSION, items:merged});
+    if(added) setTimeout(()=>toast("已同步 " + added + " 条新新闻"), 700);
+    return merged;
+  }
+  return stored.items || [];
+}
+function saveItems(list){ writeJSON(K.items, {version:DATA_VERSION, items:list}); }
+
+let ITEMS = loadItems();
+let STATE = readJSON(K.state, {read:{}, star:{}});
+if(!STATE.read) STATE.read = {};
+if(!STATE.star) STATE.star = {};
+function saveState(){ writeJSON(K.state, STATE); }
+
+let FILTER = "all";   // all | ubisoft | temu | star
+let QUERY = "";
+
+/* ---------------- 工具 ---------------- */
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function dayOffset(ds){
+  const t = todayStr();
+  if(ds === t) return 0;
+  const a = new Date(t+"T00:00:00"), b = new Date(ds+"T00:00:00");
+  return Math.round((a-b)/86400000);
+}
+function relLabel(ds){
+  const o = dayOffset(ds);
+  if(o === 0) return "今天";
+  if(o === 1) return "昨天";
+  if(o === 2) return "前天";
+  if(o > 0) return o + " 天前";
+  return "未来";
+}
+function fmtDate(ds){
+  const p = String(ds).split("-");
+  return p.length===3 ? (p[1]*1)+"月"+(p[2]*1)+"日" : ds;
+}
+function hostOf(u){ try{ return new URL(u).hostname.replace(/^www\./,""); }catch(e){ return ""; } }
+let toastTimer=null;
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove("show"), 2100);
+}
+
+/* ---------------- 渲染 ---------------- */
+function renderFilters(){
+  const cnt = t => t==="all" ? ITEMS.length : t==="star" ? Object.keys(STATE.star).filter(k=>STATE.star[k]).length : ITEMS.filter(i=>i.topic===t).length;
+  const rows = [
+    {k:"all", n:"全部新闻", c:"linear-gradient(135deg,#7E8CFF,#A66BFF)"},
+    {k:"ubisoft", n:TOPICS.ubisoft.name, c:TOPICS.ubisoft.color},
+    {k:"temu", n:TOPICS.temu.name, c:TOPICS.temu.color},
+    {k:"star", n:"星标收藏", c:"#F5A524"}
+  ];
+  document.getElementById("filters").innerHTML = rows.map(r=>
+    '<button class="filt'+(FILTER===r.k?' on':'')+'" data-topic="'+r.k+'">'+
+      '<i class="sw" style="background:'+r.c+'"></i>'+esc(r.n)+
+      '<span class="cnt">'+cnt(r.k)+'</span>'+
+    '</button>'
+  ).join("");
+  document.querySelectorAll("#tabbar button").forEach(b=>b.classList.toggle("on", b.dataset.topic===FILTER));
+}
+
+function renderChart(){
+  const days = [];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")); }
+  const data = days.map(d=>({
+    d,
+    u: ITEMS.filter(i=>i.date===d && i.topic==="ubisoft").length,
+    t: ITEMS.filter(i=>i.date===d && i.topic==="temu").length
+  }));
+  const max = Math.max(3, ...data.map(x=>x.u+x.t));
+  const W=280, H=140, pad=22, bw=16, gap=(W-pad*2-bw*7)/6;
+  let bars = "";
+  data.forEach((x,i)=>{
+    const cx = pad + i*(bw+gap);
+    const hu = (x.u/max)*(H-40), ht = (x.t/max)*(H-40);
+    const base = H-24;
+    bars += '<rect x="'+cx+'" y="'+(base-hu-ht)+'" width="'+bw+'" height="'+Math.max(x.u?2:0,hu)+'" rx="3" fill="#7E8CFF" opacity="'+(x.u?.92:.18)+'"><title>'+x.d+' 育碧 '+x.u+' 条</title></rect>';
+    bars += '<rect x="'+cx+'" y="'+(base-ht)+'" width="'+bw+'" height="'+Math.max(x.t?2:0,ht)+'" rx="3" fill="#34D399" opacity="'+(x.t?.92:.18)+'"><title>'+x.d+' Temu '+x.t+' 条</title></rect>';
+    if(x.u+x.t>0){ bars += '<text x="'+(cx+bw/2)+'" y="'+(base-hu-ht-6)+'" fill="#9AA5BC" font-size="9.5" text-anchor="middle" font-family="'+"-apple-system,sans-serif"+'">'+(x.u+x.t)+'</text>'; }
+    const lab = x.d.slice(5).replace("-","/");
+    bars += '<text x="'+(cx+bw/2)+'" y="'+(H-8)+'" fill="#68738C" font-size="9" text-anchor="middle" font-family="'+"-apple-system,sans-serif"+'">'+lab+'</text>';
+  });
+  let gl = "";
+  for(let i=0;i<=3;i++){ const y=(H-24)-((H-40)/3)*i; gl += '<line x1="'+pad+'" y1="'+y+'" x2="'+(W-pad+6)+'" y2="'+y+'" stroke="#232B3D" stroke-width="1"/>'; }
+  document.getElementById("chart").innerHTML =
+    '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+gl+bars+'</svg>';
+}
+
+function renderTimeline(){
+  const q = QUERY.trim().toLowerCase();
+  let list = ITEMS.slice();
+  if(FILTER === "star") list = list.filter(i=>STATE.star[i.id]);
+  else if(FILTER !== "all") list = list.filter(i=>i.topic===FILTER);
+  if(q) list = list.filter(i =>
+    String(i.title||"").toLowerCase().includes(q) ||
+    String(i.summary||"").toLowerCase().includes(q) ||
+    String(i.source||"").toLowerCase().includes(q) ||
+    String(i.cat||"").toLowerCase().includes(q)
+  );
+  list.sort((a,b)=>{
+    if(a.date !== b.date) return a.date < b.date ? 1 : -1;
+    const au = STATE.read[a.id] ? 1 : 0, bu = STATE.read[b.id] ? 1 : 0;
+    if(au !== bu) return au - bu;
+    return String(b.pubDate||"").localeCompare(String(a.pubDate||""));
+  });
+
+  document.getElementById("tlSub").textContent =
+    "共 " + list.length + " 条 · 覆盖 " + new Set(list.map(i=>i.date)).size + " 天 · 最新置顶，向下滚动看往期";
+
+  const el = document.getElementById("timeline");
+  if(!list.length){
+    el.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><p>没有匹配的新闻，换个关键词或话题试试</p></div>';
+    return;
+  }
+
+  const groups = {};
+  list.forEach(i=>{ (groups[i.date] = groups[i.date] || []).push(i); });
+  const dates = Object.keys(groups).sort().reverse();
+
+  el.innerHTML = dates.map(d=>{
+    const arr = groups[d];
+    const o = dayOffset(d);
+    const unread = arr.filter(i=>!STATE.read[i.id]).length;
+    return '<section class="daygroup">'+
+      '<div class="daybar">'+
+        '<span class="d'+(o===0?' today':'')+'">'+fmtDate(d)+'</span>'+
+        '<span class="rel">'+relLabel(d)+'</span>'+
+        '<span class="line"></span>'+
+        '<span class="n">'+arr.length+' 条'+(unread?' · '+unread+' 未读':'')+'</span>'+
+      '</div>'+
+      '<div class="grid">' + arr.map(cardHTML).join("") + '</div>'+
+    '</section>';
+  }).join("");
+}
+
+function cardHTML(i){
+  const tp = TOPICS[i.topic] || {short:"—", color:"#68738C", name:"其他"};
+  const read = !!STATE.read[i.id];
+  const star = !!STATE.star[i.id];
+  const host = hostOf(i.url);
+  return '<article class="item t-'+esc(i.topic)+(read?' read':'')+(star?' starred':'')+'" data-id="'+esc(i.id)+'">'+
+    '<div class="item-top">'+
+      '<span class="badge b-'+esc(i.topic)+'" style="background:'+tp.color+'22;color:'+tp.color+'">'+esc(tp.short)+'</span>'+
+      (i.cat?'<span class="cat">'+esc(i.cat)+'</span>':'')+
+      '<div class="item-acts">'+
+        '<button class="mini'+(star?' on':'')+'" data-star="'+esc(i.id)+'" title="星标">'+
+          '<svg viewBox="0 0 24 24" fill="'+(star?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'+
+        '</button>'+
+        '<button class="mini'+(read?' done':'')+'" data-read="'+esc(i.id)+'" title="'+(read?'标记未读':'标记已读')+'">'+
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'+
+        '</button>'+
+      '</div>'+
+    '</div>'+
+    '<h4>'+esc(i.title)+'</h4>'+
+    '<p>'+esc(i.summary)+'</p>'+
+    '<div class="meta">'+
+      '<span class="src">'+esc(i.source||host||"未知来源")+'</span>'+
+      '<span class="sep"></span>'+
+      '<span class="time">'+(i.pubDate? esc(i.pubDate)+' 发布' : '时间不详')+'</span>'+
+      (i.url?'<a class="linkbtn" href="'+esc(i.url)+'" target="_blank" rel="noopener noreferrer">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>原文</a>':'')+
+    '</div>'+
+  '</article>';
+}
+
+/* ---------------- Steam 在线人数 ---------------- */
+function fmtN(n){ return (n===null || n===undefined) ? "—" : Number(n).toLocaleString("en-US"); }
+
+function renderSteam(){
+  const games = STEAM_DATA.games || [];
+  const panel = document.querySelector(".steam-panel");
+  if(!games.length){ if(panel) panel.style.display = "none"; return; }
+
+  const u = String(STEAM_DATA.updatedAt || "").replace("T", " ");
+  document.getElementById("steamUpd").innerHTML = "数据更新于 <b>" + (u || "—") + "</b>";
+
+  document.getElementById("gpanels").innerHTML =
+    games.map((g,i)=>gamePanelHTML(g, i)).join("");
+  bindChartTips();
+}
+
+function gamePanelHTML(g, i){
+  const c = GCOLORS[i % GCOLORS.length];
+  const asc = (g.daily||[]).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
+  const days = asc.map(d=>d.date);
+
+  return '<section class="gpanel">'+
+    '<div class="gp-bar" style="background:linear-gradient(90deg,'+c+','+c+'55)"></div>'+
+    '<div class="gp-head">'+
+      '<div class="gavatar" style="background:linear-gradient(135deg,'+c+','+c+'99)">'+esc(g.abbr||"?")+'</div>'+
+      '<div class="gtitle">'+
+        '<div class="n">'+esc(g.nameCn || g.name)+'</div>'+
+        '<div class="s">'+esc(g.name)+' · App '+esc(g.appId)+' · '+esc(g.dev||"")+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="gkpis">'+
+      '<div class="gkpi live"><div class="n"><span class="livedot"></span>'+fmtN(g.current)+'</div><div class="l">当前在线</div></div>'+
+      '<div class="gkpi d24"><div class="n">'+fmtN(g.peak24h)+'</div><div class="l">24 小时峰值</div></div>'+
+      '<div class="gkpi atp"><div class="n">'+fmtN(g.allTimePeak)+'</div><div class="l">历史峰值'+(g.allTimePeakDate?' '+esc(String(g.allTimePeakDate).replace("-","/")):'')+'</div></div>'+
+    '</div>'+
+    '<div class="gp-chart">'+gameChartSVG(g, asc, c)+'<div class="gtip"></div></div>'+
+    '<div class="gp-note">'+gameNoteHTML(g, days)+'</div>'+
+  '</section>';
+}
+
+/* 单个游戏的折线图，X 轴为该游戏自己的日期序列 */
+function gameChartSVG(g, asc, c){
+  if(!asc || asc.length < 2){
+    return '<div style="color:var(--t3);font-size:12.5px;padding:22px 0;text-align:center">日度数据不足，无法绘制</div>';
+  }
+  const W=560, H=190, pl=46, pr=16, pt=14, pb=28;
+  const raw = Math.max.apply(null, asc.map(d=>d.peak).concat([1]));
+  const mag = Math.pow(10, String(Math.floor(raw)).length - 2) || 1000;
+  const yMax = Math.ceil(raw / (mag*2)) * (mag*2) || 1;
+  const X = i => pl + (W-pl-pr) * i / (asc.length-1);
+  const Y = v => pt + (H-pt-pb) * (1 - v/yMax);
+
+  let grid = "", labels = "";
+  for(let k=0;k<=4;k++){
+    const v = yMax/4*k, y = Y(v);
+    grid += '<line x1="'+pl+'" y1="'+y.toFixed(1)+'" x2="'+(W-pr)+'" y2="'+y.toFixed(1)+'" stroke="#232B3D" stroke-width="1"/>';
+    labels += '<text x="'+(pl-7)+'" y="'+(y+3.5).toFixed(1)+'" fill="#68738C" font-size="9" text-anchor="end" font-family="-apple-system,sans-serif">'+(v>=10000?(v/1000)+"k":fmtN(v))+'</text>';
+  }
+
+  let axis = "", dots = "";
+  asc.forEach((d,i)=>{
+    const isLast = i === asc.length-1;
+    axis += '<text x="'+X(i).toFixed(1)+'" y="'+(H-9)+'" fill="'+(isLast?"#9AA5BC":"#68738C")+'" font-size="9.5" text-anchor="middle" font-weight="'+(isLast?"700":"400")+'" font-family="-apple-system,sans-serif">'+d.date.slice(5).replace("-","/")+'</text>';
+    dots += '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(d.peak).toFixed(1)+'" r="'+(isLast?4.5:3.4)+'"'+
+      ' fill="'+(isLast?"#0B0E14":c)+'" stroke="'+c+'" stroke-width="'+(isLast?2.4:1.8)+'"'+
+      ' data-d="'+esc(d.date)+'" data-p="'+d.peak+'" data-a="'+(d.avg==null?"":d.avg)+'" data-n="'+(d.n||"")+'">'+
+      '<title>'+esc(g.abbr||g.name)+' · '+d.date+'\n峰值 '+fmtN(d.peak)+'\n日均 '+fmtN(d.avg)+(d.n?'\n采样 '+d.n+' 次':'')+'</title></circle>';
+  });
+
+  const pts = asc.map((d,i)=>({x:X(i), y:Y(d.peak)}));
+  const dAll = pts.map((p,k)=>(k?"L":"M")+p.x.toFixed(1)+" "+p.y.toFixed(1)).join(" ");
+  const area = dAll + " L"+pts[pts.length-1].x.toFixed(1)+" "+(H-pb)+" L"+pts[0].x.toFixed(1)+" "+(H-pb)+" Z";
+  const solid = pts.slice(0, pts.length-1)
+    .map((p,k)=>(k?"L":"M")+p.x.toFixed(1)+" "+p.y.toFixed(1)).join(" ");
+  const a = pts[pts.length-2], b = pts[pts.length-1];
+  const dash = "M"+a.x.toFixed(1)+" "+a.y.toFixed(1)+" L"+b.x.toFixed(1)+" "+b.y.toFixed(1);
+  const last = asc[asc.length-1];
+  const valueLabel = '<text x="'+(b.x-7)+'" y="'+(b.y-9)+'" fill="'+c+'" font-size="11" text-anchor="end" font-weight="700" font-family="-apple-system,sans-serif">'+fmtN(last.peak)+'</text>';
+
+  return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+
+    grid+labels+
+    '<path d="'+area+'" fill="'+c+'" opacity="0.09"/>'+
+    '<path d="'+solid+'" fill="none" stroke="'+c+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>'+
+    '<path d="'+dash+'" fill="none" stroke="'+c+'" stroke-width="2.2" stroke-dasharray="4 4" stroke-linecap="round"/>'+
+    axis+dots+valueLabel+
+  '</svg>';
+}
+
+function gameNoteHTML(g, days){
+  const last = days[days.length-1];
+  const hit = (g.daily||[]).find(x=>x.date===last);
+  const n = hit && hit.n ? hit.n : null;
+  return '<span>过去 '+days.length+' 天每日峰值 · 鼠标悬停圆点看当天数据</span>'+
+    '<span>· 末段虚线 = '+last.slice(5).replace("-","/")+' 未走完'+(n?'（采样 '+n+' 次）':'')+'</span>';
+}
+
+/* ---------------- 图表悬浮气泡 ---------------- */
+const WK = ["日","一","二","三","四","五","六"];
+function hideTips(){
+  document.querySelectorAll("#gpanels .gtip.on").forEach(t=>t.classList.remove("on"));
+}
+function showTip(circle){
+  const wrap = circle.closest ? circle.closest(".gp-chart") : null;
+  if(!wrap) return;
+  const tip = wrap.querySelector(".gtip");
+  if(!tip) return;
+  const d = circle.getAttribute("data-d") || "";
+  const p = circle.getAttribute("data-p");
+  const a = circle.getAttribute("data-a");
+  const n = circle.getAttribute("data-n");
+  const wk = d ? "周" + WK[new Date(d+"T00:00:00Z").getUTCDay()] : "";
+  tip.innerHTML =
+    '<div class="gt-d">'+esc(d.slice(5).replace("-","/"))+'<span>'+esc(wk)+'</span></div>'+
+    '<div class="gt-r"><span>峰值</span><b class="hl">'+fmtN(p)+'</b></div>'+
+    (a !== null && a !== "" ? '<div class="gt-r"><span>日均</span><b>'+fmtN(a)+'</b></div>' : '')+
+    (n ? '<div class="gt-r"><span>采样</span><b>'+esc(n)+' 次</b></div>' : '');
+  tip.classList.add("on");
+  const cr = circle.getBoundingClientRect();
+  const wr = wrap.getBoundingClientRect();
+  const half = (tip.offsetWidth || 130) / 2;
+  let x = cr.left - wr.left + cr.width / 2;
+  x = Math.max(half + 4, Math.min(wr.width - half - 4, x));
+  tip.style.left = x + "px";
+  tip.style.top = (cr.top - wr.top) + "px";
+}
+function bindChartTips(){
+  const gp = document.getElementById("gpanels");
+  if(!gp || gp.dataset.tipbound === "1") return;
+  gp.dataset.tipbound = "1";
+  const pick = e => {
+    const t = e.target;
+    return (t && t.closest) ? t.closest("circle[data-d]") : null;
+  };
+  gp.addEventListener("mouseover", e=>{ const c = pick(e); if(c) showTip(c); });
+  gp.addEventListener("mouseout",  e=>{ const c = pick(e); if(c) hideTips(); });
+  gp.addEventListener("click",     e=>{ const c = pick(e); if(c) showTip(c); else hideTips(); });
+  window.addEventListener("scroll", hideTips, true);
+}
+
+function renderAll(){ renderFilters(); renderChart(); renderSteam(); renderTimeline(); renderBackupTip(); }
+
+function renderBackupTip(){
+  const n = ITEMS.length;
+  const el = document.getElementById("backupTip");
+  if(n >= 30){
+    el.classList.add("show");
+    document.getElementById("backupTipTxt").textContent = "数据已积累 " + n + " 条，建议导出一份备份留存。";
+  } else el.classList.remove("show");
+}
+
+/* ---------------- 交互 ---------------- */
+document.addEventListener("click", e=>{
+  const rb = e.target.closest("[data-read]");
+  if(rb){
+    const id = rb.dataset.read;
+    const item = ITEMS.find(i=>i.id===id);
+    if(STATE.read[id]) delete STATE.read[id]; else STATE.read[id] = 1;
+    saveState(); renderAll();
+    if(item && item.url && !STATE.read[id]) {} 
+    if(item && item.url && STATE.read[id]) {}
+    return;
+  }
+  const sb = e.target.closest("[data-star]");
+  if(sb){
+    const id = sb.dataset.star;
+    if(STATE.star[id]) delete STATE.star[id]; else STATE.star[id] = 1;
+    saveState(); renderAll();
+    return;
+  }
+  const fb = e.target.closest("[data-topic]");
+  if(fb && (fb.closest("#filters") || fb.closest("#tabbar"))){
+    FILTER = fb.dataset.topic; renderFilters(); renderTimeline();
+    if(fb.closest("#tabbar")) window.scrollTo({top:0, behavior:"smooth"});
+    return;
+  }
+  const mb = e.target.closest("[data-act]");
+  if(mb){ handleAction(mb.dataset.act); document.getElementById("menu").classList.remove("open"); return; }
+});
+
+document.getElementById("menuBtn").addEventListener("click", e=>{
+  e.stopPropagation();
+  document.getElementById("menu").classList.toggle("open");
+});
+document.addEventListener("click", ()=>document.getElementById("menu").classList.remove("open"));
+
+const qEl = document.getElementById("q");
+let qTimer=null;
+qEl.addEventListener("input", ()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ QUERY=qEl.value; renderTimeline(); }, 180); });
+
+const ICON_DESKTOP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>';
+const ICON_MOBILE  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>';
+
+function storedView(){ return localStorage.getItem(K.view) || "auto"; }
+function effectiveView(){
+  const v = storedView();
+  if(v === "mobile" || v === "desktop") return v;
+  return window.innerWidth <= 768 ? "mobile" : "desktop";
+}
+/* 布局状态单一来源：同步 is-mobile 类 + 顶栏两个切换控件。
+   宽屏三档开关亮对应项；窄屏单键显示「点一下会切到哪种布局」的图标。 */
+function syncViewUI(){
+  const v = storedView();
+  const cur = effectiveView();
+  document.documentElement.classList.toggle("is-mobile", cur === "mobile");
+  document.querySelectorAll("#viewswitch button").forEach(x=>x.classList.toggle("on", x.dataset.v===v));
+  const btn = document.getElementById("viewToggle");
+  if(!btn) return;
+  btn.classList.toggle("auto", v === "auto");
+  const toDesktop = (cur === "mobile");
+  btn.innerHTML = '<span class="auto-dot"></span>' + (toDesktop ? ICON_DESKTOP : ICON_MOBILE);
+  const label = toDesktop ? "切换到电脑版布局" : "切换到手机版布局";
+  btn.setAttribute("aria-label", label);
+  btn.setAttribute("title", v === "auto" ? label + "（当前为自动模式）" : label);
+}
+function setView(v, silent){
+  localStorage.setItem(K.view, v);
+  document.documentElement.setAttribute("data-view", v);
+  syncViewUI();
+  if(!silent) toast(v==="auto" ? "自动模式：按屏幕宽度切换" : (v==="desktop" ? "已锁定电脑版布局" : "已锁定手机版布局"));
+}
+
+document.getElementById("viewswitch").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  setView(b.dataset.v);
+});
+document.getElementById("viewToggle").addEventListener("click", ()=>{
+  setView(effectiveView() === "mobile" ? "desktop" : "mobile");
+});
+
+let rzTimer=null;
+window.addEventListener("resize", ()=>{
+  clearTimeout(rzTimer);
+  rzTimer = setTimeout(()=>{
+    if(storedView() === "auto") setView("auto", true); else syncViewUI();
+  }, 160);
+});
+
+/* ---------------- 导入导出 ---------------- */
+function download(name, content, type){
+  const blob = new Blob([content], {type:type||"application/json;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+function exportJSON(){
+  download("news-hub-backup-"+todayStr()+".json",
+    JSON.stringify({app:"news-hub", version:DATA_VERSION, exportedAt:new Date().toISOString(), items:ITEMS, state:STATE}, null, 2));
+  toast("已导出 " + ITEMS.length + " 条数据");
+}
+function exportCSV(){
+  const head = ["抓取日期","话题","分类","标题","摘要","来源","发布时间","原文链接"];
+  const rows = ITEMS.slice().sort((a,b)=>a.date<b.date?1:-1).map(i=>[
+    i.date, (TOPICS[i.topic]||{}).short||i.topic, i.cat||"", i.title||"", i.summary||"", i.source||"", i.pubDate||"", i.url||""
+  ]);
+  const csv = [head].concat(rows).map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  download("news-hub-"+todayStr()+".csv", "\ufeff"+csv, "text/csv;charset=utf-8");
+  toast("已导出 CSV");
+}
+const fileIn = document.getElementById("fileIn");
+fileIn.addEventListener("change", ()=>{
+  const f = fileIn.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const data = JSON.parse(r.result);
+      const incoming = Array.isArray(data) ? data : (data.items||[]);
+      if(!incoming.length) { toast("文件里没有可导入的数据"); return; }
+      const map = new Map();
+      ITEMS.forEach(i=>map.set(i.id, i));
+      let added = 0;
+      incoming.forEach(i=>{ if(i && i.id && !map.has(i.id)){ map.set(i.id, i); added++; } });
+      ITEMS = Array.from(map.values());
+      if(data.state){
+        Object.assign(STATE.read, data.state.read||{});
+        Object.assign(STATE.star, data.state.star||{});
+      }
+      saveItems(ITEMS); saveState(); renderAll();
+      toast("导入完成，新增 " + added + " 条，当前共 " + ITEMS.length + " 条");
+    }catch(err){ toast("导入失败：文件格式不正确"); }
+    fileIn.value = "";
+  };
+  r.readAsText(f);
+});
+
+function handleAction(act){
+  switch(act){
+    case "export-json": exportJSON(); break;
+    case "export-csv": exportCSV(); break;
+    case "import": fileIn.click(); break;
+    case "readall":
+      ITEMS.forEach(i=>STATE.read[i.id]=1); saveState(); renderAll(); toast("已全部标记为已读"); break;
+    case "readnone":
+      STATE.read = {}; saveState(); renderAll(); toast("已全部标记为未读"); break;
+    case "clear":
+      if(confirm("确定清空全部 " + ITEMS.length + " 条新闻数据？\n此操作不可撤销，建议先导出备份。")){
+        ITEMS = []; STATE = {read:{}, star:{}};
+        saveItems(ITEMS); saveState(); renderAll(); toast("数据已清空");
+      }
+      break;
+  }
+}
+
+/* ---------------- 启动 ---------------- */
+(function init(){
+  syncViewUI();
+  const d = new Date();
+  document.getElementById("syncTxt").textContent = "本地存储 · " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  renderAll();
+})();
+</script>
+</body>
+</html>

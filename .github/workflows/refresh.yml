@@ -1,0 +1,63 @@
+name: 刷新新闻汇总台
+
+on:
+  schedule:
+    # UTC 时间。北京 09:00 = UTC 01:00，北京 21:00 = UTC 13:00
+    - cron: '0 1,13 * * *'
+  workflow_dispatch:      # 允许在 GitHub 网页上手动点一次
+
+permissions:
+  contents: write         # 需要回写更新后的 index.html
+  models: read            # 需要调用 GitHub Models 把摘要译成中文
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 抓取新闻
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/fetch_news.py --days 3 --max 8
+
+      - name: 抓取 Steam 在线人数
+        run: python3 scripts/fetch_steam.py --days 7
+
+      - name: 提交更新
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --quiet --cached; then
+            echo "页面无变化，跳过提交"
+          else
+            git commit -m "chore: 刷新数据 $(date -u '+%Y-%m-%d %H:%M') UTC"
+            git push
+          fi
+
+      - name: 输出摘要
+        if: always()
+        run: |
+          echo "--- 本次运行结束 ---"
+          python3 - <<'PY'
+          import json, re, os
+          html = open('index.html', encoding='utf-8').read()
+          news = json.loads(re.search(r'const\s+SEED_DATA\s*=\s*(\[.*?\])\s*;', html, re.S).group(1))
+          blk = html.split('/* <<<STEAM_DATA_START>>> */')[1].split('/* <<<STEAM_DATA_END>>> */')[0]
+          steam = json.loads(re.search(r'const\s+STEAM_DATA\s*=\s*(\{.*\})\s*;', blk, re.S).group(1))
+          print('新闻总数: %d' % len(news))
+          for g in steam['games']:
+              d = g['daily']
+              print('%s 当前 %s | 24h峰 %s | 近 %d 天峰值 %s → %s' % (
+                  g['nameCn'], f"{g['current']:,}", f"{g['peak24h']:,}",
+                  len(d), f"{d[0]['peak']:,}", f"{d[-1]['peak']:,}"))
+          PY
