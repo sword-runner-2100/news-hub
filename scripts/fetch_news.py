@@ -40,6 +40,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -55,17 +56,27 @@ UTC = timezone.utc
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
-# (话题, 搜索词, 市场)  —— Google 用 when:Nd 过滤，Bing 只支持英文
+# (话题, 搜索词, hl, gl, ceid) —— Google 用 when:Nd 过滤。
+# 中英文各一路：中文源直接给中文标题，英文源覆盖面更广、抓到后翻译成中文。
 GOOGLE_QUERIES = [
     ("ubisoft", "育碧", "zh-CN", "CN", "CN:zh-Hans"),
     ("ubisoft", "Ubisoft", "en-US", "US", "US:en"),
+    ("ubisoft", "Ubisoft Assassin's Creed Rainbow Six", "en-US", "US", "US:en"),
+    ("ubisoft", "Ubisoft earnings stock studio", "en-US", "US", "US:en"),
     ("temu", "Temu", "zh-CN", "CN", "CN:zh-Hans"),
     ("temu", "Temu", "en-US", "US", "US:en"),
+    ("temu", "Temu PDD Holdings earnings", "en-US", "US", "US:en"),
+    ("temu", "Temu EU regulation tariff customs", "en-US", "US", "US:en"),
 ]
+# Bing 只支持英文市场，但它的摘要是正文原文片段 —— 英文源的主力就靠它
 BING_QUERIES = [
     ("ubisoft", "Ubisoft"),
+    ("ubisoft", "Ubisoft Assassin's Creed"),
+    ("ubisoft", "Ubisoft Rainbow Six Far Cry"),
     ("temu", "Temu"),
     ("temu", "Temu PDD Holdings"),
+    ("temu", "Temu EU regulation tariff"),
+    ("temu", "Temu Shein cross-border ecommerce"),
 ]
 
 # 博彩 / SEO 垃圾站常用词。这类站点会把广告词塞进新闻标题混进 Google News，
@@ -215,26 +226,38 @@ def is_junk(x):
     # 标题里出现两组以上竖线分隔，通常是 SEO 标签堆砌
     if title.count("|") >= 2:
         return True
+    # 个人频道 / 聚合站的噪声条目，如 "senorablitz's Library"、"electrostreet's Library"
+    if re.search(r"\b\w+'s\s+Library\b", title, re.I):
+        return True
     return False
 
 
 def is_chinese(s):
-    """中文字符占比达到三成就认为是中文条目。"""
+    """中文字符占比达到三成就认为是中文条目（用于排序）。"""
     if not s:
         return False
     cn = len(re.findall(r"[\u4e00-\u9fff]", s))
     return cn / max(1, len(s)) >= 0.3
 
 
-def trust_score(x):
-    """排序打分：中文标题 > 有摘要 > 正规媒体 > 时间。
+def has_cn(s, n=3):
+    """是否含足够多的中文字符（用于判断要不要送去翻译）。
 
-    中文优先是因为 GitHub Models 已退役（见 translate 说明），英文摘要没法自动翻译，
-    而中文标题至少能直接读；带真实摘要的英文条目排其次。
+    比 is_chinese 宽松：像「Ubisoft正式确认Rainbow Six自己的XCOM」这种中英混合标题，
+    中文占比不到三成但其实不用翻，硬翻反而会被翻译接口弄坏。
+    """
+    return len(re.findall(r"[\u4e00-\u9fff]", s or "")) >= n
+
+
+def trust_score(x, prefer_cn=False):
+    """排序打分：有摘要 > 正规媒体 > 时间；prefer_cn 时中文标题额外 +200。
+
+    prefer_cn 只在「关闭翻译」时才开 —— 那时英文条目读不了，只能靠中文源保可读性。
+    开启翻译后所有条目最终都会变成中文，再偏袒原生中文反而会把英文源挤掉，故关掉。
     """
     src = (x.get("source") or "").lower()
     s = 0
-    if is_chinese(x.get("title")):
+    if prefer_cn and is_chinese(x.get("title")):
         s += 200
     if x.get("summary"):
         s += 100
@@ -247,58 +270,109 @@ def trust_score(x):
     return s
 
 
+def _gtx(text):
+    """Google 翻译的公开 gtx 端点，质量最好。"""
+    url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
+        {"client": "gtx", "sl": "en", "tl": "zh-CN", "dt": "t", "q": text})
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    raw = urllib.request.urlopen(req, timeout=25).read().decode("utf-8")
+    return "".join(seg[0] for seg in json.loads(raw)[0] if seg and seg[0])
+
+
+def _mymemory(text):
+    """MyMemory 免费翻译，作为备用。"""
+    url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode(
+        {"q": text, "langpair": "en|zh-CN"})
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    d = json.loads(urllib.request.urlopen(req, timeout=25).read().decode("utf-8"))
+    return ((d.get("responseData") or {}).get("translatedText") or "").strip()
+
+
+# 品牌 / 产品 / 公司名：翻译前抽成占位符，翻译后原样还原。
+# 不这么做的话 Temu 会被音译成「特姆」「特木」，PDD 也被拆得面目全非。
+BRANDS = [
+    "PDD Holdings", "PDD", "Temu", "Shein", "AliExpress", "TikTok Shop",
+    "Ubisoft", "Ubisoft+", "Assassin's Creed", "Rainbow Six Siege", "Rainbow Six",
+    "Far Cry", "Heroes of Might and Magic", "Might and Magic", "Skull and Bones",
+    "The Division", "Tom Clancy's", "Just Dance", "For Honor", "Anno",
+    "Steam", "SteamDB", "SteamCharts", "Snowdrop", "PlayStation", "Xbox",
+    "Nintendo", "Epic Games", "Gamescom", "E3", "Tencent", "Amazon", "Walmart",
+    "DSA", "VLOP", "IPO", "CEO", "CFO",
+]
+
+
+def _protect(text):
+    """把品牌名换成占位符，返回 (处理后文本, 占位符→原文 映射)。"""
+    slots = {}
+    out = text
+    for b in BRANDS:
+        def rep(m):
+            key = "QX%dQX" % len(slots)
+            slots[key] = m.group(0)
+            return key
+        out = re.sub(re.escape(b), rep, out, flags=re.I)
+    return out, slots
+
+
+def _restore(text, slots):
+    for k, v in slots.items():
+        text = text.replace(k, v)
+    # 兜底：万一占位符被翻译 API 拆开，把残留的 QX..QX 清掉
+    return re.sub(r"QX\s*\d+\s*QX", "", text).strip()
+
+
+def translate_one(text, cache):
+    """把一段英文译成中文。已是中文或翻译失败则原样返回。"""
+    if not text or not text.strip():
+        return text, False
+    if has_cn(text):
+        return text, False
+    if text in cache:
+        return cache[text], True
+
+    guarded, slots = _protect(text)
+    for fn in (_gtx, _mymemory):
+        try:
+            out = (fn(guarded) or "").strip()
+            if out and out != guarded:
+                out = _restore(out, slots) if slots else out
+                if out:
+                    cache[text] = out
+                    return out, True
+        except Exception:
+            continue
+    return text, False
+
+
 def translate(items):
-    """把标题/摘要译成中文（需 --translate 显式开启）。
+    """把英文标题与摘要译成中文。
 
-    原本用 GitHub Models（models.github.ai/inference），但它已在按计划退役，
-    服务端直接返回 410 github_models_retirement_brownout，因此默认关闭。
-    如果将来有可用的替代推理服务，改这里即可，其余流程不用动。
+    背景：原本打算用 GitHub Models（models.github.ai/inference），但它已在按计划退役，
+    服务端返回 410 github_models_retirement_brownout；官方的 actions/ai-inference
+    也改成只支持 Copilot，需要用户自备 COPILOT_PAT。
+
+    因此改用免费翻译接口：Google 公开翻译端点为主、MyMemory 为备。
+    翻译只做语言转换，不增删改任何事实；原文链接始终保留，可点开核对。
     """
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("TRANSLATE_TOKEN")
-    if not token:
-        log("    [提示] 未设置 GITHUB_TOKEN，跳过翻译")
-        return items
+    cache = {}
+    n_t = n_d = n_fail = 0
+    for it in items:
+        t, ok1 = translate_one(it.get("title", ""), cache)
+        if ok1:
+            n_t += 1
+        elif not has_cn(it.get("title", "")):
+            n_fail += 1
+        it["title"] = t
 
-    payload = [{"i": i, "t": it["title"], "d": it.get("summary", "")} for i, it in enumerate(items)]
-    body = {
-        "model": "openai/gpt-4o-mini",
-        "temperature": 0.2,
-        "messages": [
-            {"role": "system", "content":
-                "你是新闻翻译助手。把给定的英文新闻标题和摘要翻译成简体中文。\n"
-                "严格要求：\n"
-                "1. 只做翻译，严禁添加、推测、补充任何原文没有的信息；\n"
-                "2. 严禁删改数字、金额、百分比、日期、机构名与产品名；\n"
-                "3. 摘要为空就输出空字符串，不要替它编内容；\n"
-                "4. 只输出 JSON 数组，每项形如 {\"i\":0,\"t\":\"中文标题\",\"d\":\"中文摘要\"}，不要任何解释。"},
-            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
-        ],
-    }
-    req = urllib.request.Request(
-        "https://models.github.ai/inference/chat/completions",
-        data=json.dumps(body).encode("utf-8"),
-        headers={"Authorization": "Bearer " + token,
-                 "Content-Type": "application/json",
-                 "Accept": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=120) as r:
-            resp = json.loads(r.read().decode("utf-8"))
-        content = resp["choices"][0]["message"]["content"]
-        m = re.search(r"\[.*\]", content, re.S)
-        arr = json.loads(m.group(0)) if m else json.loads(content)
-        n = 0
-        for row in arr:
-            i = row.get("i")
-            if isinstance(i, int) and 0 <= i < len(items):
-                if row.get("t"):
-                    items[i]["title"] = row["t"][:200]
-                    n += 1
-                if row.get("d"):
-                    items[i]["summary"] = row["d"][:600]
-        log("    [OK] 已翻译 %d 条为中文" % n)
-    except Exception as ex:
-        log("    [SKIP] 翻译失败，保留英文：%s" % str(ex)[:80])
+        if it.get("summary"):
+            d, ok2 = translate_one(it["summary"], cache)
+            if ok2:
+                n_d += 1
+            it["summary"] = d
+        time.sleep(0.12)          # 轻微限速，避免被判滥用
+
+    log("    [OK] 翻译完成：标题 %d 条、摘要 %d 条%s"
+        % (n_t, n_d, ("，%d 条失败保留英文" % n_fail) if n_fail else ""))
     return items
 
 
@@ -309,8 +383,8 @@ def main():
                     help="Bing 源时间窗更宽（它带真实摘要但更新慢），默认 7 天")
     ap.add_argument("--max", type=int, default=8, help="每个话题最多保留 N 条，默认 8")
     ap.add_argument("--no-update", action="store_true", help="只生成 JSON，不改页面")
-    ap.add_argument("--translate", action="store_true",
-                    help="尝试把英文译成中文（默认关闭：GitHub Models 已退役，会返回 410）")
+    ap.add_argument("--no-translate", action="store_true",
+                    help="关闭中文翻译（默认开启，走免费翻译接口）")
     args = ap.parse_args()
 
     now = datetime.now(UTC)
@@ -352,8 +426,10 @@ def main():
         log("\n[FAIL] 没抓到任何近期新闻，页面保持原样")
         sys.exit(1)
 
-    # 排序：有摘要 + 正规媒体优先，其次按时间
-    merged.sort(key=lambda x: (trust_score(x), x["pub"] or now), reverse=True)
+    # 排序：有摘要 + 正规媒体优先，其次按时间。
+    # 只有在「关闭翻译」时才额外偏袒原生中文（否则英文条目最后也会译成中文，不该被挤掉）
+    prefer_cn = args.no_translate
+    merged.sort(key=lambda x: (trust_score(x, prefer_cn), x["pub"] or now), reverse=True)
 
     n_bing = sum(1 for x in merged if "bing" in (x["source"] or "").lower())
     log("\n  去重后 %d 条（Bing 系 %d / 其余 %d），过滤垃圾 %d 条" %
@@ -389,10 +465,10 @@ def main():
             "pubDate": x["pub"].strftime("%Y-%m-%d") if x["pub"] else "",
         })
 
-    if args.translate:
-        items = translate(items)
+    if args.no_translate:
+        log("    [提示] 已按 --no-translate 关闭翻译，英文条目保留原文")
     else:
-        log("    [提示] 未开启翻译（--translate）。GitHub Models 已退役，靠中文源保证可读性")
+        items = translate(items)
 
     out = {"date": datetime.now(CST).strftime("%Y-%m-%d"), "items": items}
     os.makedirs(INBOX, exist_ok=True)
@@ -403,7 +479,7 @@ def main():
     log("\n[OK] 已写入 %s" % path)
     for it in items:
         flag = "摘" if it["summary"] else "  "
-        lang = "中" if is_chinese(it["title"]) else "英"
+        lang = "中" if has_cn(it["title"]) else "英"
         log("    [%s][%s][%-7s][%s] %s" % (flag, lang, it["topic"], it["cat"], it["title"][:56]))
 
     if args.no_update:
