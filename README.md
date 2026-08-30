@@ -28,9 +28,21 @@ GitHub Actions 定时触发（每天 UTC 01:00 / 13:00，即北京 09:00 / 21:00
 - **不用 Google News 的链接做直链**：它是加密的 protobuf 中转地址（`news.google.com/rss/articles/CBMi...`），只能逆向 Google 内部接口解码，太脆弱。浏览器点击仍能跳转原文。
 - **Bing 只抓英文**：实测 `setmkt=zh-CN` 时 Bing 返回 HTML 而非 RSS。
 - **摘要不靠 AI 编造**：全部来自 Bing 的正文片段，不做任何推测或补充。
-- **中文优先**：排序时中文标题 +200 分、有摘要 +100 分、正规媒体 +50 分。实测每个话题 8 条里通常 7 条以上是中文标题，其余是带真实英文摘要的条目。
-- **没有 AI 翻译**：原本打算用 GitHub Models 把英文摘要译成中文，但它已按计划退役，服务端直接返回 `410 github_models_retirement_brownout`。`--translate` 参数保留着，将来有替代推理服务时可直接启用。
-- **垃圾过滤**（必须做）：博彩/SEO 站会把广告词混进 Google News 中文源，实测「育碧」24 条里能有 15 条是这类垃圾。脚本内置关键词黑名单、来源黑名单，以及标题竖线数判定，自动丢弃。
+- **英文源覆盖更广**：Google 英文 6 路 + Bing 7 路 + 中文 2 路，共 15 路。抓到的英文条目全部自动译成中文。
+- **翻译走免费接口**：Google 公开翻译端点为主、MyMemory 为备，无需任何 API key。想保留英文原文加 `--no-translate`。
+- **垃圾过滤**（必须做）：博彩/SEO 站会把广告词混进 Google News 中文源，实测「育碧」24 条里能有 15 条是这类垃圾。脚本内置关键词黑名单、来源黑名单、标题竖线数判定，以及 `'s Library` 这类个人频道噪声，自动丢弃。
+
+### 翻译质量的三道保险
+
+机器翻译直接套用会出不少洋相，所以加了几层处理：
+
+1. **品牌名占位符保护** —— 翻译前把 Temu / PDD Holdings / Ubisoft / Rainbow Six 等 38 个专有名词换成占位符，译后还原。不这么做 Temu 会被音译成「特姆」「特木」。
+   - 占位符必须带词边界 `(?<!\w)...(?!\w)`：否则 `Anno`（纪元这款游戏）会把 `announces` 切成 `QXnQXunces`，整句结构被打断，翻译接口就会乱翻。
+2. **术语预替换** —— Trailer→预告片、Season Pass→赛季通行证、price target→目标价、year-on-year→同比 等 16 条。同样走占位符，否则译好的中文术语会被翻译接口二次处理（「免费游玩」曾被改成「免费站立」）。
+3. **中英混合标题豁免** —— 含 3 个以上中文字符就不送翻译，避免把「Ubisoft正式确认Rainbow Six自己的XCOM」这类标题翻坏。
+
+**历史条目回填**：翻译功能是后来加的，之前抓的还是英文。
+`scripts/backfill_translate.py` 可把存量英文条目批量回译（幂等，可重复运行）。当前线上 75 条里 74 条是中文标题。
 
 ### Steam 在线人数
 
@@ -53,10 +65,11 @@ https://steamcharts.com/app/<appId>/chart-data.json
 ```
 index.html                      页面本体（数据内联在 SEED_DATA / STEAM_DATA 标记块里）
 scripts/
-  fetch_news.py                 抓新闻（Google + Bing 双源，可选翻译）
+  fetch_news.py                 抓新闻（Google + Bing 双源，自动译中）
   fetch_steam.py                抓 Steam 日度数据
   update_news.py                把新闻合并进 index.html（去重、排序、备份）
   update_steam.py               把 Steam 数据合并进 index.html
+  backfill_translate.py         把存量英文条目批量回译（幂等）
 .github/workflows/refresh.yml   定时任务
 ```
 
@@ -113,7 +126,7 @@ python3 scripts/fetch_steam.py               # 刷新 Steam 数据
 
 ## 已知限制
 
-- **新闻链接**：Google 源的条目是 `news.google.com` 中转地址，浏览器点击会自动跳转到原文，但不是原文直链。Bing 源的条目已解析成真实直链。
-- **无 AI 翻译**：GitHub Models 退役后，英文条目保留英文原文。中文标题由 Google 中文源直接提供。
+- **翻译非 AI**：走免费机器翻译接口，偶尔会有生硬或轻微误译（尤其是双关语）。原文链接始终保留，可点开核对。
+- **链接**：Google 源的条目是 `news.google.com` 中转地址，浏览器点击会自动跳转到原文，但不是原文直链。Bing 源的条目已解析成真实直链。
 - **摘要覆盖率**：只有 Bing 源给摘要，所以约一半条目有摘要，其余只有标题。
 - **Actions 推送冲突**：如果本地也改了 `index.html`，推送前记得先 `git pull --rebase`，因为 Actions 会往同一个分支提交。
