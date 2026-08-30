@@ -301,8 +301,30 @@ BRANDS = [
 ]
 
 
+# 游戏 / 财经术语：翻译前先换成标准中文说法。
+# 不这么做的话 Trailer 会被译成「拖车」、Season Pass 被拆得七零八落。
+TERMS = [
+    (r"\bTrailers?\b", "预告片"),
+    (r"\bGameplay\b", "实机演示"),
+    (r"\bSeason Pass\b", "赛季通行证"),
+    (r"\bBattle Pass\b", "战斗通行证"),
+    (r"\bOpen Beta\b", "公开测试"),
+    (r"\bClosed Beta\b", "封闭测试"),
+    (r"\bEarly Access\b", "抢先体验"),
+    (r"\bMicrotransactions?\b", "微交易"),
+    (r"\bFree[- ]to[- ]Play\b", "免费游玩"),
+    (r"\bCrossplay\b", "跨平台联机"),
+    (r"\bRemaster(ed)?\b", "重制版"),
+    (r"\bRemake\b", "重制版"),
+    (r"\bPrice target\b", "目标价"),
+    (r"\bQuarterly results\b", "季度业绩"),
+    (r"\bYear[- ]on[- ]year\b", "同比"),
+    (r"\bSupply chain\b", "供应链"),
+]
+
+
 def _protect(text):
-    """把品牌名换成占位符，返回 (处理后文本, 占位符→原文 映射)。"""
+    """把品牌名换成占位符、术语换成标准中文，返回 (处理后文本, 占位符→原文 映射)。"""
     slots = {}
     out = text
     for b in BRANDS:
@@ -310,15 +332,29 @@ def _protect(text):
             key = "QX%dQX" % len(slots)
             slots[key] = m.group(0)
             return key
-        out = re.sub(re.escape(b), rep, out, flags=re.I)
+        # 必须加词边界：否则 "Anno"（纪元这款游戏）会把 "announces" 切成 "QXnQXunces"，
+        # 整句结构被打断，翻译接口就会乱翻。
+        out = re.sub(r"(?<!\w)" + re.escape(b) + r"(?!\w)", rep, out, flags=re.I)
+    # 术语同样走占位符（而不是直接写成中文）——
+    # 否则翻译成中文的术语会被翻译接口当成源文本二次处理，比如「免费游玩」被改成「免费站立」
+    for pat, cn in TERMS:
+        def rep_term(m, _cn=cn):
+            key = "QX%dQX" % len(slots)
+            slots[key] = _cn
+            return key
+        out = re.sub(pat, rep_term, out, flags=re.I)
     return out, slots
 
 
 def _restore(text, slots):
     for k, v in slots.items():
         text = text.replace(k, v)
-    # 兜底：万一占位符被翻译 API 拆开，把残留的 QX..QX 清掉
-    return re.sub(r"QX\s*\d+\s*QX", "", text).strip()
+    # 兜底：万一占位符被翻译接口拆开，把残留的 QX..QX 清掉
+    text = re.sub(r"QX\s*\d+\s*QX", "", text)
+    # 占位符还原后，中文之间会留下多余空格（如「免费游玩 重制版」），收紧掉；
+    # 中文与英文/数字之间的空格保留，那是正常排版。
+    text = re.sub(r"(?<=[\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])", "", text)
+    return text.strip()
 
 
 def translate_one(text, cache):
