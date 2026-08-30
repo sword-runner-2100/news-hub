@@ -20,8 +20,8 @@
      - 缺点：只支持英文市场（setmkt=zh-CN 时返回 HTML 而非 RSS），且条目少
 
 合并时 Bing 的条目优先（有摘要、有直链），Google 的补充数量。
-抓到英文内容后，若存在 GITHUB_TOKEN 则调用 GitHub Models 译成中文
-（只翻译，不补充任何原文没有的信息 —— 保证数据真实性）。
+英文条目保留原文，中文条目直接采用 Google 中文源的中文标题 —— 不依赖任何 AI 翻译
+（GitHub Models 已按计划退役，服务端返回 410，详见 translate() 注释）。
 
 用法：
     python3 scripts/fetch_news.py                  # 抓最近 3 天，写入 index.html
@@ -60,7 +60,7 @@ GOOGLE_QUERIES = [
     ("ubisoft", "育碧", "zh-CN", "CN", "CN:zh-Hans"),
     ("ubisoft", "Ubisoft", "en-US", "US", "US:en"),
     ("temu", "Temu", "zh-CN", "CN", "CN:zh-Hans"),
-    ("temu", "Temu PDD 拼多多", "en-US", "US", "US:en"),
+    ("temu", "Temu", "en-US", "US", "US:en"),
 ]
 BING_QUERIES = [
     ("ubisoft", "Ubisoft"),
@@ -218,10 +218,24 @@ def is_junk(x):
     return False
 
 
+def is_chinese(s):
+    """中文字符占比达到三成就认为是中文条目。"""
+    if not s:
+        return False
+    cn = len(re.findall(r"[\u4e00-\u9fff]", s))
+    return cn / max(1, len(s)) >= 0.3
+
+
 def trust_score(x):
-    """来源可信度打分，用于排序：有摘要 > 正规媒体 > 其他。"""
+    """排序打分：中文标题 > 有摘要 > 正规媒体 > 时间。
+
+    中文优先是因为 GitHub Models 已退役（见 translate 说明），英文摘要没法自动翻译，
+    而中文标题至少能直接读；带真实摘要的英文条目排其次。
+    """
     src = (x.get("source") or "").lower()
     s = 0
+    if is_chinese(x.get("title")):
+        s += 200
     if x.get("summary"):
         s += 100
     for t in TRUSTED:
@@ -234,10 +248,15 @@ def trust_score(x):
 
 
 def translate(items):
-    """用 GitHub Models 把标题/摘要译成中文。无 GITHUB_TOKEN 时原样返回。"""
-    token = os.environ.get("GITHUB_TOKEN")
+    """把标题/摘要译成中文（需 --translate 显式开启）。
+
+    原本用 GitHub Models（models.github.ai/inference），但它已在按计划退役，
+    服务端直接返回 410 github_models_retirement_brownout，因此默认关闭。
+    如果将来有可用的替代推理服务，改这里即可，其余流程不用动。
+    """
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("TRANSLATE_TOKEN")
     if not token:
-        log("    [提示] 未设置 GITHUB_TOKEN，跳过翻译，保留英文")
+        log("    [提示] 未设置 GITHUB_TOKEN，跳过翻译")
         return items
 
     payload = [{"i": i, "t": it["title"], "d": it.get("summary", "")} for i, it in enumerate(items)]
@@ -290,7 +309,8 @@ def main():
                     help="Bing 源时间窗更宽（它带真实摘要但更新慢），默认 7 天")
     ap.add_argument("--max", type=int, default=8, help="每个话题最多保留 N 条，默认 8")
     ap.add_argument("--no-update", action="store_true", help="只生成 JSON，不改页面")
-    ap.add_argument("--no-translate", action="store_true", help="跳过中文翻译")
+    ap.add_argument("--translate", action="store_true",
+                    help="尝试把英文译成中文（默认关闭：GitHub Models 已退役，会返回 410）")
     args = ap.parse_args()
 
     now = datetime.now(UTC)
@@ -369,8 +389,10 @@ def main():
             "pubDate": x["pub"].strftime("%Y-%m-%d") if x["pub"] else "",
         })
 
-    if not args.no_translate:
+    if args.translate:
         items = translate(items)
+    else:
+        log("    [提示] 未开启翻译（--translate）。GitHub Models 已退役，靠中文源保证可读性")
 
     out = {"date": datetime.now(CST).strftime("%Y-%m-%d"), "items": items}
     os.makedirs(INBOX, exist_ok=True)
@@ -381,7 +403,8 @@ def main():
     log("\n[OK] 已写入 %s" % path)
     for it in items:
         flag = "摘" if it["summary"] else "  "
-        log("    [%s][%-7s][%s] %s" % (flag, it["topic"], it["cat"], it["title"][:58]))
+        lang = "中" if is_chinese(it["title"]) else "英"
+        log("    [%s][%s][%-7s][%s] %s" % (flag, lang, it["topic"], it["cat"], it["title"][:56]))
 
     if args.no_update:
         return

@@ -8,7 +8,9 @@ on:
 
 permissions:
   contents: write         # 需要回写更新后的 index.html
-  models: read            # 需要调用 GitHub Models 把摘要译成中文
+  # 原先这里还要 models: read —— 用来调 GitHub Models 把摘要译成中文。
+  # 但 GitHub Models 已在按计划退役（服务端返回 410 github_models_retirement_brownout），
+  # 翻译改由「中文新闻源直接给中文标题」替代，不再需要这个权限。
 
 jobs:
   refresh:
@@ -25,8 +27,6 @@ jobs:
           python-version: '3.12'
 
       - name: 抓取新闻
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/fetch_news.py --days 3 --max 8
 
       - name: 抓取 Steam 在线人数
