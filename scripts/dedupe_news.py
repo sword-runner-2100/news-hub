@@ -28,6 +28,9 @@ import shutil
 import sys
 from datetime import datetime, timezone, timedelta
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from dedupe_lib import SimilarIndex   # noqa: E402
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 HTML_PATH = os.path.join(ROOT, "index.html")
@@ -54,36 +57,6 @@ NOISE_PATTERNS = [
     r"^[\u4e00-\u9fff]{2,6}图书馆$",          # 译后的 "XX's Library"
     r"\b\w+'s\s+Library\b",                    # 未译的原文
 ]
-
-
-def title_key(t):
-    """与 update_news.py 保持一致的去重键。"""
-    return re.sub(r"[\s\W_]+", "", str(t or "")).lower()[:40]
-
-
-def _grams(t, n=2):
-    """标题的字符 2-gram 集合，用于算相似度。"""
-    s = re.sub(r"[\s\W_]+", "", str(t or "")).lower()
-    return {s[i:i + n] for i in range(len(s) - n + 1)} or {s}
-
-
-def similar(a, b, thresh=0.35):
-    """两个标题是否描述同一事件（Jaccard 相似度）。
-
-    用来兜住「同一事件、不同译法」—— 翻译接口不是确定性的，同一篇报道隔天抓回来
-    可能译出「Ubisoft游戏正式结束对多个平台的支持」和「Ubisoft游戏正式结束多平台支持」
-    这种字面不同但指同一件事的标题，精确去重键抓不到。
-
-    阈值 0.35 是实测调出来的，真实样本的分布：
-        同一事件的不同译法         0.41 ~ 0.62   → 应合并
-        只共享游戏名的不同新闻      0.14          → 应保留
-    取 0.35 刚好落在两类之间，两边都留了余量。
-    """
-    ga, gb = _grams(a), _grams(b)
-    if not ga or not gb:
-        return False
-    union = len(ga | gb)
-    return bool(union) and len(ga & gb) / union >= thresh
 
 
 def is_noise(it):
@@ -143,41 +116,18 @@ def main():
         for x in noises[:10]:
             print("    [%s] %s" % (x.get("source", "")[:14], (x.get("title") or "")[:44]))
 
-    # 2) 按标题去重
-    #    先用精确键分桶，桶内再用相似度兜「同一事件、不同译法」。
-    #    分桶是为了避免 O(n²)：只比较前 12 字相同的条目。
-    buckets = {}
-    for x in clean:
-        k = title_key(x.get("title"))
-        if k:
-            buckets.setdefault(k, []).append(x)
+    # 2) 按标题去重：精确键 + 2-gram 相似度兜底（逻辑见 dedupe_lib.py）
 
-    def prefix(t):
-        return re.sub(r"[\s\W_]+", "", t or "").lower()[:12]
-
-    kept, dups, seen = [], [], set()
-    kept_by_prefix = {}
-    # 按 keep_score 降序处理，保证留下的总是质量最高的那条
+    # 按 keep_score 降序处理，保证同一事件留下的总是质量最高的那条
+    # （有摘要 > 来源可信 > 日期新）
+    kept, dups = [], []
+    sim = SimilarIndex()
     for x in sorted(clean, key=keep_score, reverse=True):
-        k = title_key(x.get("title"))
-        if k and k in seen:
+        if sim.find(x.get("title"), x.get("topic")) is not None:
             dups.append(x)
             continue
-        # 只需与「前 12 字相同」的已保留条目比相似度，避免 O(n²)
-        hit = None
-        for other in kept_by_prefix.get(prefix(x.get("title")), []):
-            if other.get("topic") == x.get("topic") and \
-                    similar(x.get("title"), other.get("title")):
-                hit = other
-                break
-        if hit is not None:
-            dups.append(x)
-            continue
-        if k:
-            seen.add(k)
+        sim.add(x)
         kept.append(x)
-        kept_by_prefix.setdefault(prefix(x.get("title")), []).append(x)
-
     if dups:
         print("\n  === 重复条目 %d 条（每组保留 1 条）===" % len(dups))
         for x in dups[:12]:
