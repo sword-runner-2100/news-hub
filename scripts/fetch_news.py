@@ -266,6 +266,16 @@ def norm(t):
     return s[:70]
 
 
+def title_key(t):
+    """标题去重键：去掉标点空格后取前 40 字，用于译后去重与跨批次去重。
+
+    为什么不能只靠 url 去重：Google 源的链接是加密中转地址，同一篇文章换个关键词或
+    市场抓回来 url 就变了；Bing 的中转链接解析失败时也会退化成不同地址。
+    而标题（尤其是译为中文后）对同一事件是稳定的，是更可靠的去重依据。
+    """
+    return re.sub(r"[\s\W_]+", "", str(t or "")).lower()[:40]
+
+
 def guess_cat(text):
     low = text.lower()
     for name, keys in CATS:
@@ -382,6 +392,17 @@ TERMS = [
     (r"\bQuarterly results\b", "季度业绩"),
     (r"\bYear[- ]on[- ]year\b", "同比"),
     (r"\bSupply chain\b", "供应链"),
+    # 财经动词：slip 在财经语境是「下滑」，翻译接口常按「单据」译，
+    # 会产出「Temu 所有者利润单」这种残缺标题，必须提前钉死
+    (r"\bprofits?\s+slips?\b", "利润下滑"),
+    (r"\brevenues?\s+slips?\b", "营收下滑"),
+    (r"\bsales\s+slips?\b", "销量下滑"),
+    (r"\bmargins?\s+slips?\b", "利润率下滑"),
+    (r"\bshares?\s+slips?\b", "股价下滑"),
+    (r"\bprofits?\s+falls?\b", "利润下降"),
+    (r"\bprofits?\s+drops?\b", "利润下降"),
+    (r"\brevenues?\s+miss(es)?\b", "营收不及预期"),
+    (r"\bde minimis\b", "最低免税额"),
 ]
 
 
@@ -598,6 +619,19 @@ def main():
         log("    [提示] 已按 --no-translate 关闭翻译，英文条目保留原文")
     else:
         items = translate(items)
+        # 翻译后的二次去重：同一事件各家媒体的英文标题往往差一两个词，
+        # norm() 挡不住；译成中文后却几乎一模一样（实测「Ubisoft 出售了一款游戏…」
+        # 重复 4 次）。这里按中文再过一遍，保留排序靠前（可信度更高）的那条。
+        seen_cn, uniq = set(), []
+        for it in items:
+            k = title_key(it["title"])
+            if not k or k in seen_cn:
+                continue
+            seen_cn.add(k)
+            uniq.append(it)
+        if len(uniq) < len(items):
+            log("    [OK] 译后去重：%d 条 → %d 条" % (len(items), len(uniq)))
+        items = uniq
 
     out = {"date": datetime.now(CST).strftime("%Y-%m-%d"), "items": items}
     os.makedirs(INBOX, exist_ok=True)

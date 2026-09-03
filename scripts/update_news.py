@@ -61,6 +61,43 @@ def slugify(text, maxlen=60):
     return (s[:maxlen] or "item")
 
 
+def title_key(t):
+    """标题去重键：去标点空格后取前 40 字。
+
+    只按 url 去重是不够的 —— Google 源的链接是加密中转地址，同一篇文章换个关键词
+    或市场抓回来 url 就变了；Bing 的中转链接解析失败时也会退化成不同地址。
+    结果就是同一事件反复入库（实测同一标题重复 4 次）。
+    """
+    return re.sub(r"[\s\W_]+", "", str(t or "")).lower()[:40]
+
+
+def prefix_key(t):
+    """标题前 12 字，用作相似度比较的分桶键（避免全表 O(n²) 比较）。"""
+    return re.sub(r"[\s\W_]+", "", str(t or "")).lower()[:12]
+
+
+def _grams(t, n=2):
+    s = re.sub(r"[\s\W_]+", "", str(t or "")).lower()
+    return {s[i:i + n] for i in range(len(s) - n + 1)} or {s}
+
+
+def similar(a, b, thresh=0.35):
+    """两个标题是否描述同一事件（Jaccard 相似度）。
+
+    兜住「同一事件、不同译法」：翻译接口不是确定性的，同一篇报道隔天抓回来可能译出
+    「Ubisoft游戏正式结束对多个平台的支持」和「Ubisoft游戏正式结束多平台支持」，
+    精确去重键抓不到，但读者看到的是两条几乎一样的新闻。
+
+    阈值取 0.35，实测样本分布：同一事件的不同译法 0.41~0.62，
+    仅共享游戏名的不同新闻 0.14，两侧都有余量。
+    """
+    ga, gb = _grams(a), _grams(b)
+    if not ga or not gb:
+        return False
+    union = len(ga | gb)
+    return bool(union) and len(ga & gb) / union >= thresh
+
+
 def normalize(item, fallback_date):
     if not isinstance(item, dict):
         return None
@@ -157,21 +194,60 @@ def main():
 
     seed, s, e = read_seed(html)
 
-    index = {}
+    # 双索引去重：url 挡住完全相同的抓取，标题挡住「同一事件、不同链接」。
+    # 保留哪条：已存在的优先（先入库的通常是可信度排序更靠前的那条）。
+    index = {}       # url/id → item
+    by_title = {}    # 归一化标题 → item
+    by_prefix = {}   # 前 12 字 → [item]，供相似度兜底查询
     for it in seed:
         if not isinstance(it, dict):
             continue
         key = (it.get("url") or "").strip() or str(it.get("id") or "")
         if key:
             index[key] = it
+        tk = title_key(it.get("title") or "")
+        if tk and tk not in by_title:
+            by_title[tk] = it
+        pk = prefix_key(it.get("title") or "")
+        if pk:
+            by_prefix.setdefault(pk, []).append(it)
 
-    added = 0
+    added, dup_url, dup_title, dup_sim = 0, 0, 0, 0
     for it in incoming:
         key = it["url"] or it["id"]
+        tk = title_key(it["title"])
+        # 1) 标题完全一致（换了链接的同一条）
+        if tk and tk in by_title:
+            dup_title += 1
+            continue
+        # 2) 标题不同但足够相似（同一事件的不同译法 / 不同媒体报道）
+        hit = None
+        for other in by_prefix.get(prefix_key(it["title"]), []):
+            if other.get("topic") == it.get("topic") and \
+                    similar(it["title"], other.get("title")):
+                hit = other
+                break
+        if hit is not None:
+            dup_sim += 1
+            continue
+        # 3) 链接完全相同
         if key in index:
+            dup_url += 1
             continue
         index[key] = it
+        if tk:
+            by_title[tk] = it
+        pk = prefix_key(it["title"])
+        if pk:
+            by_prefix.setdefault(pk, []).append(it)
         added += 1
+
+    if dup_title:
+        print("     标题去重：拦下 %d 条（同一新闻换了链接被反复抓到）" % dup_title)
+    if dup_sim:
+        print("     相似去重：拦下 %d 条（同一事件的不同译法 / 不同媒体报道）" % dup_sim)
+    if dup_url:
+        print("     链接去重：拦下 %d 条" % dup_url)
 
     merged = list(index.values())
 
