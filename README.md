@@ -28,7 +28,8 @@ GitHub Actions 定时触发（每天 UTC 01:00 / 13:00，即北京 09:00 / 21:00
 - **不用 Google News 的链接做直链**：它是加密的 protobuf 中转地址（`news.google.com/rss/articles/CBMi...`），只能逆向 Google 内部接口解码，太脆弱。浏览器点击仍能跳转原文。
 - **Bing 只抓英文**：实测 `setmkt=zh-CN` 时 Bing 返回 HTML 而非 RSS。
 - **摘要不靠 AI 编造**：全部来自 Bing 的正文片段，不做任何推测或补充。
-- **英文源覆盖更广**：Google 英文 6 路 + Bing 7 路 + 中文 2 路，共 15 路。抓到的英文条目全部自动译成中文。
+- **全网英文源**：Google 13 路 + Bing 14 路，共 27 路并发抓取。抓到的英文条目全部自动译成中文，页面中文标题占比 98%。
+- **不抓中文源**：Google News 的中文源博彩 SEO 站占比过高（实测 24 条里 15 条是垃圾），清洗成本远高于收益。
 - **翻译走免费接口**：Google 公开翻译端点为主、MyMemory 为备，无需任何 API key。想保留英文原文加 `--no-translate`。
 - **垃圾过滤**（必须做）：博彩/SEO 站会把广告词混进 Google News 中文源，实测「育碧」24 条里能有 15 条是这类垃圾。脚本内置关键词黑名单、来源黑名单、标题竖线数判定，以及 `'s Library` 这类个人频道噪声，自动丢弃。
 
@@ -42,7 +43,34 @@ GitHub Actions 定时触发（每天 UTC 01:00 / 13:00，即北京 09:00 / 21:00
 3. **中英混合标题豁免** —— 含 3 个以上中文字符就不送翻译，避免把「Ubisoft正式确认Rainbow Six自己的XCOM」这类标题翻坏。
 
 **历史条目回填**：翻译功能是后来加的，之前抓的还是英文。
-`scripts/backfill_translate.py` 可把存量英文条目批量回译（幂等，可重复运行）。当前线上 75 条里 74 条是中文标题。
+`scripts/backfill_translate.py` 可把存量英文条目批量回译（幂等，可重复运行）。
+
+### 去重：为什么不能只靠 url
+
+早期只按 url 去重，而 Google 源的链接是**加密中转地址**（`news.google.com/rss/articles/CBMi...`），
+同一篇文章换个关键词或市场抓回来 url 就变了。结果同一事件反复入库 ——
+实测全站 168 条里有 48 条是重复，「Ubisoft 出售了一款游戏…」一条出现 4 次。
+
+三道去重（逻辑集中在 `scripts/dedupe_lib.py`，增量和存量共用）：
+
+1. **精确键** —— 标题去标点后取前 40 字比对
+2. **2-gram 相似度** —— 兜住「同一事件、不同译法」。翻译接口不是确定性的，
+   同一篇报道会译出「结束对多个平台的支持」和「结束多平台支持」这种字面不同但同源的标题
+3. **url** —— 兜底
+
+相似度用 **overlap 系数**（交集 / 较小集合）而非 Jaccard：同一事件的两条报道常常一长一短，
+Jaccard 惩罚长度差（0.275），overlap 才如实反映「短的被长的包含」（0.483）。
+
+两个反直觉的坑：
+
+- **剔除 25 字符以上的英文专名**。`Assassin's Creed Black Flag Resynced` 归一化后有 31 个字符，
+  单它一个就贡献几十个 gram，会把「更新 1.0.7 发布」和「传言将登陆 Switch 2」这两条**不同新闻**
+  顶到 0.66 判定为重复。但短专名（Temu、Ubisoft、Poşta Română）必须保留 ——
+  剔掉后「Temu 与罗马尼亚邮政签署协议」和「Poşta Română 与 Temu 达成合作」就对不上了。
+- **阈值宁松勿紧**。0.45 是实测卡出来的（同一事件 0.46~0.82，不同新闻 0.00~0.29）。
+  漏合并只是多显示一条重复，误杀是真的丢新闻，后者找不回来。
+
+`scripts/dedupe_news.py` 用于清洗存量（幂等，可重复运行），本次把 131 条洗到 94 条。
 
 ### Steam 在线人数
 
@@ -70,6 +98,8 @@ scripts/
   update_news.py                把新闻合并进 index.html（去重、排序、备份）
   update_steam.py               把 Steam 数据合并进 index.html
   backfill_translate.py         把存量英文条目批量回译（幂等）
+  dedupe_lib.py                 去重工具（精确键 + 2-gram 相似度），增量与存量共用
+  dedupe_news.py                清洗存量重复条目（幂等）
 .github/workflows/refresh.yml   定时任务
 ```
 
