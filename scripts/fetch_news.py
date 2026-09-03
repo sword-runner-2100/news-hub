@@ -86,9 +86,10 @@ EN_MARKETS = {
 # (话题, 搜索词, 覆盖的市场)
 # 核心词铺满 6 个市场求广度，长尾词只查 1-2 个主力市场控制请求量。
 SEARCH_PLAN = [
-    ("ubisoft", "Ubisoft",                                      ["US", "GB", "AU", "CA", "IN", "SG"]),
-    ("ubisoft", "Ubisoft Assassin's Creed Rainbow Six Far Cry", ["US", "GB"]),
-    ("ubisoft", "Ubisoft earnings stock studio",                ["US", "GB"]),
+    ("ubisoft", "Ubisoft",                     ["US", "GB", "AU", "CA", "IN", "SG"]),
+    ("ubisoft", "Ubisoft Assassin's Creed",    ["US", "GB"]),
+    ("ubisoft", "Ubisoft Rainbow Six Far Cry", ["US", "GB"]),
+    ("ubisoft", "Ubisoft earnings stock",      ["US", "GB"]),
     ("temu",    "Temu",                                         ["US", "GB", "AU", "CA", "IN", "SG"]),
     ("temu",    "Temu PDD Holdings earnings",                   ["US", "GB"]),
     ("temu",    "Temu Shein cross-border ecommerce",            ["US", "GB"]),
@@ -506,6 +507,21 @@ def main():
             if k == kind:
                 log("    [%-6s] %-51s → %2d 条" % (kind, label, len(got)))
                 (google_all if kind == "Google" else bing_all).extend(got)
+
+    # 市场覆盖诊断：统计每路抓到的条目里，有多少是其他路都没抓到的。
+    # 若某市场独有条目长期为 0，说明它的 gl/ceid 参数没生效、返回的是同一份结果，
+    # 那这路就是白跑，可以砍掉省配额。
+    sigs = [(label, {norm(i["title"]) for i in got}) for _, label, got in results]
+    all_others = []
+    for i, (_, ks) in enumerate(sigs):
+        others = set()
+        for j, (_, s2) in enumerate(sigs):
+            if j != i:
+                others |= s2
+        all_others.append(others)
+    log("    —— 各路独有条目（0 = 该路与其他路完全重复，可砍）——")
+    for (label, ks), others in zip(sigs, all_others):
+        log("      %-51s 独有 %3d / %3d" % (label, len(ks - others), len(ks)))
 
     # Bing 的新闻日期普遍偏旧，给它更宽的时间窗，换取带摘要的高质量条目
     bing_cutoff = now - timedelta(days=args.bing_days)
