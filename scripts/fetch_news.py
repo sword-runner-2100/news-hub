@@ -69,9 +69,12 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 # 为什么不再抓中文源：Google News 的中文源混入了大量博彩 SEO 站，实测「育碧」24 条里
 # 能有 15 条是垃圾，清洗成本高、收益低。英文源干净且覆盖广，配合翻译反而更稳。
 #
-# 为什么要横跨多个英文市场：同一个关键词在 US / GB / AU / CA / IN / SG 会命中完全不同的
-# 本地媒体（澳洲的 Kotaku AU、印度的 Economic Times、新加坡的 CNA 等），
-# 只查单一市场会漏掉大量地域性报道。
+# 为什么要横跨多个英文市场：同一个关键词在 US / GB / AU / CA / IN / SG 会命中不同的
+# 本地媒体（澳洲的 Kotaku AU、印度的 Economic Times、新加坡的 CNA 等）。
+#
+# 实测修正：这个假设只对 Bing 成立。Google News 的 gl/ceid 对搜索结果几乎没有影响 ——
+# 六个市场返回的几乎是同一份英文结果，各路「独有条目」全是 0（见 main() 的诊断日志）。
+# 所以 Google 侧每关键词只查一个市场，配额省下来投到关键词广度上。
 
 # 英文市场代码 → (hl, gl, ceid)
 EN_MARKETS = {
@@ -84,16 +87,23 @@ EN_MARKETS = {
 }
 
 # (话题, 搜索词, 覆盖的市场)
-# 核心词铺满 6 个市场求广度，长尾词只查 1-2 个主力市场控制请求量。
+#
+# Google 侧：多市场无效（见上方说明），故每词只查 US，改用更多关键词换广度。
+# 关键词要短 —— 堆 5 个词会因 AND 语义匹配不到任何文章，实测返回 0 条。
 SEARCH_PLAN = [
-    ("ubisoft", "Ubisoft",                     ["US", "GB", "AU", "CA", "IN", "SG"]),
-    ("ubisoft", "Ubisoft Assassin's Creed",    ["US", "GB"]),
-    ("ubisoft", "Ubisoft Rainbow Six Far Cry", ["US", "GB"]),
-    ("ubisoft", "Ubisoft earnings stock",      ["US", "GB"]),
-    ("temu",    "Temu",                                         ["US", "GB", "AU", "CA", "IN", "SG"]),
-    ("temu",    "Temu PDD Holdings earnings",                   ["US", "GB"]),
-    ("temu",    "Temu Shein cross-border ecommerce",            ["US", "GB"]),
-    ("temu",    "Temu EU regulation tariff customs",            ["US", "GB", "SG"]),
+    ("ubisoft", "Ubisoft",                  ["US"]),
+    ("ubisoft", "Ubisoft Assassin's Creed", ["US"]),
+    ("ubisoft", "Ubisoft Rainbow Six",      ["US"]),
+    ("ubisoft", "Ubisoft Far Cry",          ["US"]),
+    ("ubisoft", "Ubisoft earnings",         ["US"]),
+    ("ubisoft", "Ubisoft stock",            ["US"]),
+    ("temu",    "Temu",                     ["US"]),
+    ("temu",    "Temu PDD Holdings",        ["US"]),
+    ("temu",    "Temu Shein",               ["US"]),
+    ("temu",    "Temu tariff",              ["US"]),
+    ("temu",    "Temu EU",                  ["US"]),
+    ("temu",    "Temu lawsuit",             ["US"]),
+    ("temu",    "Temu sellers",             ["US"]),
 ]
 
 # 展开成 Google 的 (话题, 搜索词, hl, gl, ceid)
