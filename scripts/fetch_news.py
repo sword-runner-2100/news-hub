@@ -3,7 +3,15 @@
 """
 每日新闻汇总台（云端版）—— 新闻抓取脚本
 
-双源策略，各取所长：
+搜索策略：全网英文源 → 翻译成中文。
+
+  为什么只搜英文源：
+    - Google News 的中文源混入了大量博彩 SEO 站，实测「育碧」24 条里 15 条是垃圾
+    - 英文源干净、覆盖广，且横跨 US/GB/AU/CA/IN/SG 六个市场能命中不同的本地媒体
+      （澳洲 Kotaku AU、印度 Economic Times、新加坡 CNA 等），比单一市场全面得多
+    - 抓到后统一机器翻译，可读性由翻译环节保证，不依赖源语言
+
+双源各取所长：
 
   1) Google News RSS（主源，保数量与时效）
      https://news.google.com/rss/search?q=<query>+when:3d&hl=...&gl=...&ceid=...
@@ -20,8 +28,7 @@
      - 缺点：只支持英文市场（setmkt=zh-CN 时返回 HTML 而非 RSS），且条目少
 
 合并时 Bing 的条目优先（有摘要、有直链），Google 的补充数量。
-英文条目保留原文，中文条目直接采用 Google 中文源的中文标题 —— 不依赖任何 AI 翻译
-（GitHub Models 已按计划退役，服务端返回 410，详见 translate() 注释）。
+最后统一把英文标题与摘要译成中文（详见 translate() 注释）。
 
 用法：
     python3 scripts/fetch_news.py                  # 抓最近 3 天，写入 index.html
@@ -56,32 +63,67 @@ UTC = timezone.utc
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
-# (话题, 搜索词, hl, gl, ceid) —— Google 用 when:Nd 过滤。
-# 中英文各一路：中文源直接给中文标题，英文源覆盖面更广、抓到后翻译成中文。
+# ---------------- 搜索源配置 ----------------
+# 策略：全网英文源优先，抓到后统一译成中文。
+#
+# 为什么不再抓中文源：Google News 的中文源混入了大量博彩 SEO 站，实测「育碧」24 条里
+# 能有 15 条是垃圾，清洗成本高、收益低。英文源干净且覆盖广，配合翻译反而更稳。
+#
+# 为什么要横跨多个英文市场：同一个关键词在 US / GB / AU / CA / IN / SG 会命中完全不同的
+# 本地媒体（澳洲的 Kotaku AU、印度的 Economic Times、新加坡的 CNA 等），
+# 只查单一市场会漏掉大量地域性报道。
+
+# 英文市场代码 → (hl, gl, ceid)
+EN_MARKETS = {
+    "US": ("en-US", "US", "US:en"),
+    "GB": ("en-GB", "GB", "GB:en"),
+    "AU": ("en-AU", "AU", "AU:en"),
+    "CA": ("en-CA", "CA", "CA:en"),
+    "IN": ("en-IN", "IN", "IN:en"),
+    "SG": ("en-SG", "SG", "SG:en"),
+}
+
+# (话题, 搜索词, 覆盖的市场)
+# 核心词铺满 6 个市场求广度，长尾词只查 1-2 个主力市场控制请求量。
+SEARCH_PLAN = [
+    ("ubisoft", "Ubisoft",                                      ["US", "GB", "AU", "CA", "IN", "SG"]),
+    ("ubisoft", "Ubisoft Assassin's Creed Rainbow Six Far Cry", ["US", "GB"]),
+    ("ubisoft", "Ubisoft earnings stock studio",                ["US", "GB"]),
+    ("temu",    "Temu",                                         ["US", "GB", "AU", "CA", "IN", "SG"]),
+    ("temu",    "Temu PDD Holdings earnings",                   ["US", "GB"]),
+    ("temu",    "Temu Shein cross-border ecommerce",            ["US", "GB"]),
+    ("temu",    "Temu EU regulation tariff customs",            ["US", "GB", "SG"]),
+]
+
+# 展开成 Google 的 (话题, 搜索词, hl, gl, ceid)
 GOOGLE_QUERIES = [
-    ("ubisoft", "育碧", "zh-CN", "CN", "CN:zh-Hans"),
-    ("ubisoft", "Ubisoft", "en-US", "US", "US:en"),
-    ("ubisoft", "Ubisoft Assassin's Creed Rainbow Six", "en-US", "US", "US:en"),
-    ("ubisoft", "Ubisoft earnings stock studio", "en-US", "US", "US:en"),
-    ("temu", "Temu", "zh-CN", "CN", "CN:zh-Hans"),
-    ("temu", "Temu", "en-US", "US", "US:en"),
-    ("temu", "Temu PDD Holdings earnings", "en-US", "US", "US:en"),
-    ("temu", "Temu EU regulation tariff customs", "en-US", "US", "US:en"),
+    (topic, q) + EN_MARKETS[m]
+    for topic, q, mkts in SEARCH_PLAN
+    for m in mkts
 ]
-# Bing 只支持英文市场，但它的摘要是正文原文片段 —— 英文源的主力就靠它
-BING_QUERIES = [
-    ("ubisoft", "Ubisoft"),
-    ("ubisoft", "Ubisoft Assassin's Creed"),
-    ("ubisoft", "Ubisoft Rainbow Six Far Cry"),
-    ("temu", "Temu"),
-    ("temu", "Temu PDD Holdings"),
-    ("temu", "Temu EU regulation tariff"),
-    ("temu", "Temu Shein cross-border ecommerce"),
+
+# Bing 的 description 是正文原文片段，摘要全靠它，但它只支持英文市场。
+# (话题, 搜索词, 市场代码)
+BING_PLAN = [
+    ("ubisoft", "Ubisoft",                           ["en-US", "en-GB", "en-AU"]),
+    ("ubisoft", "Ubisoft Assassin's Creed",          ["en-US"]),
+    ("ubisoft", "Ubisoft Rainbow Six Far Cry",       ["en-US"]),
+    ("ubisoft", "Ubisoft earnings stock",            ["en-US"]),
+    ("temu",    "Temu",                              ["en-US", "en-GB", "en-AU", "en-SG"]),
+    ("temu",    "Temu PDD Holdings",                 ["en-US"]),
+    ("temu",    "Temu EU regulation tariff",         ["en-US", "en-GB"]),
+    ("temu",    "Temu Shein cross-border ecommerce", ["en-US"]),
 ]
+# 展开成 (话题, 搜索词, 市场代码)
+BING_QUERIES = [(t, q, m) for t, q, ms in BING_PLAN for m in ms]
 
 # 博彩 / SEO 垃圾站常用词。这类站点会把广告词塞进新闻标题混进 Google News，
 # 命中即丢弃，避免污染页面。
 JUNK_WORDS = [
+    # 英文博彩 / 色情 SEO —— 源全转英文后，这类才是主力噪声
+    "casino", "gambling", "betting odds", "slot machine", "sportsbook",
+    "porn", "onlyfans", "xxx video",
+    # 中文博彩站的历史特征词，保留以防中文源将来重新启用
     "威尼斯", "AG网上", "网上注册", "网上娱乐", "真人", "利来", "龙8", "23300",
     "博彩", "赌博", "赌场", "老虎机", "彩票", "开户", "注册送", "首存", "流水",
     "官方网址", "官网登录", "登录首页", "下载app", "最新网址", "备用网址",
@@ -97,6 +139,14 @@ TRUSTED = [
     "reuters", "bloomberg", "ft.com", "wsj", "cnbc", "forbes", "the verge",
     "engadget", "ign", "gamespot", "polygon", "eurogamer", "pcgamer", "heise",
     "techcrunch", "scmp", "straitstimes", "nikkei", "yahoo", "investing.com",
+    # 游戏垂类（英文源为主后，这些是 Ubisoft 话题的高质量来源）
+    "kotaku", "gamesindustry", "videogameschronicle", "gamedeveloper", "game spot",
+    "pc gamer", "rock paper shotgun", "vg247", "dexerto", "gamesradar",
+    # 综合与财经（多市场覆盖后新增的地域媒体）
+    "bbc", "the guardian", "independent", "telegraph", "marketwatch",
+    "seeking alpha", "economic times", "business standard", "channel news asia",
+    "cna", "sydney morning herald", "news.com.au", "financial post", "retail dive",
+    "modern retail", "supply chain dive", "retail gazette", "just-style",
     "thepaper", "澎湃", "凤凰", "新浪", "界面", "36氪", "虎嗅", "经济观察",
     "第一财经", "财新", "亿邦动力", "雨果网", "亿恩网", "联合早报", "香港01",
     "ubisoft", "prnewswire", "businesswire", "globenewswire",
@@ -163,9 +213,10 @@ def fetch_google(topic, query, hl, gl, ceid, days):
 
 
 # ---------------- Bing News ----------------
-def fetch_bing(topic, query):
+def fetch_bing(topic, query, mkt="en-US"):
+    # setmkt 决定命中哪个地区的媒体，setlang 保持英文以便后续统一翻译
     url = "https://www.bing.com/news/search?" + urllib.parse.urlencode(
-        {"q": query, "format": "RSS", "count": "25", "setmkt": "en-US", "setlang": "en-US"})
+        {"q": query, "format": "RSS", "count": "25", "setmkt": mkt, "setlang": "en"})
     try:
         root = ET.fromstring(http_get(url))
     except Exception as ex:
@@ -426,19 +477,35 @@ def main():
     now = datetime.now(UTC)
     cutoff = now - timedelta(days=args.days)
 
-    log("  抓取 Google News RSS（最近 %d 天）…" % args.days)
-    google_all = []
-    for topic, q, hl, gl, ceid in GOOGLE_QUERIES:
-        got = fetch_google(topic, q, hl, gl, ceid, args.days)
-        log("    %-22s → %d 条" % (q, len(got)))
-        google_all.extend(got)
+    # 34 路查询串行要跑近一分钟，必须并发。8 线程是不触发限流的平衡点。
+    def run_g(spec):
+        topic, q, hl, gl, ceid = spec
+        return ("Google", "%-44s %s" % (q[:44], hl[:5]),
+                fetch_google(topic, q, hl, gl, ceid, args.days))
 
-    log("  抓取 Bing News RSS（补充摘要与直链）…")
-    bing_all = []
-    for topic, q in BING_QUERIES:
-        got = fetch_bing(topic, q)
-        log("    %-22s → %d 条" % (q, len(got)))
-        bing_all.extend(got)
+    def run_b(spec):
+        topic, q, mkt = spec
+        return ("Bing", "%-44s %s" % (q[:44], mkt), fetch_bing(topic, q, mkt))
+
+    log("  并发抓取 %d 路（Google %d + Bing %d）…" %
+        (len(GOOGLE_QUERIES) + len(BING_QUERIES), len(GOOGLE_QUERIES), len(BING_QUERIES)))
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        futures = ([ex.submit(run_g, s) for s in GOOGLE_QUERIES] +
+                   [ex.submit(run_b, s) for s in BING_QUERIES])
+        results = []
+        for f in futures:
+            try:
+                results.append(f.result())
+            except Exception:
+                continue
+
+    # 并发结果的顺序是乱的，按源分组后再打印，日志才可读
+    google_all, bing_all = [], []
+    for kind in ("Google", "Bing"):
+        for k, label, got in results:
+            if k == kind:
+                log("    [%-6s] %-51s → %2d 条" % (kind, label, len(got)))
+                (google_all if kind == "Google" else bing_all).extend(got)
 
     # Bing 的新闻日期普遍偏旧，给它更宽的时间窗，换取带摘要的高质量条目
     bing_cutoff = now - timedelta(days=args.bing_days)
