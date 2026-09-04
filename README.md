@@ -132,6 +132,33 @@ python3 scripts/fetch_steam.py               # 刷新 Steam 数据
 
 脚本都是幂等的：数据没变化就不改动文件，并给出提示。
 
+## 推送到微信（可选）
+
+每天早 9 点把当天新增的新闻推到企业微信群。晚 21 点那次只刷数据，不推送。
+
+**配置只需三步：**
+
+1. 企业微信里建一个群（拉一个人进来，或用内部群）→ 群设置 → 群机器人 → 添加机器人 → 复制 Webhook 地址
+   （形如 `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxx`）
+2. 仓库 **Settings → Secrets and variables → Actions → New repository secret**
+3. Name 填 `WECHAT_WEBHOOK`，Value 粘贴上面的地址，保存
+
+也可以一条命令搞定：
+
+```bash
+gh secret set WECHAT_WEBHOOK --repo <用户名>/<仓库名> --body "<Webhook 地址>"
+```
+
+**没配置时的行为**：脚本检测到没有 `WECHAT_WEBHOOK` 就静默跳过，不影响抓取和提交。
+所以你可以先跑通抓取，回头再配推送。
+
+推送内容是企业微信 markdown：按话题分组，每条带标题链接、一句话摘要、来源与分类，
+末尾附 Steam 在线人数。正文超 3800 字节会按整条丢弃（不把新闻截成半句）。
+
+**想换成别的服务**（Server酱 / PushPlus / 钉钉等）：改 `scripts/push_wechat.py` 的
+`build_content()`（消息正文）和 `send()`（POST 地址与请求体）两个函数即可，
+其余流程不用动。
+
 ## 部署步骤
 
 已部署完成，当前线上：
