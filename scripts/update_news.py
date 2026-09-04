@@ -176,7 +176,7 @@ def main():
             index[key] = it
         sim.add(it)
 
-    added, dup_url, dup_title = 0, 0, 0
+    added, dup_url, dup_title, added_items = 0, 0, 0, []
     for it in incoming:
         key = it["url"] or it["id"]
         # 1) 标题命中（同一新闻换了链接，或译法略有差异）
@@ -189,7 +189,16 @@ def main():
             continue
         index[key] = it
         sim.add(it)
+        added_items.append(it)
         added += 1
+
+    # 把本次真正新增的条目单独存一份，供 push_wechat.py 使用 ——
+    # 否则推送脚本得自己去比对新旧全量数据才能知道该发哪几条。
+    if added_items:
+        os.makedirs(os.path.join(ROOT, "inbox"), exist_ok=True)
+        with open(os.path.join(ROOT, "inbox", "added.json"), "w", encoding="utf-8") as f:
+            json.dump({"date": fetch_date, "items": added_items},
+                      f, ensure_ascii=False, indent=2)
 
     if dup_title:
         print("     标题去重：拦下 %d 条（同一新闻换了链接 / 译法不同，被反复抓到）" % dup_title)

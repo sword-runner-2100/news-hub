@@ -44,6 +44,13 @@ jobs:
             git push
           fi
 
+      - name: 推送到企业微信（仅早 9 点场次）
+        # 晚 21 点那次只刷新数据，不推送 —— 一天推一次就够了
+        if: github.event_name != 'schedule' || github.event.schedule == '0 1 * * *'
+        env:
+          WECHAT_WEBHOOK: ${{ secrets.WECHAT_WEBHOOK }}
+        run: python3 scripts/push_wechat.py
+
       - name: 输出摘要
         if: always()
         run: |
