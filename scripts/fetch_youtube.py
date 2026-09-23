@@ -595,10 +595,14 @@ def summarize_video(v, key, min_comments_for_stats=3):
     desc = sn.get("description") or ""
 
     log("        · 抓字幕做内容总结…")
-    summary_points = build_transcript_summary(v["videoId"])
+    transcript_segs = _fetch_transcript_segs(v["videoId"])
+    summary_points = summarize_transcript(transcript_segs)
+    transcript_text = ""
     if summary_points:
         summary = ""
         summary_source = "transcript"
+        # 字幕全文（截断）留给上层 AI agent 做全文总结用
+        transcript_text = " ".join(tx for _, tx in transcript_segs)[:8000]
     else:
         summary = clean_description(desc)
         summary_source = "description"
@@ -654,6 +658,7 @@ def summarize_video(v, key, min_comments_for_stats=3):
         "summary": summary,
         "summarySource": summary_source,
         "summaryPoints": summary_points,
+        "transcriptText": transcript_text,
         "chapters": extract_chapters(desc),
         "sentiment": pct,
         "sampled": total,

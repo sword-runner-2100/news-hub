@@ -171,6 +171,13 @@ def main():
         vid = nv.get("videoId")
         if not vid:
             continue
+        # 排除标记：搜索噪声（如斯拉夫语 "temu" 词形巧合、纯引流标签）直接从页面剔除
+        if nv.get("exclude"):
+            if old.pop(vid, None) is not None:
+                changed.append(vid)
+            continue
+        # 字幕全文是给 AI 总结用的原料，不进页面
+        nv.pop("transcriptText", None)
         ov = old.get(vid)
         if ov is None:
             # 新上榜视频：以今天作为它的分组日（页面上出现在今天的块里）
