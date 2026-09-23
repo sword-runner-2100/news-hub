@@ -26,6 +26,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: 安装字幕抓取依赖
+        run: pip install --quiet youtube-transcript-api
+
       - name: 抓取新闻
         run: python3 scripts/fetch_news.py --days 3 --max 8
 

@@ -364,6 +364,10 @@ html.is-mobile .chart svg{height:110px}
 .yt-daygroup:last-child{margin-bottom:0}
 .yt-lbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;display:flex;align-items:center;gap:5px}
 .yt-lbl::before{content:"";width:3px;height:9px;border-radius:2px;background:var(--acc2);flex:none}
+.yt-points{margin:2px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.yt-points li{font-size:12px;color:var(--t2);line-height:1.65;padding-left:11px;position:relative}
+.yt-points li::before{content:"";position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:var(--acc2);opacity:.55}
+.yt-points li b{color:var(--acc1);font-weight:600;margin-right:6px;font-size:11px;font-variant-numeric:tabular-nums}
 .yt-dur{
   position:absolute;right:7px;bottom:7px;background:rgba(0,0,0,.78);color:#fff;
   font-size:11px;font-weight:600;padding:2px 6px;border-radius:5px;font-variant-numeric:tabular-nums;
@@ -4173,6 +4177,12 @@ function ytCardHTML(v){
     return '<div class="yt-hc' + cls + '"><span class="lk">👍' + fmtWan(c.likes) + '</span>' + esc(c.text) + '</div>';
   }).join("");
   const sum = esc(v.summary || "");
+  const srcTxt = v.summarySource === "transcript" ? "内容总结 · 基于字幕全文" : "内容总结 · 基于视频描述";
+  const pts = (v.summaryPoints || []).map(p =>
+    '<li><b>' + esc(p.t || "") + '</b>' + esc(p.s || "") + '</li>').join("");
+  const sumBlock = pts
+    ? '<div class="yt-sumwrap"><div class="yt-lbl">' + srcTxt + '</div><ul class="yt-points">' + pts + '</ul></div>'
+    : (sum ? '<div class="yt-sumwrap"><div class="yt-lbl">' + srcTxt + '</div><div class="yt-sum">' + sum + '</div></div>' : '');
 
   return '<article class="yt-card">'+
     '<a class="yt-thumb" href="' + link + '" target="_blank" rel="noopener noreferrer">'+
@@ -4183,7 +4193,7 @@ function ytCardHTML(v){
       '<div class="yt-title"><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + esc(v.title) + '</a></div>'+
       '<div class="yt-meta"><b>' + esc(v.channel) + '</b><span>' + esc(v.publishedAt || "") + ' 发布</span>'+
         '<span>▶ ' + fmtWan(v.views) + ' 播放</span><span>👍 ' + fmtWan(v.likes) + '</span><span>💬 ' + fmtWan(v.commentCount) + '</span></div>'+
-      (sum ? '<div class="yt-sumwrap"><div class="yt-lbl">内容总结</div><div class="yt-sum">' + sum + '</div></div>' : '')+
+      (sumBlock ? sumBlock : '')+
       (chaps ? '<div class="yt-chaps">' + chaps + '</div>' : '')+
       '<div class="yt-sent">'+
         '<div class="yt-bar"><i class="p" style="width:' + pos + '%"></i><i class="n" style="width:' + neg + '%"></i><i class="u" style="width:' + neu + '%"></i></div>'+

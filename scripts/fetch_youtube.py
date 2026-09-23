@@ -62,6 +62,13 @@ except Exception as _ex:  # fetch_news 改名/损坏时不至于全挂
     def _restore(text, slots):
         return text
 
+# ---- 字幕抓取（可选依赖：pip install youtube-transcript-api） ----
+# 缺库或被 YouTube 拦截时，内容总结自动降级为描述摘录，管道不断。
+try:
+    from youtube_transcript_api import YouTubeTranscriptApi as _YTTA  # noqa: E402
+except Exception:
+    _YTTA = None
+
 
 # ---------------------------------------------------------------------------
 # 多语言翻译：全球视频（英/西/葡/捷/阿/日/韩…）→ 中文
@@ -300,6 +307,106 @@ def extract_chapters(desc, max_n=6):
 
 
 # ---------------------------------------------------------------------------
+# 字幕全文 → 抽取式内容总结
+# 原则：只从字幕里抽取真实说过的句子（带时间戳可回溯核对），不生成、不编造。
+# ---------------------------------------------------------------------------
+def _clean_caption(text):
+    """去 [Music]/[Applause] 之类的标记和空白。"""
+    t = (text or "").replace("\n", " ").strip()
+    t = re.sub(r"[\[（(【]\s*(music|applause|laughter|音乐|掌声|笑)\s*[\]）)】]", " ", t, flags=re.I)
+    t = re.sub(r"^\[.*?\]\s*", "", t).strip()
+    return t
+
+
+def _fetch_transcript_segs(video_id):
+    """抓字幕原文段，返回 [(start秒, 文本), ...]；无库/无字幕/被拦时返回 []。"""
+    if _YTTA is None:
+        return []
+    segs = []
+    try:
+        if hasattr(_YTTA, "list"):                      # v1.x：实例 API
+            api = _YTTA()
+            try:
+                tr_list = list(api.list(video_id))
+                # 优先手工字幕（更准确），否则用第一个（多为自动生成）
+                tr = next((t for t in tr_list if not getattr(t, "is_generated", True)),
+                          tr_list[0] if tr_list else None)
+                if tr is None:
+                    return []
+                fetched = tr.fetch()
+            except Exception:
+                fetched = api.fetch(video_id)
+            for s in fetched:
+                segs.append((float(getattr(s, "start", 0.0) or 0.0),
+                             getattr(s, "text", "") or ""))
+        else:                                           # 旧版 0.x：静态方法
+            for s in _YTTA.get_transcript(video_id):
+                segs.append((float(s.get("start", 0.0) or 0.0),
+                             s.get("text", "") or ""))
+    except Exception:
+        return []          # 被拦截/无字幕/网络问题 → 交给调用方降级
+    cleaned = []
+    for st, tx in segs:
+        tx = _clean_caption(tx)
+        if tx:
+            cleaned.append((st, tx))
+    return cleaned
+
+
+def _info_density(text):
+    """实词密度：拉丁词/汉字越多越有信息量。"""
+    words = re.findall(r"[A-Za-z\u00c0-\u024f\u0400-\u04ff\u4e00-\u9fff]+", text)
+    return sum(len(w) for w in words)
+
+
+def summarize_transcript(segs, max_points=5):
+    """字幕全文 → 抽取式摘要：全程均分 N 个时间窗，每窗选信息密度最高的一句。
+    返回 [{t: "mm:ss", s: 句子}, ...]（s 为字幕原文，由调用方翻译）。"""
+    if not segs:
+        return []
+    # 合并成句单元：累积到 ~150 字符或遇到句末标点
+    units = []
+    buf, buf_start = "", None
+    for st, tx in segs:
+        if buf_start is None:
+            buf_start = st
+        buf = (buf + " " + tx).strip()
+        if len(buf) >= 150 or (tx and tx[-1] in ".!?。！？"):
+            if buf:
+                units.append({"start": buf_start, "text": buf})
+            buf, buf_start = "", None
+    if buf:
+        units.append({"start": buf_start, "text": buf})
+    units = [u for u in units if len(u["text"]) >= 30]
+    if not units:
+        return []
+
+    if len(units) <= max_points:
+        picked = units
+    else:
+        span = len(units) / max_points
+        picked = []
+        for i in range(max_points):
+            lo = int(i * span)
+            hi = max(int((i + 1) * span), lo + 1)
+            window = units[lo:hi]
+            if window:
+                picked.append(max(window, key=lambda u: _info_density(u["text"])))
+
+    out = []
+    for u in picked:
+        sec = int(u["start"] or 0)
+        out.append({"t": "%d:%02d" % (sec // 60, sec % 60),
+                    "s": u["text"][:220].rstrip() + ("…" if len(u["text"]) > 220 else "")})
+    return out
+
+
+def build_transcript_summary(video_id, max_points=5):
+    """抓字幕并生成抽取式摘要；失败返回 []（调用方降级为描述摘录）。"""
+    return summarize_transcript(_fetch_transcript_segs(video_id), max_points=max_points)
+
+
+# ---------------------------------------------------------------------------
 # YouTube Data API v3
 # ---------------------------------------------------------------------------
 def api_get(path, params, key, timeout=25):
@@ -375,10 +482,20 @@ def fetch_comments(video_id, key, max_n=20):
 
 
 def summarize_video(v, key, min_comments_for_stats=3):
-    """单个视频的规则式总结。全部产出都是真实数据的摘录或统计，不做推测。"""
+    """单个视频的规则式总结。全部产出都是真实数据的摘录或统计，不做推测。
+    内容总结优先用字幕全文抽取（带时间戳），无字幕/被拦时降级为描述摘录。"""
     sn = v["snippet"]
     stats = v["statistics"]
     desc = sn.get("description") or ""
+
+    log("        · 抓字幕做内容总结…")
+    summary_points = build_transcript_summary(v["videoId"])
+    if summary_points:
+        summary = ""
+        summary_source = "transcript"
+    else:
+        summary = clean_description(desc)
+        summary_source = "description"
 
     comments = fetch_comments(v["videoId"], key)
     sentiment = {"pos": 0, "neg": 0, "neu": 0}
@@ -428,7 +545,9 @@ def summarize_video(v, key, min_comments_for_stats=3):
         "views": int(stats.get("viewCount") or 0),
         "likes": int(stats.get("likeCount") or 0),
         "commentCount": int(stats.get("commentCount") or 0),
-        "summary": clean_description(desc),
+        "summary": summary,
+        "summarySource": summary_source,
+        "summaryPoints": summary_points,
         "chapters": extract_chapters(desc),
         "sentiment": pct,
         "sampled": total,
@@ -496,6 +615,8 @@ def main():
             v["title"] = t
             s, _ = translate_any(v["summary"], cache)
             v["summary"] = s
+            for p in v.get("summaryPoints") or []:
+                p["s"], _ = translate_any(p["s"], cache)
             for ch in v["chapters"]:
                 ch["name"], _ = translate_any(ch["name"], cache)
             for c in v["topComments"]:
