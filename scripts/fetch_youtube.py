@@ -188,6 +188,30 @@ def parse_duration(iso):
     return h * 3600 + mi * 60 + s
 
 
+# 英语停用词：非英语视频（西语/捷克语/阿拉伯语 Temu 大频道播放量很高）会按播放量
+# 挤进前排，而翻译管道是 en→zh，硬翻会出垃圾。两道过滤：
+# 1) API 的 defaultAudioLanguage / defaultLanguage 字段（权威）
+# 2) 缺字段时用英语停用词密度兜底（正常英文标题/描述必然命中多个）
+EN_STOPWORDS = {
+    "the", "a", "an", "and", "or", "but", "i", "you", "my", "me", "is", "are",
+    "was", "were", "this", "that", "with", "for", "of", "on", "in", "to", "it",
+    "we", "they", "have", "has", "had", "what", "how", "why", "not", "do",
+    "does", "did", "so", "if", "when", "from", "at", "by", "be", "been", "am",
+    "he", "she", "his", "her", "their", "our", "your", "just", "got", "really",
+}
+
+
+def is_english_video(snippet):
+    lang = (snippet.get("defaultAudioLanguage")
+            or snippet.get("defaultLanguage") or "").lower()
+    if lang:
+        return lang.startswith("en")
+    text = ((snippet.get("title") or "") + " "
+            + (snippet.get("description") or "")).lower()
+    words = set(re.findall(r"[a-z']+", text))
+    return len(words & EN_STOPWORDS) >= 3
+
+
 def fmt_duration(sec):
     if sec >= 3600:
         return "%d:%02d:%02d" % (sec // 3600, sec % 3600 // 60, sec % 60)
@@ -399,6 +423,7 @@ def main():
     log("    [2/5] 拉取视频详情…")
     details = fetch_video_details(ids, key)
     cands = []
+    n_lang_drop = 0
     for vid, d in details.items():
         dur = parse_duration(d["contentDetails"].get("duration"))
         title = (d["snippet"].get("title") or "")
@@ -407,7 +432,12 @@ def main():
             continue
         if "temu" not in (title + " " + descr).lower():
             continue
+        if not is_english_video(d["snippet"]):
+            n_lang_drop += 1
+            continue
         cands.append(dict(d, videoId=vid, _dur=dur))
+    if n_lang_drop:
+        log("        已过滤 %d 个非英语视频（翻译管道只支持 en→zh）" % n_lang_drop)
     cands.sort(key=lambda v: -int(v["statistics"].get("viewCount") or 0))
     cands = cands[:args.max]
     if not cands:
