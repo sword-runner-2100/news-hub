@@ -179,6 +179,14 @@ def main():
         else:
             # 在榜视频：数据字段取最新，但保留首次上榜日，页面上不挪窝
             nv["fetchedAt"] = ov.get("fetchedAt") or today
+            # 字幕总结是稀缺增强：新一轮没抓到字幕（description）时，
+            # 保留已有的字幕版总结（transcript），不让低级来源覆盖高级来源
+            if (nv.get("summarySource") != "transcript"
+                    and ov.get("summarySource") == "transcript"
+                    and ov.get("summaryPoints")):
+                nv["summarySource"] = "transcript"
+                nv["summaryPoints"] = ov["summaryPoints"]
+                nv["summary"] = ov.get("summary", "")
             nv_first = ov.get("fetchedAt")
             nv_new = dict(nv)
             if json.dumps(ov, sort_keys=True, ensure_ascii=False) != \
