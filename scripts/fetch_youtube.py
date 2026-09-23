@@ -256,7 +256,8 @@ def fmt_duration(sec):
 
 
 def clean_description(desc, limit=320):
-    """摘要 = 描述摘录：丢 URL 行、#标签行、纯大写推广行，保留真实正文。"""
+    """摘要 = 描述摘录：丢含链接的行（推广位常见「标签+URL 同行」）、#标签行、
+    纯大写推广行，保留真实正文。"""
     lines = []
     used = 0
     for raw in (desc or "").splitlines():
@@ -264,7 +265,7 @@ def clean_description(desc, limit=320):
         if not line:
             continue
         low = line.lower()
-        if line.startswith(("http://", "https://", "www.")):
+        if "http" in low or low.startswith("www."):
             continue
         if re.match(r"^[#＃@]\S+$", line):
             continue
@@ -364,7 +365,8 @@ def fetch_comments(video_id, key, max_n=20):
         }, key)
         for it in data.get("items", []):
             sn = (((it.get("snippet") or {}).get("topLevelComment") or {}).get("snippet") or {})
-            text = (sn.get("textDisplay") or "").strip()
+            # 评论里的推广链接是纯噪音，清掉再入库
+            text = re.sub(r"https?://\S+", "", (sn.get("textDisplay") or "")).strip()
             if text:
                 comments.append({"text": text, "likes": int(sn.get("likeCount") or 0)})
     except Exception:
