@@ -32,6 +32,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -318,8 +319,9 @@ def _clean_caption(text):
     return t
 
 
-def _fetch_transcript_segs(video_id):
-    """抓字幕原文段，返回 [(start秒, 文本), ...]；无库/无字幕/被拦时返回 []。"""
+def _fetch_transcript_ytta(video_id):
+    """youtube-transcript-api 直连。返回 [(start秒, 文本), ...]；失败返回 []。
+    注：GitHub Actions 的数据中心 IP 常被 YouTube 拦截（本地家宽通常没问题）。"""
     if _YTTA is None:
         return []
     segs = []
@@ -343,14 +345,118 @@ def _fetch_transcript_segs(video_id):
             for s in _YTTA.get_transcript(video_id):
                 segs.append((float(s.get("start", 0.0) or 0.0),
                              s.get("text", "") or ""))
-    except Exception:
-        return []          # 被拦截/无字幕/网络问题 → 交给调用方降级
+    except Exception as ex:
+        log("        · [字幕] 直连失败（%s），尝试 Invidious 镜像…" % type(ex).__name__)
+        return []
     cleaned = []
     for st, tx in segs:
         tx = _clean_caption(tx)
         if tx:
             cleaned.append((st, tx))
     return cleaned
+
+
+# Invidious 公共镜像：直连被拦时的第二数据源。实例随时可能挂，轮询到能用为止。
+INVIDIOUS_INSTANCES = [
+    "https://inv.nadeko.net",
+    "https://invidious.nerdvpn.de",
+    "https://yewtu.be",
+    "https://iv.melmac.space",
+    "https://invidious.f5.si",
+]
+
+
+def _parse_webvtt(raw):
+    """WebVTT → [(start秒, 文本), ...]。"""
+    segs = []
+    cur_start = None
+    for line in raw.splitlines():
+        line = line.strip()
+        m = re.match(r"(\d{1,2}):(\d{2}):(\d{2})[.,]\d{3}\s*-->", line)
+        if m:
+            cur_start = int(m.group(1)) * 3600 + int(m.group(2)) * 60 + int(m.group(3))
+            continue
+        if not line or line.startswith(("WEBVTT", "Kind:", "Language:", "NOTE")) or "-->" in line:
+            continue
+        tx = _clean_caption(re.sub(r"<[^>]+>", "", line))
+        if tx and cur_start is not None:
+            segs.append((float(cur_start), tx))
+    return segs
+
+
+def _fetch_transcript_invidious(video_id):
+    for base in INVIDIOUS_INSTANCES:
+        try:
+            req = urllib.request.Request(
+                base + "/api/v1/captions/" + video_id,
+                headers={"User-Agent": UA, "Accept": "application/json"})
+            data = json.loads(urllib.request.urlopen(req, timeout=8).read().decode("utf-8"))
+            caps = data.get("captions") or []
+            if not caps:
+                continue
+            # 优先手工字幕（label 不含 auto-generated）
+            caps.sort(key=lambda c: 1 if "auto" in (c.get("label") or "").lower() else 0)
+            url = caps[0].get("url") or ""
+            if url.startswith("/"):
+                url = base + url
+            raw = urllib.request.urlopen(
+                urllib.request.Request(url, headers={"User-Agent": UA}),
+                timeout=15).read().decode("utf-8", "ignore")
+            segs = _parse_webvtt(raw)
+            if segs:
+                return segs
+        except Exception:
+            continue          # 实例挂了/超时，换下一个
+    return []
+
+
+def _fetch_transcript_ytdlp(video_id):
+    """yt-dlp 用 ios/android client 抓字幕（与 watch 页面不同风控面）。
+    未安装 yt-dlp 或失败返回 []。产物是 WebVTT 文件。"""
+    if shutil.which("yt-dlp") is None:
+        return []
+    import glob
+    import tempfile
+    tmpd = tempfile.mkdtemp(prefix="ytsub-")
+    try:
+        r = subprocess.run(
+            ["yt-dlp", "--skip-download", "--write-subs", "--write-auto-subs",
+             "--sub-langs", ".*", "--sub-format", "vtt/best",
+             "--extractor-args", "youtube:player_client=ios,android",
+             "--no-warnings", "--quiet",
+             "-o", os.path.join(tmpd, "%(id)s"),
+             "https://www.youtube.com/watch?v=" + video_id],
+            capture_output=True, timeout=60)
+        vtts = glob.glob(os.path.join(tmpd, "*.vtt"))
+        if not vtts:
+            return []
+        # 优先非 auto（手工）字幕：文件名带 .lang.vtt，手工的排在前面即可（按文件大小，手工一般更大更完整）
+        vtts.sort(key=lambda p: (1 if ".auto." in os.path.basename(p) or os.path.basename(p).count(".") > 2 else 0,
+                                 -os.path.getsize(p)))
+        for p in vtts:
+            segs = _parse_webvtt(open(p, encoding="utf-8", errors="ignore").read())
+            if segs:
+                return segs
+        return []
+    except Exception:
+        return []
+    finally:
+        shutil.rmtree(tmpd, ignore_errors=True)
+
+
+def _fetch_transcript_segs(video_id):
+    """抓字幕原文段：直连 → Invidious 镜像 → yt-dlp(ios/android client)，
+    全失败返回 []（调用方降级为描述摘录）。"""
+    segs = _fetch_transcript_ytta(video_id)
+    if segs:
+        return segs
+    segs = _fetch_transcript_invidious(video_id)
+    if segs:
+        return segs
+    segs = _fetch_transcript_ytdlp(video_id)
+    if not segs:
+        log("        · [字幕] 三条路都没拿到，该视频降级为描述摘录")
+    return segs
 
 
 def _info_density(text):
