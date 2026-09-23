@@ -13,9 +13,9 @@
 }
 
 合并策略：
-    - 新视频按 videoId 覆盖旧数据（播放数等取最新）
-    - 旧视频保留 fetchedAt 在近 RETAIN_DAYS 天内的（跨天热门视频不会闪没）
-    - 按 (发布日, 播放量) 排序，最多保留 MAX_VIDEOS 条
+    - 新视频 fetchedAt = 抓取日，页面上出现在当天的分组块里（像新闻时间线按天一块）
+    - 在榜视频：数据字段（播放/评论等）持续更新，但保留首次上榜日，分组位置不挪窝
+    - 只保留 fetchedAt 在近 RETAIN_DAYS 天内的，最多 MAX_VIDEOS 条
     - 数据没变化就不改动文件（幂等）
     - 每次改动前自动备份 index.html 到 backups/（保留最近 10 份）
 """
@@ -34,8 +34,8 @@ BACKUP_DIR = os.path.join(ROOT, "backups")
 START_MARK = "/* <<<YOUTUBE_DATA_START>>> */"
 END_MARK = "/* <<<YOUTUBE_DATA_END>>> */"
 CST = timezone(timedelta(hours=8))
-RETAIN_DAYS = 10        # 旧视频保留窗口：最后一次抓到它算起的自然日数
-MAX_VIDEOS = 36         # 页面最多展示的视频数
+RETAIN_DAYS = 10        # 旧视频保留窗口：首次上榜日算起的自然日数
+MAX_VIDEOS = 96         # 页面最多展示的视频数（每天最多 8 个新上榜 × 10 天窗口）
 
 
 def die(msg):
@@ -172,15 +172,23 @@ def main():
         if not vid:
             continue
         ov = old.get(vid)
-        if ov is None or json.dumps(ov, sort_keys=True, ensure_ascii=False) != \
-                        json.dumps(nv, sort_keys=True, ensure_ascii=False):
+        if ov is None:
+            # 新上榜视频：以今天作为它的分组日（页面上出现在今天的块里）
+            nv["fetchedAt"] = today
             changed.append(vid)
-        nv["fetchedAt"] = today
+        else:
+            # 在榜视频：数据字段取最新，但保留首次上榜日，页面上不挪窝
+            nv["fetchedAt"] = ov.get("fetchedAt") or today
+            nv_first = ov.get("fetchedAt")
+            nv_new = dict(nv)
+            if json.dumps(ov, sort_keys=True, ensure_ascii=False) != \
+               json.dumps(nv_new, sort_keys=True, ensure_ascii=False):
+                changed.append(vid)
         old[vid] = nv
 
     # 只保留近期抓到的视频，控制页面体积
     merged = [v for v in old.values() if (v.get("fetchedAt") or "") >= cutoff]
-    merged.sort(key=lambda v: (v.get("publishedAt") or "", v.get("views") or 0), reverse=True)
+    merged.sort(key=lambda v: (v.get("fetchedAt") or "", v.get("views") or 0), reverse=True)
     merged = merged[:MAX_VIDEOS]
 
     if not changed and json.dumps(data.get("videos", []), sort_keys=True, ensure_ascii=False) == \
