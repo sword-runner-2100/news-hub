@@ -88,6 +88,30 @@ https://steamcharts.com/app/<appId>/chart-data.json
 | Delta Force（三角洲行动） | 2507950 |
 | Arena Breakout: Infinite（暗区突围：无限） | 2073620 |
 
+### YouTube · Temu 视频速览
+
+页面里 Steam 板块上方的「YouTube · Temu 视频速览」由 `fetch_youtube.py` 驱动：
+
+```
+YouTube Data API v3（需要免费的 API key，存仓库 Secret：YOUTUBE_API_KEY）
+   ├─ search.list ×2     过去 48h 内的 Temu 视频（一路按播放量、一路按最新）
+   ├─ videos.list        批量拉详情：时长 / 播放 / 点赞 / 评论数 / 描述
+   └─ commentThreads ×N  每个视频的热门评论（relevance 前 20 条）
+```
+
+- **总结不靠 AI 编造**：内容摘要 = 视频描述摘录（自动去掉链接、推广行）+ 章节列表；
+  评论区小结 = 情绪词典统计（正面 / 负面 / 中性百分比）+ 高频主题词（质量 / 价格 / 物流 / 骗局…），
+  全部是真实数据的统计或摘录。
+- **过滤**：时长 < 60 秒的 shorts 默认丢弃（`--min-duration` 可调），标题+描述须含 "Temu"。
+- **配额**：每天约 210 units（搜索 200 + 详情 1 + 评论 8），免费额度 10000 units/天。
+- **合并**：`update_youtube.py` 按 videoId 去重，新数据覆盖旧数据，近 10 天内抓到过的视频保留在页面上，
+  上限 36 条。
+- **没配 key 时的行为**：`fetch_youtube.py` 打印 `[SKIP]` 后 exit 0，不影响其他抓取步骤。
+- **配置只需两步**：
+  1. 到 [Google Cloud Console](https://console.cloud.google.com/) 新建项目 → 启用 **YouTube Data API v3** →
+     凭据 → 创建 **API 密钥**（免费额度，无需绑卡）
+  2. `gh secret set YOUTUBE_API_KEY --repo sword-runner-2100/news-hub --body "<API key>"`
+
 ## 目录结构
 
 ```
@@ -184,6 +208,8 @@ gh secret set WECHAT_WEBHOOK --repo <用户名>/<仓库名> --body "<Webhook 地
 ## 已知限制
 
 - **翻译非 AI**：走免费机器翻译接口，偶尔会有生硬或轻微误译（尤其是双关语）。原文链接始终保留，可点开核对。
+- **YouTube 摘要基于描述**：没有分析视频画面或语音（字幕抓取在 Actions 上不可靠），摘要来自视频描述与章节；
+  评论区小结是统计结果，不是逐条人工阅读。想看完整内容点卡片进原视频。
 - **链接**：Google 源的条目是 `news.google.com` 中转地址，浏览器点击会自动跳转到原文，但不是原文直链。Bing 源的条目已解析成真实直链。
 - **摘要覆盖率**：只有 Bing 源给摘要，所以约一半条目有摘要，其余只有标题。
 - **Actions 推送冲突**：如果本地也改了 `index.html`，推送前记得先 `git pull --rebase`，因为 Actions 会往同一个分支提交。

@@ -344,6 +344,60 @@ html.is-mobile .tl-head h2{font-size:15px}
 html.is-mobile .note{display:none}
 html.is-mobile .chart svg{height:110px}
 
+/* ---------- YouTube · Temu 视频速览 ---------- */
+.yt-panel{
+  background:linear-gradient(150deg,rgba(166,107,255,.08),rgba(126,140,255,.05) 55%,transparent);
+  border:1px solid rgba(166,107,255,.22);
+  border-radius:var(--r);padding:18px 20px;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.yt-panel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#A66BFF,#FF5C7A)}
+.yt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.yt-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s;
+}
+.yt-card:hover{border-color:rgba(166,107,255,.5)}
+.yt-thumb{position:relative;display:block;aspect-ratio:16/9;background:var(--bg2)}
+.yt-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.yt-dur{
+  position:absolute;right:7px;bottom:7px;background:rgba(0,0,0,.78);color:#fff;
+  font-size:11px;font-weight:600;padding:2px 6px;border-radius:5px;font-variant-numeric:tabular-nums;
+}
+.yt-body{padding:12px 14px 13px;display:flex;flex-direction:column;gap:9px;flex:1}
+.yt-title{font-size:13.5px;font-weight:700;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.yt-title a{color:var(--t1);text-decoration:none}
+.yt-title a:hover{color:var(--acc2)}
+.yt-meta{font-size:11px;color:var(--t3);display:flex;gap:7px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.yt-meta b{color:var(--t2);font-weight:600}
+.yt-sum{font-size:12px;color:var(--t2);line-height:1.65;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.yt-chaps{display:flex;gap:5px;flex-wrap:wrap}
+.yt-chap{font-size:10px;color:var(--t3);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 7px;white-space:nowrap}
+.yt-chap b{color:var(--acc1);font-weight:600;margin-right:4px;font-variant-numeric:tabular-nums}
+.yt-sent{display:flex;align-items:center;gap:8px}
+.yt-bar{flex:1;height:6px;border-radius:4px;overflow:hidden;display:flex;background:var(--bg2)}
+.yt-bar i{height:100%}
+.yt-bar .p{background:#34D399}
+.yt-bar .n{background:#F87171}
+.yt-bar .u{background:#3A4356}
+.yt-sent-l{font-size:10.5px;color:var(--t3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.yt-themes{display:flex;gap:5px;flex-wrap:wrap}
+.yt-theme{
+  font-size:10.5px;color:#C9B6FF;background:rgba(166,107,255,.1);
+  border:1px solid rgba(166,107,255,.25);border-radius:6px;padding:2px 7px;
+}
+.yt-theme b{font-weight:700}
+.yt-csum{
+  font-size:11.5px;color:var(--t2);line-height:1.6;
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+}
+.yt-hot{display:flex;flex-direction:column;gap:6px}
+.yt-hc{font-size:11.5px;color:var(--t3);line-height:1.6;padding-left:9px;border-left:2px solid var(--border2)}
+.yt-hc.pos{border-left-color:#34D399}
+.yt-hc.neg{border-left-color:#F87171}
+.yt-hc .lk{color:var(--t3);margin-right:5px;font-variant-numeric:tabular-nums}
+html.is-mobile .yt-panel{padding:15px 14px;margin-bottom:14px}
+html.is-mobile .yt-grid{grid-template-columns:1fr;gap:11px}
+
 /* ---------- Steam 在线人数 ---------- */
 .steam-panel{
   background:linear-gradient(150deg,rgba(52,211,153,.08),rgba(126,140,255,.05) 55%,transparent);
@@ -535,6 +589,23 @@ html.is-mobile .tabbar button.on{color:var(--acc1);background:rgba(126,140,255,.
     <span id="backupTipTxt"></span>
     <button data-act="export-json">立即导出</button>
   </div>
+
+  <section class="yt-panel" id="ytPanel">
+    <div class="steam-head">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></svg>
+        YouTube · Temu 视频速览
+      </h2>
+      <span class="upd" id="ytUpd"></span>
+    </div>
+    <div class="yt-grid" id="ytGrid"></div>
+    <div class="srcnote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+      数据来源
+      <a href="https://www.youtube.com/results?search_query=Temu" target="_blank" rel="noopener noreferrer">YouTube · Temu 搜索</a>
+      <span>· 每日抓取近 48 小时热门 Temu 视频；内容摘要取自视频描述与章节，评论区小结基于热评的倾向与主题词统计，均为真实数据摘录而非 AI 推测</span>
+    </div>
+  </section>
 
   <section class="steam-panel">
     <div class="steam-head">
@@ -2939,6 +3010,13 @@ const STEAM_DATA = {
 };
 /* <<<STEAM_DATA_END>>> */
 
+/* <<<YOUTUBE_DATA_START>>> */
+const YOUTUBE_DATA = {
+  "updatedAt": "",
+  "videos": []
+};
+/* <<<YOUTUBE_DATA_END>>> */
+
 const TOPICS = {
   ubisoft: {name:"育碧 Ubisoft", short:"育碧", color:"#7E8CFF"},
   temu:    {name:"拼多多 Temu",  short:"Temu", color:"#34D399"}
@@ -3131,6 +3209,68 @@ function cardHTML(i){
   '</article>';
 }
 
+/* ---------------- YouTube · Temu 视频速览 ---------------- */
+function fmtWan(n){
+  if(n === null || n === undefined) return "—";
+  n = Number(n);
+  if(n >= 1e8) return (n/1e8).toFixed(1).replace(/\.0$/,"") + "亿";
+  if(n >= 1e4) return (n/1e4).toFixed(1).replace(/\.0$/,"") + "万";
+  return n.toLocaleString("en-US");
+}
+function fmtDur(sec){
+  sec = Number(sec) || 0;
+  if(sec >= 3600) return Math.floor(sec/3600) + ":" + String(Math.floor(sec%3600/60)).padStart(2,"0") + ":" + String(sec%60).padStart(2,"0");
+  return Math.floor(sec/60) + ":" + String(sec%60).padStart(2,"0");
+}
+
+function renderYouTube(){
+  const panel = document.getElementById("ytPanel");
+  const vids = YOUTUBE_DATA.videos || [];
+  if(!vids.length){ if(panel) panel.style.display = "none"; return; }
+  const u = String(YOUTUBE_DATA.updatedAt || "").replace("T", " ");
+  document.getElementById("ytUpd").innerHTML = "数据更新于 <b>" + (u || "—") + "</b>";
+  document.getElementById("ytGrid").innerHTML = vids.map(ytCardHTML).join("");
+}
+
+function ytCardHTML(v){
+  const id = esc(v.videoId || "");
+  const link = "https://www.youtube.com/watch?v=" + id;
+  const sent = v.sentiment || {};
+  const pos = sent.pos || 0, neg = sent.neg || 0;
+  const neu = Math.max(0, 100 - pos - neg);
+  const dur = v.durationSec ? fmtDur(v.durationSec) : "";
+  const chaps = (v.chapters || []).slice(0, 4).map(c =>
+    '<span class="yt-chap"><b>' + esc(c.ts) + '</b>' + esc(c.name) + '</span>').join("");
+  const themes = (v.themes || []).map(t =>
+    '<span class="yt-theme">' + esc(t.name) + ' <b>' + t.count + '</b></span>').join("");
+  const hot = (v.topComments || []).slice(0, 3).map(c => {
+    const cls = c.sent === "neg" ? " neg" : (c.sent === "pos" ? " pos" : "");
+    return '<div class="yt-hc' + cls + '"><span class="lk">👍' + fmtWan(c.likes) + '</span>' + esc(c.text) + '</div>';
+  }).join("");
+  const sum = esc(v.summary || "");
+
+  return '<article class="yt-card">'+
+    '<a class="yt-thumb" href="' + link + '" target="_blank" rel="noopener noreferrer">'+
+      '<img src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" loading="lazy" alt="" onerror="this.remove()">'+
+      (dur ? '<span class="yt-dur">' + dur + '</span>' : '')+
+    '</a>'+
+    '<div class="yt-body">'+
+      '<div class="yt-title"><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + esc(v.title) + '</a></div>'+
+      '<div class="yt-meta"><b>' + esc(v.channel) + '</b><span>' + esc(v.publishedAt || "") + ' 发布</span>'+
+        '<span>▶ ' + fmtWan(v.views) + ' 播放</span><span>👍 ' + fmtWan(v.likes) + '</span><span>💬 ' + fmtWan(v.commentCount) + '</span></div>'+
+      (sum ? '<div class="yt-sum">' + sum + '</div>' : '')+
+      (chaps ? '<div class="yt-chaps">' + chaps + '</div>' : '')+
+      '<div class="yt-sent">'+
+        '<div class="yt-bar"><i class="p" style="width:' + pos + '%"></i><i class="n" style="width:' + neg + '%"></i><i class="u" style="width:' + neu + '%"></i></div>'+
+        '<span class="yt-sent-l">' + pos + '% 正面 · ' + neg + '% 负面</span>'+
+      '</div>'+
+      (themes ? '<div class="yt-themes">' + themes + '</div>' : '')+
+      '<div class="yt-csum">' + esc(v.commentSummary || "") + '</div>'+
+      (hot ? '<div class="yt-hot">' + hot + '</div>' : '')+
+    '</div>'+
+  '</article>';
+}
+
 /* ---------------- Steam 在线人数 ---------------- */
 function fmtN(n){ return (n===null || n===undefined) ? "—" : Number(n).toLocaleString("en-US"); }
 
@@ -3270,7 +3410,7 @@ function bindChartTips(){
   window.addEventListener("scroll", hideTips, true);
 }
 
-function renderAll(){ renderFilters(); renderChart(); renderSteam(); renderTimeline(); renderBackupTip(); }
+function renderAll(){ renderFilters(); renderChart(); renderYouTube(); renderSteam(); renderTimeline(); renderBackupTip(); }
 
 function renderBackupTip(){
   const n = ITEMS.length;

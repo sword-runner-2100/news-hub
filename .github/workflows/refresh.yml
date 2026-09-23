@@ -32,6 +32,11 @@ jobs:
       - name: 抓取 Steam 在线人数
         run: python3 scripts/fetch_steam.py --days 7
 
+      - name: 抓取 Temu 视频（YouTube）
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python3 scripts/fetch_youtube.py
+
       - name: 提交更新
         run: |
           git config user.name "github-actions[bot]"
