@@ -400,6 +400,8 @@ def summarize_video(v, key, min_comments_for_stats=3):
             mood = "整体偏正面"
         elif pct["neg"] >= pct["pos"] + 20:
             mood = "整体偏负面"
+        elif pct["pos"] < 15 and pct["neg"] < 15:
+            mood = "整体中性"
         else:
             mood = "正负掺半"
         parts = ["热门评论%s：%d%% 表达正面、%d%% 表达负面" % (mood, pct["pos"], pct["neg"])]
