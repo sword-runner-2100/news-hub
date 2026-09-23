@@ -5,14 +5,14 @@
 
 做什么：
     1. 搜索过去 48 小时内发布的、标题/描述含 "Temu" 的视频
-       （两路搜索：order=viewCount 保热门 + order=date 保最新）
+       （全球各语种，不限语言/地区；两路搜索：order=viewCount 保热门 + order=date 保最新）
     2. 拉取视频详情（播放 / 点赞 / 评论数 / 时长 / 描述）
     3. 拉取每个视频的热门评论（relevance 排序 top 20）
     4. 规则式总结 —— 全部基于真实数据，不编造：
        - 内容摘要 = 视频描述摘录（去链接/推广行）+ 章节列表
-       - 评论区小结 = 情绪比例（正面/负面/中性词典分类）+ 高频主题词统计
+       - 评论区小结 = 情绪比例（英/西语词典分类）+ 高频主题词统计
        - 热门评论 = 点赞最高的 5 条
-    5. 英文内容全部译成中文（复用 fetch_news.py 的翻译函数，品牌名占位符保护）
+    5. 任意语言自动检测译成中文（sl=auto，品牌名占位符保护，失败保留原文）
 
 API 消耗：搜索 2 次（200 units）+ 详情 1 次 + 评论每视频 1 次 ≈ 210 units/天
 （免费额度 10000 units/天，绰绰有余）
@@ -35,6 +35,7 @@ import re
 import subprocess
 import sys
 import time
+import unicodedata
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -48,36 +49,66 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 
 API_BASE = "https://www.googleapis.com/youtube/v3/"
 
-# ---- 复用 fetch_news.py 的翻译函数（品牌占位符 + 术语预替换 + 免费接口双保险） ----
+# ---- 品牌占位符保护复用 fetch_news（Temu/Shein/Amazon 等不被音译坏） ----
 try:
     sys.path.insert(0, HERE)
-    from fetch_news import translate_one, has_cn  # noqa: E402
+    from fetch_news import _protect, _restore  # noqa: E402
 except Exception as _ex:  # fetch_news 改名/损坏时不至于全挂
-    sys.stderr.write("[WARN] 无法导入 fetch_news 翻译函数（%s），改用内置精简版\n" % _ex)
+    sys.stderr.write("[WARN] 无法导入 fetch_news 品牌保护（%s），改用无占位符兜底\n" % _ex)
 
-    def has_cn(s):
-        return any("\u4e00" <= ch <= "\u9fff" for ch in (s or ""))
+    def _protect(text):
+        return text, {}
 
-    def _gtx(text):
-        url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
-            {"client": "gtx", "sl": "en", "tl": "zh-CN", "dt": "t", "q": text})
-        req = urllib.request.Request(url, headers={"User-Agent": UA})
-        raw = urllib.request.urlopen(req, timeout=25).read().decode("utf-8")
-        return "".join(seg[0] for seg in json.loads(raw)[0] if seg and seg[0])
+    def _restore(text, slots):
+        return text
 
-    def translate_one(text, cache):
-        if not text or not text.strip() or has_cn(text):
-            return text, False
-        if text in cache:
-            return cache[text], True
-        try:
-            out = (_gtx(text) or "").strip()
-            if out and out != text:
+
+# ---------------------------------------------------------------------------
+# 多语言翻译：全球视频（英/西/葡/捷/阿/日/韩…）→ 中文
+# Google gtx 端点 sl=auto 自动检测源语言；失败保留原文（卡片始终有原视频链接）。
+# ---------------------------------------------------------------------------
+def _gtx_auto(text):
+    url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
+        {"client": "gtx", "sl": "auto", "tl": "zh-CN", "dt": "t", "q": text})
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    raw = urllib.request.urlopen(req, timeout=25).read().decode("utf-8")
+    return "".join(seg[0] for seg in json.loads(raw)[0] if seg and seg[0])
+
+
+def needs_translation(text):
+    """判断文本是否需要送翻译。
+    - 含日文假名/韩文谚文 → 不是中文，翻
+    - 无 CJK 汉字 → 翻（英/西/捷/阿等）
+    - 含汉字：≥2 个汉字且汉字多于拉丁字母 → 视为中英混合/中文，豁免；
+      否则翻（比如只有一个汉字的泰文/纯品牌标题）
+    """
+    if not text or not text.strip():
+        return False
+    if re.search(r"[\u3040-\u30ff\uac00-\ud7af]", text):
+        return True
+    cjk = re.findall(r"[\u4e00-\u9fff]", text)
+    if not cjk:
+        return True
+    latin = len(re.findall(r"[A-Za-z]", text))
+    return not (len(cjk) >= 2 and latin < len(cjk))
+
+
+def translate_any(text, cache):
+    if not needs_translation(text):
+        return text, False
+    if text in cache:
+        return cache[text], True
+    guarded, slots = _protect(text)
+    try:
+        out = (_gtx_auto(guarded) or "").strip()
+        if out and out != guarded:
+            out = _restore(out, slots) if slots else out
+            if out:
                 cache[text] = out
                 return out, True
-        except Exception:
-            pass
-        return text, False
+    except Exception:
+        pass
+    return text, False
 
 
 def log(msg):
@@ -92,11 +123,15 @@ NEG_PHRASES = [
     "never again", "rip off", "ripoff", "not worth", "not recommended", "waste of money",
     "waste of time", "do not buy", "don't buy", "got scammed", "got a refund",
     "going back", "returned mine", "sending it back", "throws away",
+    # 西语
+    "no funciona", "dinero perdido", "no lo compro", "me arrepiento",
 ]
 POS_PHRASES = [
     "worth it", "worth every", "highly recommend", "so cute", "love it", "loved it",
     "best ever", "pretty good", "really good", "surprisingly good", "great quality",
     "good quality", "amazing quality", "works great", "held up", "no regrets",
+    # 西语
+    "me gusta", "me encanta", "muy bueno", "muy buena",
 ]
 
 NEG_WORDS = {
@@ -106,6 +141,9 @@ NEG_WORDS = {
     "warning", "lawsuit", "fake", "counterfeit", "nasty", "stolen", "boycott",
     "danger", "dangerous", "unsafe", "toxic", "banned", "illegal", "dropshipper",
     "dropshipping", "cheaply", "shoddy", "flimsy", "falling apart", "useless",
+    # 西语
+    "estafa", "estafas", "malo", "mala", "malos", "malas", "horrible", "pesimo",
+    "basura", "roto", "rompe", "rompio", "falso", "falsa", "peligro", "peligroso",
 }
 POS_WORDS = {
     "love", "loved", "lovely", "great", "good", "best", "awesome", "amazing",
@@ -114,12 +152,24 @@ POS_WORDS = {
     "stunning", "favorite", "favourite", "beautiful", "funny", "hilarious",
     "wholesome", "helpful", "thanks", "thank", "genius", "underrated",
     "satisfying", "impressive", "legit", "solid", " impressed",
+    # 西语
+    "encanta", "increible", "genial", "bueno", "buena", "buenos", "buenas",
+    "bonito", "bonita", "barato", "barata", "perfecto", "gracias",
+    "hermoso", "hermosa", "economico",
 }
 
 
+def _norm_latin(text):
+    """去重音并只留 a-z 空格：increíble → increible。西语/葡语词典匹配的前提。"""
+    t = unicodedata.normalize("NFD", (text or "").lower())
+    t = "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
+    return " " + re.sub(r"[^a-z' ]", " ", t) + " "
+
+
 def classify_sentiment(text):
-    """返回 pos / neg / neu。短语优先于单词，负面短语优先于正面词（宁严勿宽）。"""
-    t = " " + re.sub(r"[^a-z' ]", " ", (text or "").lower()) + " "
+    """返回 pos / neg / neu。短语优先于单词，负面短语优先于正面词（宁严勿宽）。
+    词典覆盖英语 + 西语高频情绪词（Temu 内容两大语种）；其他语种归中性。"""
+    t = _norm_latin(text)
     for p in NEG_PHRASES:
         if p in t:
             return "neg"
@@ -162,11 +212,22 @@ THEMES = [
     (r"\brecommend(s|ed|ation)?\b", "推荐"),
     (r"\bpackaging\b", "包装"),
     (r"\baliexpress\b|\bshein\b|\bamazon\b", "其他平台对比"),
+    # 西语（Temu 内容第二大语种）
+    (r"\bcalidad\b", "质量"),
+    (r"\bprecio(s)?\b", "价格"),
+    (r"\benvio\b|\bentrega\b|\bpaquete\b", "物流"),
+    (r"\bestafa(s)?\b", "骗局"),
+    (r"\bdevolucion\b|\bdevolver\b", "退款退货"),
+    (r"\bropa\b|\bcamisa\b|\bvestido\b", "服装"),
+    (r"\bmaquillaje\b", "美妆"),
+    (r"\bcocina\b", "厨具"),
+    (r"\brecomend(o|a|ar)\b", "推荐"),
+    (r"\bbarato\b|\bbarata\b", "便宜好物"),
 ]
 
 
 def extract_themes(text):
-    t = (text or "").lower()
+    t = _norm_latin(text)      # 去重音：envío → envio，西语主题才匹配得上
     found = []
     for pat, cn in THEMES:
         n = len(re.findall(pat, t))
@@ -186,30 +247,6 @@ def parse_duration(iso):
         return 0
     h, mi, s = (int(x) if x else 0 for x in m.groups())
     return h * 3600 + mi * 60 + s
-
-
-# 英语停用词：非英语视频（西语/捷克语/阿拉伯语 Temu 大频道播放量很高）会按播放量
-# 挤进前排，而翻译管道是 en→zh，硬翻会出垃圾。两道过滤：
-# 1) API 的 defaultAudioLanguage / defaultLanguage 字段（权威）
-# 2) 缺字段时用英语停用词密度兜底（正常英文标题/描述必然命中多个）
-EN_STOPWORDS = {
-    "the", "a", "an", "and", "or", "but", "i", "you", "my", "me", "is", "are",
-    "was", "were", "this", "that", "with", "for", "of", "on", "in", "to", "it",
-    "we", "they", "have", "has", "had", "what", "how", "why", "not", "do",
-    "does", "did", "so", "if", "when", "from", "at", "by", "be", "been", "am",
-    "he", "she", "his", "her", "their", "our", "your", "just", "got", "really",
-}
-
-
-def is_english_video(snippet):
-    lang = (snippet.get("defaultAudioLanguage")
-            or snippet.get("defaultLanguage") or "").lower()
-    if lang:
-        return lang.startswith("en")
-    text = ((snippet.get("title") or "") + " "
-            + (snippet.get("description") or "")).lower()
-    words = set(re.findall(r"[a-z']+", text))
-    return len(words & EN_STOPWORDS) >= 3
 
 
 def fmt_duration(sec):
@@ -274,7 +311,7 @@ def api_get(path, params, key, timeout=25):
 
 
 def search_video_ids(key, hours, per_search=50):
-    """两路搜索：viewCount（热门优先）+ date（保最新）。返回去重后的 videoId 列表。"""
+    """两路搜索（不限定语言/地区，全球 Temu 内容）：viewCount（热门优先）+ date（保最新）。"""
     after = (datetime.now(timezone.utc) - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
     ids = []
     for order in ("viewCount", "date"):
@@ -282,7 +319,7 @@ def search_video_ids(key, hours, per_search=50):
             data = api_get("search", {
                 "part": "snippet", "q": "Temu", "type": "video",
                 "order": order, "publishedAfter": after,
-                "maxResults": per_search, "relevanceLanguage": "en",
+                "maxResults": per_search,
             }, key)
             for it in data.get("items", []):
                 vid = (it.get("id") or {}).get("videoId")
@@ -423,7 +460,6 @@ def main():
     log("    [2/5] 拉取视频详情…")
     details = fetch_video_details(ids, key)
     cands = []
-    n_lang_drop = 0
     for vid, d in details.items():
         dur = parse_duration(d["contentDetails"].get("duration"))
         title = (d["snippet"].get("title") or "")
@@ -432,12 +468,7 @@ def main():
             continue
         if "temu" not in (title + " " + descr).lower():
             continue
-        if not is_english_video(d["snippet"]):
-            n_lang_drop += 1
-            continue
         cands.append(dict(d, videoId=vid, _dur=dur))
-    if n_lang_drop:
-        log("        已过滤 %d 个非英语视频（翻译管道只支持 en→zh）" % n_lang_drop)
     cands.sort(key=lambda v: -int(v["statistics"].get("viewCount") or 0))
     cands = cands[:args.max]
     if not cands:
@@ -453,24 +484,24 @@ def main():
         time.sleep(0.3)
 
     if not args.no_translate:
-        log("    [4/5] 翻译成中文（品牌名占位符保护）…")
+        log("    [4/5] 翻译成中文（自动检测源语言 + 品牌名占位符保护）…")
         cache = {}
         for v in videos:
-            t, _ = translate_one(v["title"], cache)
-            v["titleEn"] = v["title"]
+            t, _ = translate_any(v["title"], cache)
+            v["titleOriginal"] = v["title"]
             v["title"] = t
-            s, _ = translate_one(v["summary"], cache)
+            s, _ = translate_any(v["summary"], cache)
             v["summary"] = s
             for ch in v["chapters"]:
-                ch["name"], _ = translate_one(ch["name"], cache)
+                ch["name"], _ = translate_any(ch["name"], cache)
             for c in v["topComments"]:
-                c["text"], _ = translate_one(c["text"], cache)
+                c["text"], _ = translate_any(c["text"], cache)
             time.sleep(0.1)
-        log("        翻译完成，失败条目保留英文原文")
+        log("        翻译完成，失败条目保留原文")
     else:
         log("    [4/5] 已按 --no-translate 跳过翻译")
         for v in videos:
-            v["titleEn"] = v["title"]
+            v["titleOriginal"] = v["title"]
 
     out = {"updatedAt": now.strftime("%Y-%m-%dT%H:%M"), "videos": videos}
     os.makedirs(INBOX, exist_ok=True)
