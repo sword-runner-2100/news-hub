@@ -663,6 +663,23 @@ def summarize_video(v, key, min_comments_for_stats=3):
     }
 
 
+def load_api_key():
+    """key 来源：环境变量 YOUTUBE_API_KEY > 项目根 .env.local（不进 git，本地跑用）。"""
+    key = os.environ.get("YOUTUBE_API_KEY", "").strip()
+    if key:
+        return key
+    env_file = os.path.join(ROOT, ".env.local")
+    if os.path.isfile(env_file):
+        try:
+            for line in open(env_file, encoding="utf-8"):
+                line = line.strip()
+                if line.startswith("YOUTUBE_API_KEY="):
+                    return line.split("=", 1)[1].strip().strip('"').strip("'")
+        except Exception:
+            pass
+    return ""
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48, help="搜索时间窗（小时）")
@@ -673,9 +690,9 @@ def main():
     ap.add_argument("--print", dest="do_print", action="store_true", help="打印结果 JSON")
     args = ap.parse_args()
 
-    key = os.environ.get("YOUTUBE_API_KEY", "").strip()
+    key = load_api_key()
     if not key:
-        log("[SKIP] 未配置 YOUTUBE_API_KEY（在仓库 Secrets 里添加后此步骤自动生效），本次跳过")
+        log("[SKIP] 未配置 YOUTUBE_API_KEY（环境变量或项目根 .env.local），本次跳过")
         return
 
     now = datetime.now(CST)
