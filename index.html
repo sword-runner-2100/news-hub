@@ -408,6 +408,41 @@ html.is-mobile .yt-panel{padding:15px 14px;margin-bottom:14px}
 html.is-mobile .yt-grid{grid-template-columns:1fr;gap:11px}
 html.is-mobile .yt-thumb{width:118px}
 
+/* 已读 / 折叠：看完的视频收成一行，整块也能一键折起来 */
+.yt-acts{display:flex;gap:6px;flex:none;flex-wrap:wrap}
+.yt-act{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 11px;border-radius:8px;font-size:11.5px;font-weight:600;
+  background:var(--bg2);border:1px solid var(--border);color:var(--t2);transition:.16s;
+}
+.yt-act svg{width:12px;height:12px}
+.yt-act:hover{background:var(--panel2);color:var(--t1);border-color:rgba(166,107,255,.45)}
+.yt-act.on{color:#C9B6FF;border-color:rgba(166,107,255,.42)}
+.yt-card{position:relative}
+.yt-toggle{
+  position:absolute;right:8px;top:8px;z-index:2;
+  width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  color:var(--t3);background:rgba(11,14,20,.74);border:1px solid var(--border);transition:.15s;
+}
+.yt-toggle svg{width:14px;height:14px}
+.yt-toggle:hover{color:var(--t1);border-color:rgba(166,107,255,.5)}
+.yt-card.read{opacity:.55}
+.yt-card.read:hover{opacity:.88}
+.yt-card.read .yt-detail{display:none}
+.yt-card.read .yt-thumb{width:112px}
+.yt-card.read .yt-title{-webkit-line-clamp:1}
+.yt-daytoggle{
+  width:22px;height:22px;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;
+  color:var(--t3);background:var(--panel);border:1px solid var(--border);transition:.15s;
+}
+.yt-daytoggle svg{width:13px;height:13px;transition:transform .18s}
+.yt-daytoggle:hover{color:var(--t1);background:var(--panel2)}
+.yt-daytoggle.folded svg{transform:rotate(-90deg)}
+.yt-daygroup.folded .yt-grid{display:none}
+.yt-daygroup.folded{margin-bottom:12px}
+html.is-mobile .yt-card.read .yt-thumb{width:86px}
+html.is-mobile .yt-act{padding:7px 12px;min-height:34px}
+
 /* ---------- Steam 在线人数 ---------- */
 .steam-panel{
   background:linear-gradient(150deg,rgba(52,211,153,.08),rgba(126,140,255,.05) 55%,transparent);
@@ -607,6 +642,7 @@ html.is-mobile .tabbar button.on{color:var(--acc1);background:rgba(126,140,255,.
         YouTube · Temu 视频速览
       </h2>
       <span class="upd" id="ytUpd"></span>
+      <div class="yt-acts" id="ytActs"></div>
     </div>
     <div id="ytGrid"></div>
     <div class="srcnote">
@@ -8656,6 +8692,8 @@ let ITEMS = loadItems();
 let STATE = readJSON(K.state, {read:{}, star:{}});
 if(!STATE.read) STATE.read = {};
 if(!STATE.star) STATE.star = {};
+if(!STATE.ytRead) STATE.ytRead = {};   // YouTube 视频已读（key = videoId）
+if(!STATE.ytFold) STATE.ytFold = {};   // YouTube 按天分组折叠（key = 上榜日期）
 function saveState(){ writeJSON(K.state, STATE); }
 
 let FILTER = "all";   // all | ubisoft | temu | star
@@ -8827,7 +8865,17 @@ function fmtDur(sec){
   return Math.floor(sec/60) + ":" + String(sec%60).padStart(2,"0");
 }
 
+/* YouTube 的已读 / 折叠状态（可能被「清空数据」重置，这里兜底重建） */
+function ytState(){
+  if(!STATE.ytRead) STATE.ytRead = {};
+  if(!STATE.ytFold) STATE.ytFold = {};
+  return STATE;
+}
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const ICON_FOLD  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+
 function renderYouTube(){
+  ytState();
   const panel = document.getElementById("ytPanel");
   const vids = YOUTUBE_DATA.videos || [];
   if(!vids.length){ if(panel) panel.style.display = "none"; return; }
@@ -8841,15 +8889,36 @@ function renderYouTube(){
     (groups[d] = groups[d] || []).push(v);
   });
   const dates = Object.keys(groups).sort().reverse();
+
+  // 顶部操作条：未读数 + 全部已读 / 全部未读 / 全部折叠
+  const total = vids.length;
+  const unread = vids.filter(v=>!STATE.ytRead[v.videoId]).length;
+  const allFolded = dates.length > 0 && dates.every(d=>!!STATE.ytFold[d]);
+  const acts = document.getElementById("ytActs");
+  if(acts){
+    acts.innerHTML =
+      '<button class="yt-act'+(unread?'':' on')+'" data-yt-act="yt-readall" title="把全部视频标为已读，内容自动折成一行">'+
+        ICON_CHECK + '全部已读' + (unread ? ' · ' + unread : ' ✓') +
+      '</button>'+
+      (unread < total ? '<button class="yt-act" data-yt-act="yt-readnone" title="把全部视频恢复成未读">全部未读</button>' : '')+
+      '<button class="yt-act" data-yt-act="'+(allFolded?'yt-unfoldall':'yt-foldall')+'">'+
+        (allFolded ? '全部展开' : '全部折叠') +
+      '</button>';
+  }
+
   document.getElementById("ytGrid").innerHTML = dates.map(d=>{
     const arr = groups[d];
     const o = dayOffset(d);
-    return '<section class="yt-daygroup">'+
+    const un = arr.filter(v=>!STATE.ytRead[v.videoId]).length;
+    const folded = !!STATE.ytFold[d];
+    return '<section class="yt-daygroup'+(folded?' folded':'')+'">'+
       '<div class="daybar">'+
+        '<button class="yt-daytoggle'+(folded?' folded':'')+'" data-yt-fold="'+esc(d)+'" '+
+          'title="'+(folded?'展开这一天':'折叠这一天')+'" aria-label="'+(folded?'展开':'折叠')+'">'+ICON_FOLD+'</button>'+
         '<span class="d'+(o===0?' today':'')+'">'+fmtDate(d)+'</span>'+
         '<span class="rel">'+relLabel(d)+'</span>'+
         '<span class="line"></span>'+
-        '<span class="n">'+arr.length+' 个视频</span>'+
+        '<span class="n">'+arr.length+' 个视频'+(un < arr.length ? ' · 未读 '+un : '')+'</span>'+
       '</div>'+
       '<div class="yt-grid">' + arr.map(ytCardHTML).join("") + '</div>'+
     '</section>';
@@ -8883,15 +8952,9 @@ function ytCardHTML(v){
       ? '<div class="yt-sumwrap"><div class="yt-lbl">' + srcTxt + '</div><ul class="yt-points">' + pts + '</ul></div>'
       : (sum ? '<div class="yt-sumwrap"><div class="yt-lbl">' + srcTxt + '</div><div class="yt-sum">' + sum + '</div></div>' : ''));
 
-  return '<article class="yt-card">'+
-    '<a class="yt-thumb" href="' + link + '" target="_blank" rel="noopener noreferrer">'+
-      '<img src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" loading="lazy" alt="" onerror="this.remove()">'+
-      (dur ? '<span class="yt-dur">' + dur + '</span>' : '')+
-    '</a>'+
-    '<div class="yt-body">'+
-      '<div class="yt-title"><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + esc(v.title) + '</a></div>'+
-      '<div class="yt-meta"><b>' + esc(v.channel) + '</b><span>' + esc(v.publishedAt || "") + ' 发布</span>'+
-        '<span>▶ ' + fmtWan(v.views) + ' 播放</span><span>👍 ' + fmtWan(v.likes) + '</span><span>💬 ' + fmtWan(v.commentCount) + '</span></div>'+
+  // 除标题 / 元信息之外的正文（总结、章节、情绪、主题、评论）统一塞进 .yt-detail，
+  // 卡片标记已读后整块 display:none，只留「缩略图 + 一行标题」的折叠态
+  const detail =
       (sumBlock ? sumBlock : '')+
       (chaps ? '<div class="yt-chaps">' + chaps + '</div>' : '')+
       '<div class="yt-sent">'+
@@ -8900,9 +8963,44 @@ function ytCardHTML(v){
       '</div>'+
       (themes ? '<div class="yt-themes">' + themes + '</div>' : '')+
       '<div class="yt-csumwrap"><div class="yt-lbl">评论区总结</div><div class="yt-csum">' + esc(v.commentSummary || "") + '</div></div>'+
-      (hot ? '<div class="yt-hot">' + hot + '</div>' : '')+
+      (hot ? '<div class="yt-hot">' + hot + '</div>' : '');
+  const read = !!STATE.ytRead[v.videoId];
+
+  return '<article class="yt-card'+(read?' read':'')+'" data-yt-id="'+id+'">'+
+    '<a class="yt-thumb" href="' + link + '" target="_blank" rel="noopener noreferrer">'+
+      '<img src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" loading="lazy" alt="" onerror="this.remove()">'+
+      (dur ? '<span class="yt-dur">' + dur + '</span>' : '')+
+    '</a>'+
+    '<div class="yt-body">'+
+      '<div class="yt-title"><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + esc(v.title) + '</a></div>'+
+      '<div class="yt-meta"><b>' + esc(v.channel) + '</b><span>' + esc(v.publishedAt || "") + ' 发布</span>'+
+        '<span>▶ ' + fmtWan(v.views) + ' 播放</span><span>👍 ' + fmtWan(v.likes) + '</span><span>💬 ' + fmtWan(v.commentCount) + '</span></div>'+
+      '<div class="yt-detail">' + detail + '</div>'+
     '</div>'+
+    '<button class="yt-toggle'+(read?' on':'')+'" data-yt-read="'+id+'" '+
+      'title="'+(read?'标为未读（展开内容）':'标为已读（折叠内容）')+'" aria-label="'+(read?'标为未读':'标为已读')+'">'+
+      (read ? ICON_CHECK : ICON_FOLD)+
+    '</button>'+
   '</article>';
+}
+
+/* YouTube 板块的批量操作：全部已读 / 全部未读 / 全部折叠展开 */
+function handleYtAction(act){
+  ytState();
+  const vids = YOUTUBE_DATA.videos || [];
+  const dayOf = v => String(v.fetchedAt || v.publishedAt || "未知日期");
+  if(act === "yt-readall"){
+    vids.forEach(v=>{ if(v.videoId) STATE.ytRead[v.videoId] = 1; });
+    saveState(); renderYouTube();
+    toast("已把 " + vids.length + " 个视频标记为已读，内容已折叠");
+  } else if(act === "yt-readnone"){
+    STATE.ytRead = {}; saveState(); renderYouTube(); toast("已全部恢复为未读");
+  } else if(act === "yt-foldall"){
+    vids.forEach(v=>{ STATE.ytFold[dayOf(v)] = 1; });
+    saveState(); renderYouTube(); toast("已折叠全部分组");
+  } else if(act === "yt-unfoldall"){
+    STATE.ytFold = {}; saveState(); renderYouTube(); toast("已展开全部分组");
+  }
 }
 
 /* ---------------- Steam 在线人数 ---------------- */
@@ -9074,6 +9172,26 @@ document.addEventListener("click", e=>{
     saveState(); renderAll();
     return;
   }
+  /* YouTube：单卡已读切换（顺带折叠正文） */
+  const yr = e.target.closest("[data-yt-read]");
+  if(yr){
+    ytState();
+    const id = yr.dataset.ytRead;
+    if(STATE.ytRead[id]) delete STATE.ytRead[id]; else STATE.ytRead[id] = 1;
+    saveState(); renderYouTube();
+    return;
+  }
+  /* YouTube：按天分组折叠 / 展开 */
+  const yf = e.target.closest("[data-yt-fold]");
+  if(yf){
+    ytState();
+    const d = yf.dataset.ytFold;
+    if(STATE.ytFold[d]) delete STATE.ytFold[d]; else STATE.ytFold[d] = 1;
+    saveState(); renderYouTube();
+    return;
+  }
+  const ya = e.target.closest("[data-yt-act]");
+  if(ya){ handleYtAction(ya.dataset.ytAct); return; }
   const fb = e.target.closest("[data-topic]");
   if(fb && (fb.closest("#filters") || fb.closest("#tabbar"))){
     FILTER = fb.dataset.topic; renderFilters(); renderTimeline();
