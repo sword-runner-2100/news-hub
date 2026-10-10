@@ -32,6 +32,15 @@ jobs:
       - name: 抓取新闻
         run: python3 scripts/fetch_news.py --days 3 --max 8
 
+      # LinkedIn 必须带登录 cookie 才能拿到帖子，cookie 过期是常态。
+      # 这一步失败不影响新闻抓取和提交，所以允许失败；
+      # 需要重新取 cookie 时日志里会明确写出「登录态失效」。
+      - name: 抓取 LinkedIn @Temu
+        continue-on-error: true
+        env:
+          LI_AT: ${{ secrets.LI_AT }}
+        run: python3 scripts/fetch_linkedin.py --days 3 --max 6
+
       - name: 抓取 Steam 在线人数
         run: python3 scripts/fetch_steam.py --days 7
 
