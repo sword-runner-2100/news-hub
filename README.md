@@ -169,6 +169,37 @@ python3 scripts/fetch_steam.py               # 刷新 Steam 数据
 | 帖子页 `/posts/` | 302 跳登录页 |
 | RSSHub 官方实例 | 403（该路由需自托管配 cookie） |
 | Bing `site:linkedin.com/...` | 0 条（搜索引擎不索引帖子） |
+| Voyager 内部接口（voyager/api/...） | 全部 404 / 403，端点已下线 |
+
+**解析方式（页面现在是 SDUI + RSC，不再是老 DOM）**
+
+带 cookie 能拿到页面（4.8 MB，标题 "Temu: Posts"），但老的那套
+`feed-shared-update-v2` DOM 已经一个都没有了：
+`<code>` 标签 0 个、`permalink` 0 次、`createdAt` 0 次、可见文本里只有公司简介。
+真正的数据在内嵌的 RSC 树里（组件状态用 `proto.sdui.State` protobuf 序列化）。
+
+所以解析改成**按组件名定位**，不依赖任何 CSS 类名：
+
+| 要什么 | 靠什么定位 |
+|---|---|
+| 正文 | `viewName":"feed-commentary"`，正文是里面的字符串字面量 |
+| 发布时间 | `viewName":"feed-full-update"`，其后紧跟 `1d` / `2d` 这类相对时间 |
+| 永久链接 | `postSlugUrl":"https://www.linkedin.com/posts/..."` |
+
+两个坑，代码里都处理了：
+
+- **正文被切成四种形态**：`{"children":[null,"一句话"]}`、
+  换行后的 `{"children":[["$","br",null,{}],"一句话"]}`、
+  中间夹 @提及/链接的 `[null,"前半句",[...]]`（结尾也可能是 `,null]`）、
+  以及被加粗链出去的机构名 `{"children":["ICQRF"]}`。
+  少抓任何一种都会丢掉帖子第一句。同一种模式按位置排序后拼接，
+  撞上第一句就停（同一条帖子会被连续渲染两遍）。
+- **链接和正文对不上号**：`postSlugUrl` 在文档里的位置跟正文顺序不一致，
+  不能按下标配对。但 slug 本身是由正文前几个词生成的
+  （`temu-has-signed-of-a-memorandum-of-understanding-...`），
+  所以按「slug 词序列 ∩ 正文前缀」的最长公共前缀做贪心分配即可，3 条全部对上。
+
+抓到的英文帖同样走 `fetch_news.py` 的翻译链路（品牌名占位符 + 术语表）再上页面。
 
 **配置：**
 
@@ -192,7 +223,18 @@ gh secret set LI_AT --repo <用户名>/<仓库名> --body "<复制的值>"
 
 ## 推送到微信（可选）
 
-每天早 9 点把当天新增的新闻推到企业微信群。晚 21 点那次只刷数据，不推送。
+有两条路，互不冲突：
+
+**路 A：WorkBuddy 云端自动化（每天 9:20）**
+
+自动化「news-hub · 推送当天网页新闻摘要」会去读线上页面，把当天新增条目
+按板块整理成中文摘要输出。WorkBuddy 侧已连的微信只能**读**（有读会话/读消息
+接口，没有发送接口），所以这是唯一能流到微信的路子。
+不需要在仓库里配任何密钥。
+
+**路 B：企业微信群机器人（GitHub Actions 里推送）**
+
+每天早 9 点那次 workflow 把当天新增的新闻 POST 到企业微信群。晚 21 点只刷数据，不推送。
 
 **配置只需三步：**
 
