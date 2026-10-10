@@ -180,7 +180,10 @@ def main():
     for it in incoming:
         key = it["url"] or it["id"]
         # 1) 标题命中（同一新闻换了链接，或译法略有差异）
-        if sim.find(it["title"], it.get("topic")) is not None:
+        #    官方渠道（LinkedIn 公司号）例外：它是一手信源，即使媒体已经报过同一件事，
+        #    官方口径本身也值得留一条，不能被相似度去重吃掉。只跳过链接完全相同的情况。
+        official = (it.get("cat") == "官方")
+        if not official and sim.find(it["title"], it.get("topic")) is not None:
             dup_title += 1
             continue
         # 2) 链接完全相同

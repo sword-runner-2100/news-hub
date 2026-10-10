@@ -39,7 +39,9 @@ jobs:
         continue-on-error: true
         env:
           LI_AT: ${{ secrets.LI_AT }}
-        run: python3 scripts/fetch_linkedin.py --days 3 --max 6
+        # Temu 官方号发得不勤（实测 3 天 3 条），窗口放宽到 7 天，
+        # 免得刚好卡在边界上把官方帖过滤掉。
+        run: python3 scripts/fetch_linkedin.py --days 7 --max 8
 
       - name: 抓取 Steam 在线人数
         run: python3 scripts/fetch_steam.py --days 7

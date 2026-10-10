@@ -265,6 +265,11 @@ input{font-family:inherit}
 .badge.b-ubisoft{background:var(--ubi-dim);color:var(--ubi)}
 .badge.b-temu{background:var(--temu-dim);color:var(--temu)}
 .cat{font-size:10.5px;color:var(--t3);padding:3px 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);flex:none}
+/* 官方渠道：用 LinkedIn 蓝做高亮，和灰色普通分类拉开对比，扫一眼就能认出来 */
+.cat.official{
+  display:inline-flex;align-items:center;gap:4px;
+  color:#7FC4FF;background:rgba(56,120,200,.16);border:1px solid rgba(90,160,235,.42);font-weight:700;
+}
 .item-acts{margin-left:auto;display:flex;gap:3px;flex:none}
 .mini{
   width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;
@@ -830,6 +835,17 @@ const SEED_DATA = [
     "summary": "Temu 正在通过其品牌注册中新的专用地理标志类别加强对地理标志 (GI) 的在线保护。地理标志将产品的质量和声誉与其原产地联系起来。在网上保护他们可以维护消费者的信任，并为生计依赖于这种声誉的生产者提供支持。新的品牌注册类别适用于所有市场，为地理标志权利持有者提供了与 Temu 合作并报告潜在侵权列表以供审查的直接方式。阅读更多：",
     "source": "LinkedIn",
     "url": "https://www.linkedin.com/posts/temu-is-strengthening-the-protection-of-geographical-share-7513917984898424833-tXaH",
+    "pubDate": "2026-10-08"
+  },
+  {
+    "id": "temu-20261010-https-www-linkedin-com-posts-temu-has-signed-a-memorandum-of",
+    "date": "2026-10-10",
+    "topic": "temu",
+    "cat": "官方",
+    "title": "Temu已与意大利中央欺诈检查局签署谅解备忘录……",
+    "summary": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS",
+    "source": "LinkedIn",
+    "url": "https://www.linkedin.com/posts/temu-has-signed-a-memorandum-of-understanding-share-7513806232504184833--_Gn",
     "pubDate": "2026-10-08"
   },
   {
@@ -4023,7 +4039,7 @@ const SEED_DATA = [
     "pubDate": "2026-08-24"
   }
 ];
-const DATA_VERSION = "2026-10-10T21:40";
+const DATA_VERSION = "2026-10-10T21:57";
 /* <<<SEED_DATA_END>>> */
 
 /* <<<STEAM_DATA_START>>> */
@@ -8802,22 +8818,30 @@ function loadItems(){
     writeJSON(K.items, {version:DATA_VERSION, items:SEED_DATA});
     return SEED_DATA.slice();
   }
-  if(String(DATA_VERSION) > String(stored.version || "")){
-    const map = new Map();
-    (stored.items||[]).forEach(i=>{ if(i && i.id) map.set(i.id, i); });
-    let added = 0;
-    SEED_DATA.forEach(i=>{ if(i && i.id && !map.has(i.id)){ map.set(i.id, i); added++; } });
-    const merged = Array.from(map.values());
-    writeJSON(K.items, {version:DATA_VERSION, items:merged});
-    if(added) setTimeout(()=>toast("已同步 " + added + " 条新新闻"), 700);
-    return merged;
+  // 只在版本号变大时才合并 → 同一版本内新抓到的条目（比如 LinkedIn 官方帖）
+  // 会被浏览器里那份旧快照挡住，页面上永远看不到。改成每次加载都按 id 补齐，
+  // 版本号只用来决定要不要弹「已同步 N 条」的提示。
+  // 唯一例外是用户手动「清空数据」：那时 STATE.noReseed 会记下当前版本，
+  // 不让被清掉的条目又自动长回来，直到版本号再次变化。
+  const map = new Map();
+  (stored.items || []).forEach(i => { if (i && i.id) map.set(i.id, i); });
+  const before = map.size;
+  let added = 0;
+  if (!STATE || STATE.noReseed !== String(DATA_VERSION)) {
+    SEED_DATA.forEach(i => { if (i && i.id && !map.has(i.id)) { map.set(i.id, i); added++; } });
   }
-  return stored.items || [];
+  const merged = Array.from(map.values());
+  if (added || !before) {
+    writeJSON(K.items, {version: DATA_VERSION, items: merged});
+  }
+  if (added) setTimeout(() => toast("已同步 " + added + " 条新新闻"), 700);
+  return merged;
 }
 function saveItems(list){ writeJSON(K.items, {version:DATA_VERSION, items:list}); }
 
-let ITEMS = loadItems();
+// STATE 要先于 loadItems 读出来，因为补新条目时要看有没有被手动清空过
 let STATE = readJSON(K.state, {read:{}, star:{}});
+let ITEMS = loadItems();
 if(!STATE.read) STATE.read = {};
 if(!STATE.star) STATE.star = {};
 if(!STATE.ytRead) STATE.ytRead = {};   // YouTube 视频已读（key = videoId）
@@ -8949,6 +8973,19 @@ function renderTimeline(){
   }).join("");
 }
 
+// 官方渠道（LinkedIn 公司号这类）单独给一枚高亮徽章。
+// 原来只用一个灰色 .cat 标签，跟「其他」「评测」这些混在一起，扫一眼根本分不出来。
+const OFFICIAL_SRC = {LinkedIn: "LinkedIn 官方"};
+function officialBadge(i){
+  const src = String(i.source || "");
+  const label = OFFICIAL_SRC[src] || (i.cat === "官方" ? (src + " 官方") : "");
+  if(!label) return i.cat ? '<span class="cat">'+esc(i.cat)+'</span>' : '';
+  return '<span class="cat official" title="'+esc(src)+' 官方账号发布">'+
+           '<svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true">'+
+             '<path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.76-1.95C21.2 8.75 22 11 22 14.1V21h-4v-6.1c0-1.45-.52-2.45-1.82-2.45-1 0-1.6.67-1.86 1.32-.1.24-.12.57-.12.9V21h-4z"/>'+
+           '</svg>'+esc(label)+'</span>';
+}
+
 function cardHTML(i){
   const tp = TOPICS[i.topic] || {short:"—", color:"#68738C", name:"其他"};
   const read = !!STATE.read[i.id];
@@ -8957,7 +8994,7 @@ function cardHTML(i){
   return '<article class="item t-'+esc(i.topic)+(read?' read':'')+(star?' starred':'')+'" data-id="'+esc(i.id)+'">'+
     '<div class="item-top">'+
       '<span class="badge b-'+esc(i.topic)+'" style="background:'+tp.color+'22;color:'+tp.color+'">'+esc(tp.short)+'</span>'+
-      (i.cat?'<span class="cat">'+esc(i.cat)+'</span>':'')+
+      officialBadge(i)+
       '<div class="item-acts">'+
         '<button class="mini'+(star?' on':'')+'" data-star="'+esc(i.id)+'" title="星标">'+
           '<svg viewBox="0 0 24 24" fill="'+(star?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'+
@@ -9448,7 +9485,7 @@ function handleAction(act){
       STATE.read = {}; saveState(); renderAll(); toast("已全部标记为未读"); break;
     case "clear":
       if(confirm("确定清空全部 " + ITEMS.length + " 条新闻数据？\n此操作不可撤销，建议先导出备份。")){
-        ITEMS = []; STATE = {read:{}, star:{}};
+        ITEMS = []; STATE = {read:{}, star:{}, noReseed: String(DATA_VERSION)};
         saveItems(ITEMS); saveState(); renderAll(); toast("数据已清空");
       }
       break;
