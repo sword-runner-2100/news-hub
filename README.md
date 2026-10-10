@@ -156,6 +156,40 @@ python3 scripts/fetch_steam.py               # 刷新 Steam 数据
 
 脚本都是幂等的：数据没变化就不改动文件，并给出提示。
 
+## 抓取 LinkedIn 公司帖子（可选）
+
+把 Temu 在 LinkedIn 发的帖子也收进汇总台。抓到的条目归入 `temu` 话题，
+来源标 `LinkedIn`、分类标「官方」，不需要改页面结构。
+
+**为什么必须配 cookie**：LinkedIn 未登录时拿不到任何帖子。实测——
+
+| 尝试 | 结果 |
+|---|---|
+| 公司主页直接抓 | 只有粉丝数，帖子字段出现 0 次 |
+| 帖子页 `/posts/` | 302 跳登录页 |
+| RSSHub 官方实例 | 403（该路由需自托管配 cookie） |
+| Bing `site:linkedin.com/...` | 0 条（搜索引擎不索引帖子） |
+
+**配置：**
+
+1. 浏览器登录 linkedin.com（**建议用小号**，自动化访问违反 LinkedIn 用户协议，主号有风险）
+2. F12 → Application（应用）→ Storage → Cookies → `https://www.linkedin.com`
+3. 复制 `li_at` 的 Value
+4. 存进仓库：
+
+```bash
+gh secret set LI_AT --repo <用户名>/<仓库名> --body "<复制的值>"
+```
+
+**没配置时**：脚本静默跳过，不影响新闻抓取。
+
+**cookie 会过期**（几个月到一年）。失效时 LinkedIn 会回一个 `li_at=delete me`
+并把请求 302 回原地址，脚本据此明确报「登录态失效」，重新取一次即可。
+这一步在 workflow 里标了 `continue-on-error`，即使失效也不影响新闻和 Steam 的更新。
+
+想换公司：改 `fetch_linkedin.py` 里的 `COMPANY`（默认 `temuapp`），
+或设环境变量 `LI_COMPANY`。
+
 ## 推送到微信（可选）
 
 每天早 9 点把当天新增的新闻推到企业微信群。晚 21 点那次只刷数据，不推送。
