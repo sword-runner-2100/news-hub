@@ -112,78 +112,166 @@ def is_login_wall(html):
     return ("sign in" in title or "log in" in title or "authwall" in html.lower())
 
 
-def _walk(node, out, seen_urn):
-    """在嵌套 JSON 里递归找帖子正文。
+def _unescape(html):
+    """把 RSC 载荷里的转义还原，方便直接用正则匹配。
 
-    LinkedIn 把页面数据塞在 <code> 标签的 HTML 注释里，结构很深且经常变，
-    比起猜 HTML 类名，直接找 commentary 字段更抗改动。
+    页面把整棵 React 组件树当成 JS 字符串塞进 <script>，里面的引号是 \\" ，
+    换行是 \\n。先还原成正常 JSON 文本，后面才好按结构取字段。
     """
-    if isinstance(node, dict):
-        c = node.get("commentary")
-        if isinstance(c, dict):
-            t = c.get("text")
-            text = ""
-            if isinstance(t, dict):
-                text = (t.get("text") or "").strip()
-            elif isinstance(t, str):
-                text = t.strip()
-            urn = node.get("urn") or node.get("entityUrn") or ""
-            if text and (not urn or urn not in seen_urn):
-                if urn:
-                    seen_urn.add(urn)
-                out.append({
-                    "text": text,
-                    "permalink": node.get("permalink") or "",
-                    "created": node.get("createdAt") or node.get("publishedAt") or 0,
-                    "urn": urn,
-                })
-        for v in node.values():
-            _walk(v, out, seen_urn)
-    elif isinstance(node, list):
-        for v in node:
-            _walk(v, out, seen_urn)
+    return html.replace('\\"', '"').replace('\\n', '\n').replace('\\\\', '\\')
+
+
+# 正文在 RSC 树里有三种形态，都在 commentary 组件内部：
+#   1) {"children":[null,"一句话"]}                      普通段落
+#   2) {"children":[["$","br",null,{}],"一句话"]}         换行后的段落
+#   3) [null,"前半句",[...span 链接...]]                  句子中间夹了 @提及/话题标签
+#      （结尾也可能是 ,null]，两种都要认）
+#   4) {"children":["ICQRF"]}                            被加粗/链出去的公司名
+# 四种都要抓，否则会丢掉帖子第一句或中间的机构名。
+_TEXT_PATS = [
+    re.compile(r'\{"children":\[(?:null,|\["\$","br",null,\{\}\],)"((?:[^"\\]|\\.)*)"\]'),
+    re.compile(r'\[null,"((?:[^"\\]|\\.)*)",(?:\[|null\])'),
+    re.compile(r'\["\$","[^"]*",null,\{[^{}]{0,400}\}\],"((?:[^"\\]|\\.)*)"'),
+    re.compile(r'\{"children":\["((?:[^"\\]|\\.){2,80})"\]\}'),
+]
+_CSS = re.compile(r'^[a-z0-9]+(?: [a-z0-9]+)*$')   # gflfb3 gfllgi 这类样式名，不是正文
+
+
+def _block_text(seg):
+    """从一个 commentary 区块里按出现顺序拼出正文。"""
+    found = []
+    for pat in _TEXT_PATS:
+        for m in pat.finditer(seg):
+            found.append((m.start(), m.group(1)))
+    found.sort()
+    lines, seen = [], set()
+    for _, s in found:
+        s = s.strip()
+        if len(s) < 2 or s.startswith("$") or _CSS.match(s):
+            continue
+        # 正文里链出去的短网址（https://lnkd.in/xxx）不算正文，丢掉
+        if s.startswith("http") and " " not in s:
+            continue
+        # 同一条帖子会连续渲染两遍，撞上第一句说明开始重复了，直接收尾
+        if lines and s == lines[0]:
+            break
+        if s in seen:
+            continue
+        seen.add(s)
+        lines.append(s)
+    return _join(lines)
+
+
+def _join(lines):
+    """把切片拼回自然段落。
+
+    被加粗链出去的机构名（Startup Valencia / ICQRF）在 RSC 里是独立节点，
+    直接换行会变成「...with Spain's \n Startup Valencia \n , a private...」，
+    所以按前后标点决定是接排还是换行。
+    """
+    buf = ""
+    for s in lines:
+        if not buf:
+            buf = s
+        elif buf[-1] in "([（“" or s[0] in ",.;:!?)]}）”'’":
+            buf += s
+        elif len(s) < 60 and buf[-1] not in ".!?…":
+            buf += " " + s
+        else:
+            buf += "\n" + s
+    return buf
+
+
+def _rel_to_days(rel):
+    """'3h' / '2d' / '1w' / '2mo' -> 天数（小数）。"""
+    m = re.match(r'^(\d+)(m|h|d|w|mo|y)$', rel.strip())
+    if not m:
+        return None
+    n, unit = int(m.group(1)), m.group(2)
+    return {"m": n / 1440.0, "h": n / 24.0, "d": float(n),
+            "w": n * 7.0, "mo": n * 30.0, "y": n * 365.0}[unit]
+
+
+def _slug_words(url):
+    """把帖子 slug URL 还原成词序列，用来和正文配对。
+
+    https://.../temu-has-signed-of-a-memorandum-of-understanding-share-7513...-pnq
+    -> ['temu','has','signed','of','a','memorandum','of','understanding']
+    """
+    tail = url.rstrip("/").split("/")[-1]
+    tail = re.sub(r'-share-\d+.*$', '', tail)
+    tail = re.sub(r'-\d{15,}.*$', '', tail)
+    return [w for w in re.split(r'[^a-z0-9]+', tail.lower()) if w]
+
+
+def _prefix_hit(slug_words, text_words):
+    """slug 是正文前几个词生成的，比对前缀长度即可判定归属。"""
+    n = 0
+    for a, b in zip(slug_words, text_words):
+        if a != b:
+            break
+        n += 1
+    return n
 
 
 def parse_posts(html):
-    """从页面 HTML 里提取帖子，失败时退化到正则。"""
-    posts, seen = [], set()
+    """解析 LinkedIn 新版 SDUI/RSC 页面里的公司帖子。
 
-    # 途径 1：内嵌 JSON（结构最完整）
-    for m in re.finditer(r"<!--(\{.*?\})-->", html, re.S):
-        raw = m.group(1)
-        if "commentary" not in raw and "urn:li:activity" not in raw:
+    页面已经不再输出 feed-shared-update-v2 那套 DOM，正文藏在内嵌 RSC 树中，
+    靠 viewName=feed-commentary 定位帖子正文块，viewName=feed-full-update
+    定位帖子起始（发布时间就在它后面），postSlugUrl 拿永久链接。
+    """
+    t = _unescape(html)
+
+    # 1) 正文块：同一个帖子会被渲染两次（间隔 1~3k 字符），合并成一组
+    groups = []
+    for m in re.finditer(r'"viewName":"feed-commentary"', t):
+        p = m.start()
+        if groups and p - groups[-1][-1] < 6000:
+            groups[-1].append(p)
+        else:
+            groups.append([p])
+
+    # 2) 帖子起始位置（每个后面紧跟发布时间）
+    starts = [m.start() for m in re.finditer(r'"viewName":"feed-full-update"', t)]
+    times = {}
+    for s in starts:
+        m = re.search(r'"children":\["(\d+[mhdw]|(?:\d+)?mo|\d+y)"\]', t[s:s + 8000])
+        times[s] = m.group(1) if m else ""
+
+    # 3) 永久链接
+    urls = [m.group(1) for m in
+            re.finditer(r'postSlugUrl":"(https://www\.linkedin\.com/posts/[^"]+)"', t)]
+
+    posts = []
+    for i, g in enumerate(groups):
+        # 正文可能跨到下一个 commentary 标记之后，给足窗口；但不能越过下一条帖子
+        end = g[0] + 20000
+        if i + 1 < len(groups):
+            end = min(end, groups[i + 1][0])
+        text = _block_text(t[g[0]:end])
+        if len(text) < 10:
             continue
-        try:
-            _walk(json.loads(raw), posts, seen)
-        except Exception:
-            continue
+        # 发布时间：取本块之前最近的一个帖子起始点
+        prev = [s for s in starts if s <= g[0]]
+        rel = times.get(prev[-1], "") if prev else ""
+        posts.append({"text": text, "rel": rel, "url": ""})
 
-    # 途径 2：JSON 不在注释里，而是 <script type="application/json">
-    if not posts:
-        for m in re.finditer(r'<script[^>]*type="application/json"[^>]*>(.*?)</script>', html, re.S):
-            if "commentary" not in m.group(1):
+    # 4) 正文 ↔ 链接配对：slug 由正文前几个词生成，按前缀匹配度贪心分配
+    if urls:
+        tw = [[w for w in re.split(r'[^a-z0-9]+', p["text"].lower()) if w] for p in posts]
+        pairs = []
+        for i, p in enumerate(posts):
+            for u in urls:
+                pairs.append((_prefix_hit(_slug_words(u), tw[i]), i, u))
+        pairs.sort(key=lambda x: -x[0])
+        used_p, used_u = set(), set()
+        for score, i, u in pairs:
+            if score < 2 or i in used_p or u in used_u:
                 continue
-            try:
-                _walk(json.loads(m.group(1)), posts, seen)
-            except Exception:
-                continue
-
-    # 途径 3：正则抓 data-urn 附近的可见文本（最后的兜底）
-    if not posts:
-        for m in re.finditer(r'urn:li:activity:(\d+)', html):
-            urn = m.group(1)
-            if urn in seen:
-                continue
-            tail = html[m.end(): m.end() + 6000]
-            seg = re.search(r'class="[^"]*update-components-text[^"]*"[^>]*>(.*?)</(?:div|span)>',
-                            tail, re.S)
-            text = re.sub(r"<[^>]+>", " ", seg.group(1)).strip() if seg else ""
-            if len(text) < 10:
-                continue
-            seen.add(urn)
-            posts.append({"text": re.sub(r"\s+", " ", text),
-                          "permalink": "https://www.linkedin.com/feed/update/urn:li:activity:%s" % urn,
-                          "created": 0, "urn": urn})
+            posts[i]["url"] = u
+            used_p.add(i)
+            used_u.add(u)
     return posts
 
 
@@ -215,29 +303,34 @@ def main():
         log("  [WARN] 页面拿到了但解析出 0 条帖子 —— LinkedIn 可能改了页面结构，需要更新解析规则")
         sys.exit(1)
 
-    cutoff_ms = int((datetime.now(CST) - timedelta(days=args.days)).timestamp() * 1000)
+    now = datetime.now(CST)
     items = []
     for p in posts:
-        created = int(p.get("created") or 0)
-        if created and created < cutoff_ms:
-            continue
-        text = re.sub(r"\s+", " ", p["text"]).strip()
+        # 正文按行拼，去掉空行；标题用首行
+        text = "\n".join(ln.strip() for ln in p["text"].split("\n") if ln.strip())
         if len(text) < 10:
             continue
-        # 帖子没有标题，用正文首行做标题
-        first = text.split("\n")[0].strip()
-        title = first if len(first) <= 90 else first[:90] + "…"
-        dt = (datetime.fromtimestamp(created / 1000, CST) if created
-              else datetime.now(CST))
+        days = _rel_to_days(p.get("rel") or "")
+        if days is not None and days > args.days:
+            continue
+        dt = now - timedelta(days=days) if days is not None else now
+        flat = re.sub(r"\s+", " ", text)
         items.append({
             "topic": TOPIC,
             "cat": "官方",
-            "title": title,
-            "summary": text[:600],
+            "title": flat if len(flat) <= 90 else flat[:90] + "…",
+            "summary": flat[:600],
             "source": SOURCE,
-            "url": p.get("permalink") or "",
+            "url": p.get("url") or "https://www.linkedin.com/company/%s/posts/" % COMPANY,
             "pubDate": dt.strftime("%Y-%m-%d"),
         })
+
+    # 官方帖子是英文，和新闻一样译成中文再上页面
+    try:
+        from fetch_news import translate
+        items = translate(items)
+    except Exception as ex:
+        log("  [WARN] 翻译未生效（%s），保留英文原文" % str(ex)[:80])
 
     items = items[: args.max]
     log("  解析到 %d 条，保留最近 %d 天内的 %d 条" % (len(posts), args.days, len(items)))
