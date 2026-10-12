@@ -221,3 +221,14 @@
 - push 后校验：今日 6 条 AI 全在页面；24 个噪声 videoId 零回归；发现 _xmQWD8CD98（Temu 翻车合集 P1）被云端降级为 description → 从昨日 commit bd5dc32 提取对象回补（fc725e7/96d04fe 等旧提交也已降级或 absent，bd5dc32 是最近的好版本），修复 commit 0658d73 推送成功
 - 页面最终：69 个视频，summarySource=ai 共 52 条
 - 无新踩坑，流程稳定
+
+## 2026-10-11 20:30
+- 状态：成功（[OK]，push 三次成功，最终 commit 46676fc）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：8 个（首次全部带字幕、零噪声的一天：6mlYu40r9_0 Sturmwaffel 玉米热狗机 37.6 欧 5/10-连续第二天上榜、zOyxpgVVerk Sturmwaffel 3D 打印垃圾袋提手 2.12 欧 10/10-热评指手部不便者实用、JKmDb-0iras NerdECrafter Temu 山寨万圣节 Needoh 礼盒对比官方版-字幕被自动译成阿语、A2CWtlDUQ7A Sturmwaffel 多功能咖啡杯垫 1.29 欧 1/10、hi361S3cHOI Denki 科技小玩意开箱-火车汽笛/电动行李箱/Fingerbot-字幕译成阿语、h_7MbIGnayk 阿塞拜疆家庭频道 Temu 服饰开箱、jiOqAB7HltM 日本主播怜 Temu 赞助 Fortnite 伤害×10 日元购物企划、q7oRfSaL6f4 罗语 ChatGPT 代选 Temu 商品开箱）
+- 剔除噪声：0 个（8 条全是真实 Temu 内容，首次出现）
+- 合并：update_youtube.py 成功，页面 71 个视频（新增/更新 8）
+- push：commit（ac548d1）后 pull --rebase 因 .workbuddy/memory 与 reports/ 未提交改动报「unstaged changes」→ 用 git stash -u 后 rebase，与远端 7cd39f4（Actions 07:00 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + 重新 commit 004d400 + push）一次成功，stash pop 恢复本地文件
+- push 后校验：今日 8 条 AI 全在页面；24 个噪声 videoId 零回归；发现 cRxxajisgL4（Tibo 走步机，10-09/10-10 两日上榜）与 FoWeKBwtNzE（Temu 买 Switch 2，昨日）被云端降级为 description → 从昨日好版本 0658d73 提取对象回补（只覆盖 title/aiSummary/summarySource/topComments，保留当前元数据），修复 commit 46676fc 推送成功
+- 页面最终：71 个视频，summarySource=ai 共 54 条
+- 新经验：rebase 前如有 memory/reports 等本地未提交改动，git stash -u 即可（push 后 stash pop 恢复）；云端降级回补时若当前页面仍有该视频，只覆盖 AI 四字段、不整体替换对象更安全

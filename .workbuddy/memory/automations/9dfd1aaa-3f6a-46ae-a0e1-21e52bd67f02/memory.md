@@ -1,5 +1,20 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-12 08:30
+- 抓取成功：8 视频全带字幕，inbox/youtube-2026-10-12.json。
+- AI 处理：7 个 AI 总结+标题热评翻译（日语おーがすと SHEIN vs Temu 穿搭对决 bGeMBdiUXqw / 德语 Sturmwaffel 垃圾袋提手 zOyxpgVVerk / 德语 Sturmwaffel Temu 新食品实测 cZUi-c2duVI / 德语 Sturmwaffel 多功能咖啡杯套 A2CWtlDUQ7A（连续第 2 天） / 德语 Sturmwaffel 弹射式开瓶器 hgXygJ4E6kY / 英语 Denki 数码开箱（含 450 美元可骑行行李箱）hi361S3cHOI / 阿语 Noraafitt 万圣节带货 x_AT0ctikNI）；0 个无字幕；1 个剔除（P8K2lvuabxM 波语 "7 MINUT TEMU"="7 分钟前"王室八卦，词形巧合）。
+- rebase 第 17 天首次无冲突：本地仅落后远端一个 Actions 提交（cf99286）无分叉，先 stash .workbuddy memory 再 pull --rebase 即 fast-forward（stash 是因为 memory.md 为 tracked 修改，会阻止 rebase）。
+- 合并 68 视频在页。核验：50 个 ai 全带 aiSummary、今日 7 条在页、昨日 7 条无降级、历史噪声零混入。注意 TnvXELThO4w 是 10-09 正经 AI 视频，不是噪声（本次核验清单误标过）。
+- 提交 9337fc5 推送成功。临时脚本已删除；scripts/ 与 .env.local 未动。
+
+## 2026-10-11 08:30
+- 抓取成功：97 候选 → 8 视频全带字幕，inbox/youtube-2026-10-11.json。
+- AI 处理：7 个 AI 总结+标题热评翻译（德语 Sturmwaffel 切面包板 3/5 分 DJUcmfE4qrs——连续第 2 天同条 / 阿塞拜疆语 AYKA 14 回应恶评 vlog+123 马纳特擦窗机器人 ZSAZCjdq5l0——连续第 2 天同条 / 英语主播 Mega Temu 服装试穿直播剪辑 jI1aBtRSpSQ，内容成人化已如实注明 / 德语 Sturmwaffel 玉米热狗机 37.60 欧判 5/10 6mlYu40r9_0 / 日语都市传说"Temu 卖被诅咒的盗版《我的世界》"xO7oa1XJ_MQ，娱乐演绎已如实注明 / 英语 NerdECrafter Temu 假万圣节捏捏乐对比 JKmDb-0iras，假货质感意外不错、字幕为阿语自动译文 / 德语 Sturmwaffel 1.29 欧咖啡杯套判 1/5 A2CWtlDUQ7A）；0 个无字幕；1 个剔除（S6eD8KhE89w "TEMU MK" 街球 1v1，连续第 2 天同条）。
+- rebase 第 16 天连冲突，abort 重试仍冲突。沿用重建方案：backup/main-20261011 → reset --hard 到远端 d858014（Actions 10-10 17:45 UTC）→ 重跑 update_youtube.py（67 在页）。
+- **第 10 次抓到 Actions 带回历史噪声**：Ii9LrghHMSM（印尼语时政直播）再次被远端基底带回，剔除补丁后 66 在页。**第 10 次抓到 Actions 降级**：_xmQWD8CD98（Temu 翻车合集第 1 部分）被降回 description，已从备份分支取回整条恢复，ai 回到 47。
+- 提交 3ccc7fe 推送成功。最终核验：66 视频、47 个 summarySource=ai 全带 aiSummary、今日 7 条全在页、备份 diff 零降级、16 条重点噪声零混入。
+- 临时脚本已删除（写回脚本含条目数与 videoId 集合 assert）；scripts/ 与 .env.local 未动。备份分支 backup/main-20261011 保留。
+
 ## 2026-10-09 08:30
 - 抓取成功：97 候选 → 8 视频（7 带字幕、1 降级描述），inbox/youtube-2026-10-09.json。
 - AI 处理：5 个 AI 总结+标题热评翻译（罗马尼亚语 Bogdan IBMFamily 10 列伊小商品实测 kkHltZqxFbU——连续第 3 天同条，正常重处理 / 德语 Sturmwaffel 厨房小工具吐槽 EE5YZq0-ZAE，芒果切果器 8.28 欧被判不值 / 阿塞拜疆语 AYKA 14 Temu 七层木质鞋架 VFLkGOCO-RA——连续第 3 天同条 / 英语 Katie Roams Temu 迷彩帐篷野外过夜 TnvXELThO4w——弄丢炉头转接头只吃麦丽素哭了 25 分钟，字幕为阿语自动译文 / 日语 USB 优盘 20 支批量购 vv6dyLyTUiA，带 #PR 植入、优盘无容量虚标，如实注明）；1 个无字幕仅翻译（克罗地亚语 ZOV PRIREODE 秋季鞋裙开箱 TJTY_W5mtUQ）；2 个剔除（LROBGBZXj5s "TEMU SOLO LEVELING"=Solo Leveling 山寨动漫吐槽、Temu 为山寨梗词 / Ii9LrghHMSM 印尼语时政直播，temu=印尼语"会面"指 Prabowo 与 Jokowi 会面）。
