@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-13 08:30
+- 抓取成功：94 候选 → 8 视频全带字幕，inbox/youtube-2026-10-13.json。
+- AI 处理：7 个 AI 总结+标题热评翻译（日语おーがすと SHEIN vs Temu 穿搭对决 bGeMBdiUXqw——连续第 2 天 / 德语 Mohi Toys Amazon vs Temu 玩具对比本集 Temu 全胜 CPFa2_oa-Ls / 英语 Ina Yu Temu 买最便宜国行 PS5 自己破解锁区+加装 1TB 固态 opOBQR49Z2U / 德语 Sturmwaffel Temu 新食品实测判灾难级（波兰 Milka 棉花糖疑走私货）cZUi-c2duVI——连续第 2 天 / 英语 More WillNE 团队实测 Temu 奢侈品（梵克雅宝风格手链/金扑克/6 英尺狮子像）GgoSemqgyns / 德语 Sturmwaffel 弹射式开瓶器 1.52 欧实测差评 hgXygJ4E6kY——连续第 3 天 / 阿尔巴尼亚语 Noraafitt 万圣节带货优惠码 kev5423 x_AT0ctikNI——连续第 2 天）；0 个无字幕；1 个剔除（A7yGA-VTRbI 3.7 小时日语闲聊直播，仅标题顺带提一句"TAKAHIRO 穿 Temu 衣服"，正文与 Temu 无关）。
+- push 流程：index.html 未暂存导致 pull --rebase 拒绝 → 先 stash 后 rebase fast-forward（远端有 Actions 10-12 21:42 UTC 提交 588d519）→ stash pop 时 index.html 冲突 → 按预案 checkout HEAD 取远端干净基底 + reset → 重跑 update_youtube.py（70 在页）→ 提交 20c9eb1 推送成功 → 丢弃失效 stash。
+- 核验：70 视频、53 个 ai 全带 aiSummary、今日 7 条全在页（5 条 fetchedAt 保留昨日首抓日期属正常）、昨日修复 3 条（jiOqAB7HltM/h_7MbIGnayk/q7oRfSaL6f4）完好、8 条重点噪声零混入。
+- 临时脚本已删除（写回脚本含条目数/videoId 集合/ai 数量断言）；scripts/ 与 .env.local 未动。
+
 ## 2026-10-12 08:30
 - 抓取成功：8 视频全带字幕，inbox/youtube-2026-10-12.json。
 - AI 处理：7 个 AI 总结+标题热评翻译（日语おーがすと SHEIN vs Temu 穿搭对决 bGeMBdiUXqw / 德语 Sturmwaffel 垃圾袋提手 zOyxpgVVerk / 德语 Sturmwaffel Temu 新食品实测 cZUi-c2duVI / 德语 Sturmwaffel 多功能咖啡杯套 A2CWtlDUQ7A（连续第 2 天） / 德语 Sturmwaffel 弹射式开瓶器 hgXygJ4E6kY / 英语 Denki 数码开箱（含 450 美元可骑行行李箱）hi361S3cHOI / 阿语 Noraafitt 万圣节带货 x_AT0ctikNI）；0 个无字幕；1 个剔除（P8K2lvuabxM 波语 "7 MINUT TEMU"="7 分钟前"王室八卦，词形巧合）。
@@ -145,3 +152,11 @@
 - **第 8 次抓到 Actions 带回历史噪声**：LROBGBZXj5s（"TEMU SOLO LEVELING" 山寨梗词，昨日刚剔）被远端基底带回，已打剔除补丁移除，最终 67 视频在页。
 - 提交 2df238a 推送成功。最终核验：67 视频、49 个 summarySource=ai 全带 aiSummary、今日 6 条全在页、昨日 5 条 AI 视频无降级、10 条重点噪声零混入。
 - 临时脚本已删除（写回脚本含条目数与 videoId 集合 assert）；scripts/ 与 .env.local 未动。备份分支 backup/main-20261010 保留。
+
+## 2026-10-14 08:30
+- 抓取成功：97 候选 → 8 视频全带字幕，inbox/youtube-2026-10-14.json。
+- AI 处理：6 个 AI 总结+标题热评翻译（英语 More WillNE 团队实测 Temu 奢侈品（梵克雅宝风格手链做工精致/金扑克噱头/6 英尺狮子像）GgoSemqgyns——连续第 3 天同条 / 德语 Mohi Toys Amazon vs Temu 玩具对比本集 Temu 全胜 CPFa2_oa-Ls——连续第 3 天 / 英语 Chris Slix 自述 Temu 买宾利车身套件翻车、尾部尺寸不对交 Chrome&Carbon 返工，累计花 10 万英镑 IzsGMxNIdac / 英语 Joe Bart 4.5 小时直播回放（26:08-1:46 为 Temu 推荐页挑选环节）xsIyvLk_ZAE / 捷克语 Vítek 零基础实测 Temu 最便宜渔具 3000 克朗钓上第一条鱼 _5STtQUHvC8 / 英语 Joe Bart 剪辑：观众投票买猎奇商品 faF5S0e5NGQ）；0 个无字幕；2 个剔除（lik2iCqzVjs 阿语摩洛哥婚姻伦理故事 #temu 纯引流 / yVq9ppQeGD8 "Zack D Films From Temu" 山寨梗词，同 09-26 XEOORQGckI4 先例）。
+- rebase 第 18 天连冲突，abort 重试仍冲突。沿用重建方案：backup/main-20261014 → reset --hard 到远端 c025451（Actions 10-13 19:52 UTC）→ 重跑 update_youtube.py（69 在页）。
+- **第 11 次抓到 Actions 带回历史噪声**：A7yGA-VTRbI（3.7 小时日语闲聊直播）再次被远端基底带回，剔除补丁后 68 在页。
+- 提交 731fab4 推送成功。最终核验：68 视频、50 个 summarySource=ai 全带 aiSummary、今日 6 条全在页、20 条重点噪声零混入（A7yGA-VTRbI 已剔）。核对清单笔误提醒：昨日 Mohi Toys 正确 ID 是 CPFa2_oa-Ls、Noraafitt 视频是 x_AT0ctikNI（kev5423 是优惠码不是 videoId）。
+- 临时脚本与临时补丁已删除（写回脚本含条目数/顺序/统计 assert）；scripts/ 与 .env.local 未动。备份分支 backup/main-20261014 保留。

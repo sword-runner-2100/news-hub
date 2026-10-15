@@ -232,3 +232,42 @@
 - push 后校验：今日 8 条 AI 全在页面；24 个噪声 videoId 零回归；发现 cRxxajisgL4（Tibo 走步机，10-09/10-10 两日上榜）与 FoWeKBwtNzE（Temu 买 Switch 2，昨日）被云端降级为 description → 从昨日好版本 0658d73 提取对象回补（只覆盖 title/aiSummary/summarySource/topComments，保留当前元数据），修复 commit 46676fc 推送成功
 - 页面最终：71 个视频，summarySource=ai 共 54 条
 - 新经验：rebase 前如有 memory/reports 等本地未提交改动，git stash -u 即可（push 后 stash pop 恢复）；云端降级回补时若当前页面仍有该视频，只覆盖 AI 四字段、不整体替换对象更安全
+
+## 2026-10-12 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 194e6ad）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：8 个（bGeMBdiUXqw 日语おーがすと SHEIN vs Temu 3000 日元穿搭对决-结论 SHEIN 更时髦、opOBQR49Z2U Ina Yu Temu 中国站 3600 元 PS5-最大问题是锁区需自己破解、cZUi-c2duVI Sturmwaffel Temu 新上线食品-波兰版 Milka 棉花糖棒 6.23 欧价格离谱、zOyxpgVVerk 垃圾袋提手 10/10-连续第二天、hgXygJ4E6kY 最烂弹射开瓶器 1.52 欧已下架、hi361S3cHOI Denki-连续第二天-Fingerbot/电动行李箱/火车汽笛、x_AT0ctikNI 阿尔巴尼亚语万圣节带货码 kev5423、3NYuzjq47qI 蜘蛛侠腕式发射器-儿童尺寸）
+- 剔除噪声：0 个（8 条全是真实 Temu 内容，第二天连续零噪声）
+- 合并：update_youtube.py 成功，页面 70 个视频（新增/更新 8）
+- 事故与修复（新坑）：rebase 前 git stash -u 把刚 update 过的 index.html 一起 stash 掉了 → commit 报 nothing to commit，随后 fast-forward pull 把云端 Actions 版本（8 条全 description、缺 3NYuzjq47qI）检出覆盖工作区 → 用 /tmp 备份（update 后版本）恢复 index.html + 从 stash（含 ^3 untracked 树）checkout 回 memory/reports 文件 + 重新 commit（7b8c539）push 一次成功
+- 新经验：stash 前必须先 commit index.html；正确顺序 = 先 commit 本次改动 → 再 stash 无关文件 → pull --rebase；恢复 stash 用 git checkout stash@{0} -- 与 stash@{0}^3 --（untracked），不要盲目 stash pop
+- push 后校验发现云端降级 3 条昨日 AI 总结（jiOqAB7HltM/h_7MbIGnayk/q7oRfSaL6f4）→ 从 46676fc 提取对象只覆盖 title/aiSummary/summarySource/topComments 四字段回补，修复 commit 194e6ad 推送成功
+- 页面最终：70 个视频，summarySource=ai 共 55 条；今日 8 条 + 回补 3 条全在页面；24 个噪声 videoId 零回归；YOUTUBE_DATA JSON 整体校验通过
+- 附注：本次 commit 顺带把 stash 恢复出的 reports/2026-10-11、2026-10-12 每日摘要提交进了仓库（无害）
+
+## 2026-10-13 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 85bc75b）
+- 抓取：8 个视频，7 个带字幕（bGeMBdiUXqw 日语 SHEIN vs Temu 短视频 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：5 个（GgoSemqgyns More WillNE「奢侈品」实测-Van Cleef 手链平替/镀金扑克/狮子雕像-字幕被自动译成孟加拉语、CPFa2_oa-Ls Mohi Toys 德语 Amazon vs Temu 玩具对比-本期 Temu 大胜、opOBQR49Z2U Ina Yu 国行 PS5 锁区破解-连续第二天-字幕被自动译成阿语、IzsGMxNIdac Chris Slix 宾利套件被骗-后部尺寸不对需切割原车、_5STtQUHvC8 捷克语 3000 克朗钓鱼装备实测-人生第一条鱼）
+- 仅翻译：1 个（bGeMBdiUXqw 无字幕，只译标题和热评，summary 未动）
+- 剔除噪声：2 个 → exclude:true
+  - lik2iCqzVjs：阿语「新婚夜提离婚」道德故事，temu 仅 hashtag
+  - WbdR48UQB7o：印尼语爪哇婚礼视频，「temu manten」=爪哇传统「会亲」仪式，词义巧合
+- 合并：update_youtube.py 成功，页面 72 个视频（新增/更新 6）
+- push：先 commit（46278e4）再 stash -u 再 pull --rebase 与远端 f9edff3（Actions 07:36 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit 2142f2e + push）一次成功
+- push 后校验发现 bGeMBdiUXqw 被本地 update_youtube 合并降级回 description（昨日是 ai）——注意：降级这次是本地 update 脚本造成的，不是云端 Actions；从 194e6ad 提取对象只覆盖 title/aiSummary/summarySource/topComments 回补，修复 commit 85bc75b 推送成功
+- 页面最终：72 个视频，summarySource=ai 共 55 条；今日 5 条新 AI + bGeMBdiUXqw 回补全在页面；24 个噪声 videoId（22 历史 + 今日 2）零回归
+- 无其他新踩坑，流程稳定
+
+## 2026-10-14 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit aa9a701）
+- 抓取：首次因代理 503 搜索失败（[SKIP]/[FAIL]），立即重试一次成功；8 个视频全部带字幕，耗时约 1 分钟
+- AI 总结：6 个（GgoSemqgyns More WillNE 奢侈品实测-连续第二天-字幕自动译成孟加拉语、IzsGMxNIdac Chris Slix Temu 汽车配件被骗-连续第二天-宾利后部尺寸不对、xsIyvLk_ZAE Joe Bart 直播录像-已如实注明主体是 reacts、_5STtQUHvC8 捷克语钓鱼装备-连续第二天-人生第一条鱼、dV0UAd6kHy4 TikTok Shop vs Temu 对决-More 团队、faF5S0e5NGQ Joe Bart Shorts 观众投票买 Temu）
+- 剔除噪声：2 个 → exclude:true
+  - lik2iCqzVjs：阿语「新婚夜提离婚」道德故事（连续第二天），temu 仅 hashtag
+  - yVq9ppQeGD8：Steak & Cruz 反应 Zack D Films 山寨版，From Temu=山寨俚语玩梗
+- 合并：update_youtube.py 成功，页面 69 个视频（新增/更新 6）
+- push：先 commit（697e9d5）再 stash -u 再 pull --rebase 与远端 133e351（Actions 06:00 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit c936727 + push）一次成功
+- push 后校验发现云端把昨日噪声 WbdR48UQB7o（爪哇婚礼 temu manten）重新加回页面（历史噪声 re-add 第二例）→ 从页面删除，修复 commit aa9a701 推送成功（中途一次 SSL 闪断，重试即成）
+- 页面最终：68 个视频，summarySource=ai 共 51 条；今日 6 条 AI 全在页面；26 个噪声 videoId（24 历史 + 今日 2）零回归
+- 无新踩坑，流程稳定
