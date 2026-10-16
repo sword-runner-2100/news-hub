@@ -271,3 +271,14 @@
 - push 后校验发现云端把昨日噪声 WbdR48UQB7o（爪哇婚礼 temu manten）重新加回页面（历史噪声 re-add 第二例）→ 从页面删除，修复 commit aa9a701 推送成功（中途一次 SSL 闪断，重试即成）
 - 页面最终：68 个视频，summarySource=ai 共 51 条；今日 6 条 AI 全在页面；26 个噪声 videoId（24 历史 + 今日 2）零回归
 - 无新踩坑，流程稳定
+
+## 2026-10-15 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 2c8656d）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：7 个（dV0UAd6kHy4 More 团队 TikTok Shop vs Temu 对决续集-连庄第三天-字幕自动译成孟加拉语、A6FWUflgpdE Klengan 德语揭秘 Temu 脏广告套路-假网红/46 万包裹每日/无安全检测、57S_cfkCTT0 阿语 Sara 服装 haul-涤纶裙偏宽太透、oPVB9BER2QY 伊拉克家庭免费码开箱-码 KNB953、eZuRQsuBkWw Ginger Fisherman 全套 Temu 装备钓到巨物-字幕自动译成阿语、xX4tPEUwbNU 阿塞拜疆 Tacir 接发+服饰开箱-无热评、fPCfzDSPoXc Sturmwaffel 棉花糖鸡块 3.31 欧-纯糖炸弹灾难级差评）
+- 剔除噪声：1 个 → exclude:true
+  - o3oHsJZFnb8：WSJ「Temu Range Rover」讲中国车 Jaecoo 7 在英国热卖，Temu 仅是「山寨」俚语昵称，与 Temu 购物无关
+- 合并：update_youtube.py 成功，页面 67 个视频（新增/更新 7）
+- push：先 commit（53c3629）再 stash -u 再 pull --rebase 与远端 f6b9fbb（Actions 05:46 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit 2c8656d + push）一次成功
+- push 后校验：今日 7 条 AI 全在页面；28 个噪声 videoId（27 历史 + 今日 1）零回归；页面 67 视频 / ai 共 52 条
+- 流程稳定，无新踩坑

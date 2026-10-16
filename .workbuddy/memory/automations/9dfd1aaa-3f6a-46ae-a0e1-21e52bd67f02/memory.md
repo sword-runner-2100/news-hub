@@ -1,5 +1,13 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-15 08:30
+- 抓取成功：95 候选 → 8 视频全带字幕，inbox/youtube-2026-10-15.json。
+- AI 处理：8 个 AI 总结+标题热评翻译（英语 More Aj TikTok Shop vs Temu 商品对决（35 英镑思乐冰机/榨汁机 A 级、Temu 汉堡架 D 级）dV0UAd6kHy4 / 英语 JOE CLIPPER Joe Bart 直播剪辑观众投票买猎奇 Temu 商品 faF5S0e5NGQ / 英语 Joe Bart 4.5 小时直播回放（26:08-1:46 Temu 挑选环节）xsIyvLk_ZAE——连续第 2 天 / 德语 Klengan 调查视频：欧盟因婴儿玩具含毒罚 2 亿欧、防晒霜 SPF<1、46 万包裹/日无人抽检 A6FWUflgpdE / 阿语 Sara's Makeup Temu 服饰开箱几乎全军覆没+SE10 优惠码植入 57S_cfkCTT0 / 英语 The Ginger Fisherman Temu 5 节旅行竿钓上 8 磅 15 盎司巴赫鱼+khj2796 优惠码 eZuRQsuBkWw / 阿塞拜疆语 Tacir 家庭 vlog 接发美甲+Temu 衣物麦克风开箱 xX4tPEUwbNU / 德语 Sturmwaffel 棉花糖"鸡块"三种口感纯糖判灾难级 fPCfzDSPoXc）；0 个无字幕；0 个剔除（8 条均与 Temu 相关）。
+- push 流程：先 stash 后 pull --rebase 顺利 fast-forward（远端 Actions f0828b0），stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（69 在页）。
+- **第 12 次抓到 Actions 问题**：远端基底带回 2 条昨日已剔噪声（lik2iCqzVjs 阿语摩洛哥婚姻故事 / yVq9ppQeGD8 "Zack D Films From Temu" 山寨梗词），且昨日 AI 视频 GgoSemqgyns（More WillNE Temu 奢侈品实测）被降回 description 丢 aiSummary。已打补丁：剔除 2 噪声 + 从 inbox/youtube-2026-10-14.json 取回整条恢复，67 在页。
+- 提交 97f6550 推送成功（连带 4 个已暂存的 memory 文件，与往日一致）。最终核验：67 视频、52 个 summarySource=ai 全带 aiSummary、今日 8 条全在页、17 条重点噪声零混入。
+- 临时脚本（写回+补丁，均含条目数/videoId 断言）已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-13 08:30
 - 抓取成功：94 候选 → 8 视频全带字幕，inbox/youtube-2026-10-13.json。
 - AI 处理：7 个 AI 总结+标题热评翻译（日语おーがすと SHEIN vs Temu 穿搭对决 bGeMBdiUXqw——连续第 2 天 / 德语 Mohi Toys Amazon vs Temu 玩具对比本集 Temu 全胜 CPFa2_oa-Ls / 英语 Ina Yu Temu 买最便宜国行 PS5 自己破解锁区+加装 1TB 固态 opOBQR49Z2U / 德语 Sturmwaffel Temu 新食品实测判灾难级（波兰 Milka 棉花糖疑走私货）cZUi-c2duVI——连续第 2 天 / 英语 More WillNE 团队实测 Temu 奢侈品（梵克雅宝风格手链/金扑克/6 英尺狮子像）GgoSemqgyns / 德语 Sturmwaffel 弹射式开瓶器 1.52 欧实测差评 hgXygJ4E6kY——连续第 3 天 / 阿尔巴尼亚语 Noraafitt 万圣节带货优惠码 kev5423 x_AT0ctikNI——连续第 2 天）；0 个无字幕；1 个剔除（A7yGA-VTRbI 3.7 小时日语闲聊直播，仅标题顺带提一句"TAKAHIRO 穿 Temu 衣服"，正文与 Temu 无关）。
