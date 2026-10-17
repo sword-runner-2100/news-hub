@@ -282,3 +282,18 @@
 - push：先 commit（53c3629）再 stash -u 再 pull --rebase 与远端 f6b9fbb（Actions 05:46 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit 2c8656d + push）一次成功
 - push 后校验：今日 7 条 AI 全在页面；28 个噪声 videoId（27 历史 + 今日 1）零回归；页面 67 视频 / ai 共 52 条
 - 流程稳定，无新踩坑
+
+## 2026-10-16 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit e59be4d）
+- 抓取：8 个视频，6 个带字幕（rmyhhT5GSMI Minecraft、6qsJn4A73YA 格鲁吉亚语均 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：3 个（oPVB9BER2QY 伊拉克家庭免费码开箱-连续第二天-码 KNP953、A6FWUflgpdE Klengan 脏广告揭秘-连续第二天-46 万包裹每日/AI 假网红/无安全检测、4LnAHQxtELA 西语 Islas Plus Temu 烧烤实测-便携烤架和清洁刷好评愿回购）
+- 仅翻译：1 个（6qsJn4A73YA 格鲁吉亚语互送 TEMU 露营装备挑战-无字幕只译标题热评）
+- 剔除噪声：4 个（单日最多）→ exclude:true
+  - o3oHsJZFnb8：WSJ「Temu Range Rover」Jaecoo 7 中国车报道（连续第二天），Temu=山寨俚语
+  - X8wW0TwuZ_c：摩洛哥方言屋顶晾晒衣物宗教故事，temu 仅 hashtag
+  - WFoRLY_EngU：僧伽罗语斯里兰卡时政评论节目（Anojan 死刑案），Temu Version=山寨玩梗
+  - rmyhhT5GSMI：Minecraft 模组武器 Temu 版 vs 原版对比，与 Temu 购物无关
+- 合并：update_youtube.py 成功，页面 57 个视频（新增/更新 5）
+- push：commit（1a99f99）→ stash -u → pull --rebase 与远端 3632e51（Actions 05:43 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit e59be4d + push）一次成功
+- push 后校验：今日 3 条 AI 全在页面；近期 24 个 AI 视频无降级；29 个噪声 videoId（26 历史 + 今日 3，去重后）零回归；页面 57 视频 / ai 共 44 条
+- 流程稳定，无新踩坑
