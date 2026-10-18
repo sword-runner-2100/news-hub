@@ -1,5 +1,15 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-17 08:30
+- 抓取成功：99 候选 → 8 视频（7 带字幕、1 格鲁吉亚语降级描述），inbox/youtube-2026-10-17.json。
+- AI 处理：5 个 AI 总结+标题热评翻译（伊拉克阿语带货博主 Temu 开箱，与昨日同条复用总结 oPVB9BER2QY——连续第 2 天 / 西语 Islas Plus Temu 烧烤特辑：便携炭烤架+Shark Tank"啤酒发射器"+烤架清洁刷最惊艳会回购 4LnAHQxtELA / 阿塞拜疆语 AYKA 14 给婆婆的 400 马纳特包裹：猫沙发+Kasi 手表比本地便宜近 70 ticrQ47fAdM / 俄语 BANARU 开箱带锁信箱+925 银耳环+院子施工 JOWnxKalOWM / 摩洛哥阿语 Just Nini 带货 #ad 优惠码 ali753212：胶带救的耳夹+形似十字架的夹子引发热评争议 v5gcbaoRVQw）；1 个无字幕仅翻译（格鲁吉亚语互赠 TEMU 露营装备 6qsJn4A73YA——连续第 2 天同条）；2 个剔除（OD6RldzjTHw "Temu Zach D Films Is Cursed" 山寨梗词，同 09-26 XEOORQGckI4 先例 / pNqMpubE2rQ 4.6 小时西语 Free Fire 直播 "CUÑADO YT de TEMU"=主播外号梗词）。
+- push 流程：stash 后 pull --rebase fast-forward（远端 Actions 07322e0）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py。
+- **第 14 次抓到 Actions 丢数据**：Actions 10-16 17:19 UTC（07322e0）把 dV0UAd6kHy4（More Aj TikTok Shop vs Temu）和 GgoSemqgyns（More WillNE Temu 奢侈品）两条 AI 视频整条丢掉，已分别从 inbox/youtube-2026-10-15.json、10-14.json 取回恢复，ai 回到 47。
+- **发现昨晚 20:35 有第二轮本地刷新**（提交 e59be4d，非本 automation，记录在另一 automation 9b208658/52bed6be 的 memory）：它将 o3oHsJZFnb8（WSJ 奇瑞 Jaecoo"Temu 版揽胜"汽车报道）改判为噪声剔除——最近一次明确决策，本次尊重未恢复。
+- **核验清单纠错**：6mlYu40r9_0（10-11 Sturmwaffel 玉米热狗机）是正经 AI 视频非噪声，之前清单误标过，今后勿再列入。
+- 提交 9e910d6 推送成功（连带 3 个已暂存 memory 文件，与往日一致）。最终核验：58 视频、47 个 summarySource=ai 全带 aiSummary、标记零不一致、今日 6+恢复 2 全在页、29 条重点噪声零混入。
+- 临时脚本（写回+恢复，均含条目数/videoId 断言）已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-16 08:30
 - 抓取成功：96 候选 → 8 视频全带字幕，inbox/youtube-2026-10-16.json。
 - AI 处理：5 个 AI 总结+标题热评翻译（伊拉克阿语博主 Temu 应用开箱：保鲜袋/手摇动能小夜灯/儿童玩具+优惠码 KNP953 带货 oPVB9BER2QY / 德语 Klengan 调查视频：Temu 无自营无仓库纯中介、46 万包裹/日无人抽检、伪造网红与砍价裂变营销 A6FWUflgpdE——连续第 2 天同条 / 阿语 Sara's Makeup 服饰开箱：镂空裙偏透偏大、100% 聚酯纤维+SE10 优惠码植入 57S_cfkCTT0——连续第 2 天同条 / 英语 WSJ 报道：奇瑞 Jaecoo 7 被戏称"Temu 版揽胜"成英国畅销车，Temu 为戏称、视频主体是汽车行业报道已如实注明 o3oHsJZFnb8 / 德语 Sturmwaffel 实测烤肉味棉花糖 5.35 欧判甜腻怪味不建议 Ria26WZBfc4）；0 个无字幕；3 个剔除（X8wW0TwuZ_c 摩洛哥语宗教说教"屋顶晾晒衣物" #temu 纯引流、WFoRLY_EngU 僧伽罗语斯里兰卡时政播客 "Temu Version"=山寨梗词、PaLl9CRUcc0 美国时政剪辑 "Temu Obama"=政客外号梗词）。

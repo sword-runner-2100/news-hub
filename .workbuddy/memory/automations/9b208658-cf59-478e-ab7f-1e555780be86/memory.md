@@ -297,3 +297,15 @@
 - push：commit（1a99f99）→ stash -u → pull --rebase 与远端 3632e51（Actions 05:43 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit e59be4d + push）一次成功
 - push 后校验：今日 3 条 AI 全在页面；近期 24 个 AI 视频无降级；29 个噪声 videoId（26 历史 + 今日 3，去重后）零回归；页面 57 视频 / ai 共 44 条
 - 流程稳定，无新踩坑
+
+## 2026-10-17 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 1a86187）
+- 抓取：8 个视频，5 个带字幕（6qsJn4A73YA 格鲁吉亚语、ticrQ47fAdM 阿塞拜疆语、7U1nmNeoNKw 意大利语均无字幕降级描述摘录），耗时约 9 分钟
+- AI 总结：4 个（4LnAHQxtELA 西语 Islas Plus Temu 烧烤实测-连续第二天-清洁刷愿回购、JOWnxKalOWM 俄语家庭 Vlog+Temu 开箱修复-已如实注明主体为家庭日常、2DMp5MkQZUg 罗语 100 件婴儿用品实测-马桶高尔夫 9.5 分、v5gcbaoRVQw 摩洛哥带货码 ali753212 Shorts-唇膜见效/蓝牙耳机正常）
+- 仅翻译：3 个（6qsJn4A73YA 格鲁吉亚语互送露营装备-连续第二天、ticrQ47fAdM Ayka 400 马纳特送婆婆包裹、7U1nmNeoNKw Blur 直播开箱）
+- 剔除噪声：1 个 → exclude:true
+  - OD6RldzjTHw：Wackawackamunv2 反应山寨动画频道 Kcraft 3D，Temu=山寨俚语，与购物无关
+- 合并：update_youtube.py 成功，页面 60 个视频（新增/更新 7）
+- push：commit（11029a9）→ stash -u → pull --rebase 与远端 17dc85d（Actions 05:28 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit 1a86187 + push）一次成功
+- push 后校验：今日 4 条 AI 全在页面；近期 60+ 个历史 AI 视频仍在页者无降级；30 个噪声 videoId（29 历史 + 今日 1）零回归；页面 60 视频 / ai 共 47 条
+- 流程稳定，无新踩坑
