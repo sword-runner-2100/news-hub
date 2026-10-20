@@ -1,5 +1,13 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-20 08:30
+- 抓取成功：93 候选 → 8 视频全带字幕，inbox/youtube-2026-10-20.json。
+- AI 处理：8 个 AI 总结+标题热评翻译（乌克兰语 Andro-news 科技周报：手机销量 14 年新低+乌议会对 Ali/Temu 包裹征 20% 增值税等，Temu 为议题之一非测评已注明 nmncbhNoHiU / 阿塞拜疆语 Tacir 600 马纳特 Temu 服装包裹试穿 nFGFeGgRf9k / 英语 Badbishlily 24 小时只吃 Temu 食品挑战 7tKv7QQRa_Q / 西语 VICTOR CABALLERO 1 美元翻新 PS5+Xbox 开箱、反复声明"别在 Temu 买东西"防骗 qgL0DgCvWqo / 德语 Gnu Glotzt reaction Temu 调查片：纯中介+AI 假网红营销+婴儿玩具有毒 bNgK43Js1Pk / 西语 Rango Temu 声呐+水下摄像头渔具实测、联盟带货 FSlzfv8-kDI / 英语 Sydney 捏捏乐 0 美元码带货 kop8458、热评揭"免费"实需满 20 刀 IsIprdcFgno / 英语 You Betcha 51 刀 Temu CarPlay 装 99 款雪佛兰好评 VtWet3AW5qw）；0 个无字幕；0 个剔除（8 条均与 Temu 相关）。多数字幕是阿语自动译文已注明。
+- push 流程：**第 20 天首次 rebase 顺利**——stash 后 pull --rebase fast-forward（远端 Actions 1ad0e80）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（67 在页）。
+- **第 17 次抓到 Actions 降级**：昨日 AI 视频 se55EyGL1RI（西语零元购带货短剧"送货员"）被远端基底降回 description，已从 inbox/youtube-2026-10-19.json 取回整条恢复，ai 回到 55。历史噪声零混入。
+- 提交 3081f03 推送成功。最终核验：67 视频、55 个 summarySource=ai 全带 aiSummary、标记零不一致、今日 8 条全在页、33 条重点噪声零混入。
+- 临时脚本（写回+恢复+核验，均含条目数/videoId 断言）已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-19 08:30
 - 抓取成功：8 视频（7 带字幕、1 塞尔维亚语降级描述），inbox/youtube-2026-10-19.json。
 - AI 处理：7 个 AI 总结+标题热评翻译（英语 Dude Life 三兄弟 Temu/Amazon/TikTok Shop 充气 A 字屋过夜对比 PxDA-WzNPjc——与昨日同条复用 / 英语 Beluga 充电器恶搞短剧 GJVYoxHhOHE——与昨日同条，字幕近空但非空按 AI 处理并注明非真实测评 / 阿塞拜疆语 AYKA 14 秋装两包裹 Le69FvqUNFk——与昨日同条复用 / 英语 REPerformance 修复 Chris Slix Temu 超跑（换电池+修悬挂+查漏液，如实注明主体为汽车维修）tBk7uvx6VqM / 旁遮普语 Pulwasha 厨房用品开箱+KU7399 优惠码联盟带货 L63K-21a3Ek / 保加利亚语给猫订 300 欧万圣节包裹 CSPopgWyknI / 西语哥伦比亚纺织业评论：Arturo Calle 因 Temu/Shein 裁员 2000+、de minimis 包裹 4300 万→1.3 亿件 FhtCyY65WFQ）；0 个无字幕仅翻译（唯一 description 条目被剔除）；1 个剔除（aPE37YReGvI 塞尔维亚语 "KUPIO SAM BMW 530 SA TEMU-a"="从 Temu 买宝马"劣质改装梗，评论区全谈改装车与平台无关，同 09-27 DbZrtKbb1ro 先例）。
