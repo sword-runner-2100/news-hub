@@ -309,3 +309,13 @@
 - push：commit（11029a9）→ stash -u → pull --rebase 与远端 17dc85d（Actions 05:28 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit 1a86187 + push）一次成功
 - push 后校验：今日 4 条 AI 全在页面；近期 60+ 个历史 AI 视频仍在页者无降级；30 个噪声 videoId（29 历史 + 今日 1）零回归；页面 60 视频 / ai 共 47 条
 - 流程稳定，无新踩坑
+
+## 2026-10-19 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 9aefdd1）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：8 个（GJVYoxHhOHE Beluga 充电器搞笑短剧-已注明非真实测评、L63K-21a3Ek 旁遮普语厨房用品带货码 KEU7399、tBk7uvx6VqM REPerformance 修 Chris Slix 的 Temu 迈凯伦-减振器漏油/转向泵烧毁-字幕自动译成阿语、se55EyGL1RI 西语送货员带货短剧码 caretillo、FhtCyY65WFQ 哥伦比亚时评 Arturo Calle 因 Temu/Shein 裁员 2000 人-「总统阿韦拉多」疑为虚构角色已注明、nmncbhNoHiU 乌克兰科技周报-Temu/AliExpress 20% 增值税最早 2027-07-01 生效、nFGFeGgRf9k 阿语 600 马纳特服饰开箱、GI6DaGFyGQQ 捷克语 Temu 山寨签名球 450 克朗-售价低于生产成本）
+- 剔除噪声：0 个（8 条全是真实 Temu 内容）
+- 合并：update_youtube.py 成功，页面 63 个视频（新增/更新 8）
+- push：commit（39dc6f2）→ stash -u → pull --rebase 与远端 1f5d28f（Actions 05:57 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit 9aefdd1 + push）一次成功
+- push 后校验：今日 8 条 AI 全在页面；噪声 32 个 videoId 零回归；页面 63 视频 / ai 共 52 条
+- 流程稳定，无新踩坑

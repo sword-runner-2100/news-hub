@@ -1,5 +1,13 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-19 08:30
+- 抓取成功：8 视频（7 带字幕、1 塞尔维亚语降级描述），inbox/youtube-2026-10-19.json。
+- AI 处理：7 个 AI 总结+标题热评翻译（英语 Dude Life 三兄弟 Temu/Amazon/TikTok Shop 充气 A 字屋过夜对比 PxDA-WzNPjc——与昨日同条复用 / 英语 Beluga 充电器恶搞短剧 GJVYoxHhOHE——与昨日同条，字幕近空但非空按 AI 处理并注明非真实测评 / 阿塞拜疆语 AYKA 14 秋装两包裹 Le69FvqUNFk——与昨日同条复用 / 英语 REPerformance 修复 Chris Slix Temu 超跑（换电池+修悬挂+查漏液，如实注明主体为汽车维修）tBk7uvx6VqM / 旁遮普语 Pulwasha 厨房用品开箱+KU7399 优惠码联盟带货 L63K-21a3Ek / 保加利亚语给猫订 300 欧万圣节包裹 CSPopgWyknI / 西语哥伦比亚纺织业评论：Arturo Calle 因 Temu/Shein 裁员 2000+、de minimis 包裹 4300 万→1.3 亿件 FhtCyY65WFQ）；0 个无字幕仅翻译（唯一 description 条目被剔除）；1 个剔除（aPE37YReGvI 塞尔维亚语 "KUPIO SAM BMW 530 SA TEMU-a"="从 Temu 买宝马"劣质改装梗，评论区全谈改装车与平台无关，同 09-27 DbZrtKbb1ro 先例）。
+- push 流程：commit 后 rebase 冲突（第 19+1 天连冲突），abort 重试仍冲突 → 沿用重建方案：backup/main-20261019 → reset --hard 到远端 11b8f37（Actions 10-18 16:28 UTC）→ 重跑 update_youtube.py（61 在页）→ 补丁 + 提交 b2616f7 推送成功。注意：重建方案会丢掉上个本地 commit 里的 memory/reports 文件（保留在备份分支，本次 2026-10-18.md 与昨日报告已从备份找回并随本次提交附带？——实际未随附，仅 index.html 入提交，memory 文件留在备份分支）。
+- **第 16 次抓到 Actions 问题（降级 1 条 + 噪声 1 条）**：昨日 AI 视频 2DMp5MkQZUg（罗马尼亚语 Ariana Mtz 婴儿用品开箱）被远端基底降回 description，从 inbox/youtube-2026-10-18.json 取回整条恢复；噪声 qatMNHO5_Lg（摩洛哥阿语宗教说教）再次被带回，已移除。核验清单教训：6qsJn4A73YA 是格鲁吉亚语无字幕正经视频，勿再列入噪声清单（本次误报一次）。
+- 提交 b2616f7 推送成功（diff 3942 行删除为 pretty→minified，正常）。最终核验：60 视频、49 个 summarySource=ai 全带 aiSummary、今日 7 条全在页、32 条重点噪声零混入。
+- 临时脚本（写回+补丁+核验，均含条目数/videoId 断言；补丁脚本首跑因"剔除后应为 60"误写成 61 断言失败，文件未写坏，修正后通过）已删除；scripts/ 与 .env.local 未动。备份分支 backup/main-20261019 保留。
+
 ## 2026-10-17 08:30
 - 抓取成功：99 候选 → 8 视频（7 带字幕、1 格鲁吉亚语降级描述），inbox/youtube-2026-10-17.json。
 - AI 处理：5 个 AI 总结+标题热评翻译（伊拉克阿语带货博主 Temu 开箱，与昨日同条复用总结 oPVB9BER2QY——连续第 2 天 / 西语 Islas Plus Temu 烧烤特辑：便携炭烤架+Shark Tank"啤酒发射器"+烤架清洁刷最惊艳会回购 4LnAHQxtELA / 阿塞拜疆语 AYKA 14 给婆婆的 400 马纳特包裹：猫沙发+Kasi 手表比本地便宜近 70 ticrQ47fAdM / 俄语 BANARU 开箱带锁信箱+925 银耳环+院子施工 JOWnxKalOWM / 摩洛哥阿语 Just Nini 带货 #ad 优惠码 ali753212：胶带救的耳夹+形似十字架的夹子引发热评争议 v5gcbaoRVQw）；1 个无字幕仅翻译（格鲁吉亚语互赠 TEMU 露营装备 6qsJn4A73YA——连续第 2 天同条）；2 个剔除（OD6RldzjTHw "Temu Zach D Films Is Cursed" 山寨梗词，同 09-26 XEOORQGckI4 先例 / pNqMpubE2rQ 4.6 小时西语 Free Fire 直播 "CUÑADO YT de TEMU"=主播外号梗词）。
