@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-21 08:30
+- 抓取成功：96 候选 → 8 视频，inbox/youtube-2026-10-21.json。
+- AI 处理：3 个 AI 总结+标题热评翻译（英语 Ginge+ 实测 Temu 零食多数难吃 Qt33Qy5_-rM，孟加拉语自动译文 / 英语 Sydney 捏捏乐 0 美元码带货 kop8458 IsIprdcFgno 与昨日同条 / 英语 You Betcha 51 刀 Temu CarPlay 装 99 款雪佛兰好评 VtWet3AW5qw 与昨日同条）；0 个无字幕；5 个剔除（3b_kymZp-Oc 阿语蛋糕教程 #temu 引流 / TObkaHTwP3c 波语 "temu"="之前"词形巧合德国美食排名 / qRtUlsCEmdU Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词 / bCdGuZ1Yg1U + g2357DlxMqg Link Lauren "Temu Royals" 山寨王室贬称梗词×2）。
+- push 流程：rebase 冲突 → abort 重试仍冲突 → 重建方案（backup/main-20261021 → reset --hard 远端 211a525 → 重跑 update_youtube.py 68 在页）。**新教训：reset --hard 在 rebase 进行中执行会留下残留 .git/rebase-merge 目录 + HEAD 游离 + 本地 main 停旧位，push 连报 non-fast-forward（远端没动）。修复 = rm -rf .git/rebase-merge + git branch -f main HEAD + checkout main。今后重建前必须先 abort 干净再 reset。**
+- stash pop 时旧 index.html 冲突 → checkout HEAD 保留已推送版本 → drop stash，memory 正常恢复。
+- 提交 b3f8db3 推送成功。核验：68 视频、52 个 ai 全带 aiSummary、今日 3 条全在页、昨日 8 条无降级（本轮 Actions 未降级）、38 条重点噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。备份分支 backup/main-20261021 保留。
+
 ## 2026-10-20 08:30
 - 抓取成功：93 候选 → 8 视频全带字幕，inbox/youtube-2026-10-20.json。
 - AI 处理：8 个 AI 总结+标题热评翻译（乌克兰语 Andro-news 科技周报：手机销量 14 年新低+乌议会对 Ali/Temu 包裹征 20% 增值税等，Temu 为议题之一非测评已注明 nmncbhNoHiU / 阿塞拜疆语 Tacir 600 马纳特 Temu 服装包裹试穿 nFGFeGgRf9k / 英语 Badbishlily 24 小时只吃 Temu 食品挑战 7tKv7QQRa_Q / 西语 VICTOR CABALLERO 1 美元翻新 PS5+Xbox 开箱、反复声明"别在 Temu 买东西"防骗 qgL0DgCvWqo / 德语 Gnu Glotzt reaction Temu 调查片：纯中介+AI 假网红营销+婴儿玩具有毒 bNgK43Js1Pk / 西语 Rango Temu 声呐+水下摄像头渔具实测、联盟带货 FSlzfv8-kDI / 英语 Sydney 捏捏乐 0 美元码带货 kop8458、热评揭"免费"实需满 20 刀 IsIprdcFgno / 英语 You Betcha 51 刀 Temu CarPlay 装 99 款雪佛兰好评 VtWet3AW5qw）；0 个无字幕；0 个剔除（8 条均与 Temu 相关）。多数字幕是阿语自动译文已注明。

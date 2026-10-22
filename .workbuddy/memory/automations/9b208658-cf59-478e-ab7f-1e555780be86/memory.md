@@ -319,3 +319,31 @@
 - push：commit（39dc6f2）→ stash -u → pull --rebase 与远端 1f5d28f（Actions 05:57 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash pop + 重新 commit 9aefdd1 + push）一次成功
 - push 后校验：今日 8 条 AI 全在页面；噪声 32 个 videoId 零回归；页面 63 视频 / ai 共 52 条
 - 流程稳定，无新踩坑
+
+## 2026-10-20 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 343b98e）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：6 个（nFGFeGgRf9k 阿语 600 马纳特服饰开箱-尺码教训+IG 求链接、IsIprdcFgno 零元码 kop8458 捏捏乐开箱、qgL0DgCvWqo 西语 1 美元翻新 PS5/Xbox-无封条但真机+非广告声明、VtWet3AW5qw 51 美元车载 CarPlay 装 99 款雪佛兰-结论留着、bNgK43Js1Pk 德语反应 Temu 内幕揭秘视频-AI 假网红/无仓库中间商、ds_KcSrk3Eg 法语捏捏乐-字幕显示实购于 Smyths Toys 与标题 Temu 不符已注明）
+- 剔除噪声：2 个 → exclude:true
+  - bCdGuZ1Yg1U：名人八卦播客（梅根哈里/维密大秀），Temu Royal Tour=山寨俚语玩梗
+  - TObkaHTwP3c：波兰语德餐排名视频，temu 是波兰语词形巧合
+- 合并：update_youtube.py 成功，页面 68 个视频（新增/更新 6）
+- push：commit（f998d7f）→ stash -u → pull --rebase 与远端 c9fb16a（Actions 刷新）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash 文件 checkout 回工作区 + 重新 commit 343b98e + push）一次成功；本次 stash 恢复的 memory/reports 文件被顺带 commit 进仓库（同 10-12 情况，无害）
+- push 后校验：今日 6 条 AI 全在页面；近期 48 个历史 AI 视频无降级；34 个噪声 videoId（32 历史 + 今日 2）零回归；页面 68 视频 / ai 共 56 条
+- 流程稳定，无新踩坑
+
+## 2026-10-21 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 1b2bf41）
+- 抓取：8 个视频，6 个带字幕（bZQbYZzC_FE 捏捏乐 Shorts TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：2 个（Qt33Qy5_-rM Ginge+ Temu 零食实测-字幕自动译成孟加拉语-仿 Menuards 软糖酸牙/纯糖棉花糖被批/Divine 巧克力最受期待-结论大多名不副实；VtWet3AW5qw You Betcha 51 美元 CarPlay 装 99 款雪佛兰-字幕自动译成阿语-连续第二天上榜-点烟器取电蓝牙即用/可投屏看 YouTube/偶尔需拔插重连-结论保留）
+- 剔除噪声：6 个（单日第二多）→ exclude:true
+  - 3b_kymZp-Oc：摩洛哥方言蛋糕烘焙视频，temu 仅 hashtag
+  - CW-c3A57niI：西语 Free Fire 直播录像，标题 de Temu=山寨俚语
+  - TObkaHTwP3c：波兰语德餐排名视频，temu=波兰语「之前」词形巧合（连续第二天）
+  - bCdGuZ1Yg1U：名人八卦播客，Temu Royal Tour=山寨玩梗（连续第二天）
+  - g2357DlxMqg：Link Reacts「Temu Royals」反应视频，同玩梗
+  - bZQbYZzC_FE：捏捏乐 Shorts，热评证实内容盗用自 Joyfultingles 且并非购自 Temu，虚假引流搬运号（首次以此理由剔除）
+- 合并：update_youtube.py 成功，页面 68 个视频（新增/更新 2）
+- push：commit（a1e9777）→ stash -u → pull --rebase 与远端 e7d27fb（Actions 刷新）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + checkout stash 文件回工作区 + 重新 commit 1b2bf41 + push）一次成功；本次恢复 stash 后先 unstage memory 文件再 push，避免顺带入库
+- push 后校验：今日 2 条 AI 全在页面；近期 37 个 AI 视频无降级；35 个噪声 videoId 零回归；页面 68 视频 / ai 共 52 条
+- 流程稳定，无新踩坑
