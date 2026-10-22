@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-22 08:30
+- 抓取成功：94 候选 → 8 视频（7 带字幕、1 无字幕降级描述），inbox/youtube-2026-10-22.json。
+- AI 处理：4 个 AI 总结+标题热评翻译（英语 Ginge+ 实测 Temu 零食多数难吃 Qt33Qy5_-rM——与昨日同条 / 德语 Sturmwaffel Temu 食品实测开场即发现近半商品过期（Takis 7 月到期）判不建议买 eVl0ebCfhu4 / 哈萨克斯坦俄语博主 0 坚戈免单 Temu 包裹开箱带货 NciFEvqQOIw / 西语 elmexitachi 万圣节 0 美元码 kfg8776 带货短剧 Xfx8D6CyMms，如实注明是宣传短剧）；1 个无字幕仅翻译（malaika Rathore 捏捏乐 0 美元开箱 bZQbYZzC_FE，热评指出是搬运 Joyful Tingles 的视频）；3 个剔除（3b_kymZp-Oc 摩洛哥阿语蛋糕教程 #temu 引流，与昨日同条 / CW-c3A57niI Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词，同昨日 qRtUlsCEmdU 性质 / _Nrgw1WFijU "Temu Michael Jackson" 山寨梗词 freestyle 短视频，同 Temu Obama 先例）。
+- push 流程：stash 后 pull --rebase fast-forward（远端 Actions 9e09a73）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（66 在页）。
+- **第 17+1 次抓到 Actions 带回历史噪声**：bCdGuZ1Yg1U + g2357DlxMqg（Link Lauren "Temu Royals" 山寨王室梗词，昨日刚剔）再次被远端基底带回，用 exclude 补丁 JSON 走 update_youtube.py 剔除，64 在页。
+- 提交 1d7d665 推送成功。最终核验：64 视频、47 个 summarySource=ai 全带 aiSummary 与中文标题、今日 5 条全在页、昨日 3 条 AI 无降级、42 条重点噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-21 08:30
 - 抓取成功：96 候选 → 8 视频，inbox/youtube-2026-10-21.json。
 - AI 处理：3 个 AI 总结+标题热评翻译（英语 Ginge+ 实测 Temu 零食多数难吃 Qt33Qy5_-rM，孟加拉语自动译文 / 英语 Sydney 捏捏乐 0 美元码带货 kop8458 IsIprdcFgno 与昨日同条 / 英语 You Betcha 51 刀 Temu CarPlay 装 99 款雪佛兰好评 VtWet3AW5qw 与昨日同条）；0 个无字幕；5 个剔除（3b_kymZp-Oc 阿语蛋糕教程 #temu 引流 / TObkaHTwP3c 波语 "temu"="之前"词形巧合德国美食排名 / qRtUlsCEmdU Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词 / bCdGuZ1Yg1U + g2357DlxMqg Link Lauren "Temu Royals" 山寨王室贬称梗词×2）。
