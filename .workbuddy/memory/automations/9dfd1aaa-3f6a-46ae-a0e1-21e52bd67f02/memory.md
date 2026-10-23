@@ -1,5 +1,13 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-23 08:30
+- 抓取成功：96 候选 → 8 视频（7 带字幕、1 塞尔维亚语降级描述），inbox/youtube-2026-10-23.json。
+- AI 处理：6 个 AI 总结+标题热评翻译（西语 Ale Wang 与好友试吃约 20 款 Temu 食品：鸡肉味零食 10 分、10 美元切片肉干量少似鞋底给 8 分 RUceq57Cf-M / 俄语 Natalya_Erbol "0 坚戈免单"包裹开箱带货，热评拆穿不凑单拿不到免费 NciFEvqQOIw——与昨日同条 / 德语 Sturmwaffel 猎奇食品实测近半过期（Takis 7 月到期），肝肠味棉花糖 5 分判不建议买 eVl0ebCfhu4——与昨日同条 / 西语亲子号 Mamá y mia 返校季带货优惠码 kjb6985 iVRwS29seKA / 哥伦比亚 Semana 报道 Shein/Temu/AliExpress 冲击当地：或失 2000 岗位、Temu 月发 220 万包裹、桑坦德 16 家关停 mBSg_NUA8Dg / 阿塞拜疆语 150 马纳特包裹开箱，博主自评部分与图片不符、热评嫌贵 Q8ghWQtRjS8）；1 个无字幕仅翻译（塞尔维亚语 Lord Zeks "XXXL Haul Unboxing"，热评提到 Temu 加长款，保留 rztck187yso）；1 个剔除（u8ENGfm3LzA Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词，同昨日 CW-c3A57niI 性质）。
+- push 流程：stash 后 pull --rebase fast-forward（远端 Actions b46138e，基底 60→67）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（67 在页）。
+- **第 18 次抓到 Actions 问题（噪声 3 + 降级 2）**：远端基底带回昨日 3 条已剔噪声（3b_kymZp-Oc / CW-c3A57niI / _Nrgw1WFijU），且昨日 AI 视频 Qt33Qy5_-rM、Xfx8D6CyMms 被降回 description，已从 inbox/youtube-2026-10-22.json 取回整条恢复。补丁后 64 在页、ai=45。
+- **核验教训：不要把"无字幕 description 条目"误判为降级**——bZQbYZzC_FE 昨日就是 description（无字幕仅翻译），页面条目中文标题/译文完好，本次恢复脚本断言失败中止、未写坏文件，属虚惊。
+- 提交 50ecb1a 推送成功（连带 memory 与 reports 文件）。最终核验：64 视频、45 个 summarySource=ai 全带 aiSummary 与中文标题、今日 7 条全在页、昨日 5 条完好、42 条重点噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-22 08:30
 - 抓取成功：94 候选 → 8 视频（7 带字幕、1 无字幕降级描述），inbox/youtube-2026-10-22.json。
 - AI 处理：4 个 AI 总结+标题热评翻译（英语 Ginge+ 实测 Temu 零食多数难吃 Qt33Qy5_-rM——与昨日同条 / 德语 Sturmwaffel Temu 食品实测开场即发现近半商品过期（Takis 7 月到期）判不建议买 eVl0ebCfhu4 / 哈萨克斯坦俄语博主 0 坚戈免单 Temu 包裹开箱带货 NciFEvqQOIw / 西语 elmexitachi 万圣节 0 美元码 kfg8776 带货短剧 Xfx8D6CyMms，如实注明是宣传短剧）；1 个无字幕仅翻译（malaika Rathore 捏捏乐 0 美元开箱 bZQbYZzC_FE，热评指出是搬运 Joyful Tingles 的视频）；3 个剔除（3b_kymZp-Oc 摩洛哥阿语蛋糕教程 #temu 引流，与昨日同条 / CW-c3A57niI Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词，同昨日 qRtUlsCEmdU 性质 / _Nrgw1WFijU "Temu Michael Jackson" 山寨梗词 freestyle 短视频，同 Temu Obama 先例）。
