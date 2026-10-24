@@ -347,3 +347,16 @@
 - push：commit（a1e9777）→ stash -u → pull --rebase 与远端 e7d27fb（Actions 刷新）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + checkout stash 文件回工作区 + 重新 commit 1b2bf41 + push）一次成功；本次恢复 stash 后先 unstage memory 文件再 push，避免顺带入库
 - push 后校验：今日 2 条 AI 全在页面；近期 37 个 AI 视频无降级；35 个噪声 videoId 零回归；页面 68 视频 / ai 共 52 条
 - 流程稳定，无新踩坑
+
+## 2026-10-23 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 3502b7a）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：7 个（RUceq57Cf-M 阿根廷 Ale Wang 试吃约 20 件 Temu 食品-鸡肉芝士零食 10 分/风干牛肉 8 分量少、iVRwS29seKA 西语母女开学用品带货码 kjb6985、eVl0ebCfhu4 Sturmwaffel 德语 Temu 零食实测-近一半商品已过期摆「墓地」/肝肠味棉花糖 5 分、Q8ghWQtRjS8 阿塞拜疆 150 马纳特开箱-部分与图片不符、mBSg_NUA8Dg 哥伦比亚 Semana 新闻-Shein/Temu/AliExpress 竞争或致 2000 岗位流失/桑坦德 16 家公司倒闭、4QA_tdL6zyw El Muñe 露营装备实测-防潮垫薄但隔热/头盔颜色翻车、h07kcjuS9tU 阿根廷 Brillager 万圣节三套 Cosplay-芭比/绫乃/初音未来）
+- 剔除噪声：1 个 → exclude:true
+  - u8ENGfm3LzA：西语 4.4 小时 Free Fire 直播录像，「CUÑADO YT de TEMU」=山寨俚语，与 Temu 购物无关
+- 合并：update_youtube.py 成功，页面 66 个视频（新增/更新 7）
+- push：commit（fb2643d）→ stash -u → pull --rebase 与远端 a82c11b（Actions 05:54 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + 重新 commit 67e6d1e + push）一次成功；本次 stash 恢复时两个 automation memory 文件又被顺带 commit 入库（git checkout stash -- 会直接进暂存区，老坑重犯，无害但下次注意先恢复后 unstage）
+- push 后校验：今日 7 条 AI 全在页面；发现云端把 10-21 剔除的噪声 bZQbYZzC_FE（盗用捏捏乐搬运号）重新加回页面 → 从 YOUTUBE_DATA 删除，修复 commit 3502b7a 推送成功
+- 页面最终：65 个视频，summarySource=ai 共 47 条；36 个噪声 videoId（35 历史 + 今日 1）零回归
+- 校验踩坑：YOUTUBE_DATA 是对象 {"videos":[...]} 不是数组，花括号配对后要取 ['videos']
+- 流程稳定
