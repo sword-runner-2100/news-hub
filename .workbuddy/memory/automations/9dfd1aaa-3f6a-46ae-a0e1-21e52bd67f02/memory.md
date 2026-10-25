@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-24 08:30
+- 抓取成功：96 候选 → 8 视频（7 带字幕、1 捏捏乐短频降级描述），inbox/youtube-2026-10-24.json。
+- AI 处理：5 个 AI 总结+标题热评翻译（西语亲子号 Mamá y mia 返校季带货优惠码 kjb6985：双面彩笔/带灯放大镜/记事本/硅胶手工桌垫 iVRwS29seKA——连续第 2 天同条 / 阿塞拜疆语 mirsabdiary 150 马纳特家居包裹开箱，热评嫌贵 Q8ghWQtRjS8——连续第 2 天同条 / 哥伦比亚 El Muñe 露营装备实测吐槽：铝膜隔热垫薄如纸判不行、声明无合作 4QA_tdL6zyw / 阿根廷 Brillager 万圣节三造型 cos（芭比/病娇模拟器爱野/初音未来），20 万比索优惠码联盟带货 h07kcjuS9tU / 德语 Sturmwaffel 肝肠味棉花糖居然有咸香 5 分、咖喱香肠味 3 分、单件 5 欧判太贵 jmj-U-lAPqw）；1 个无字幕仅翻译（英语捏捏乐短频带码 khr2933 sP9jVTMWAUg）；2 个剔除（u8ENGfm3LzA Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词，连续第 3 天同条 / rX9C6UoH9lw 印尼语 "Titik temu"=相遇点 AI 恋爱短剧，词形巧合）。
+- push 流程：远端有 Actions 夜间提交 38a4b7c，stash 后 pull --rebase fast-forward → stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（66 在页）。
+- **第 21 次抓到 Actions 降级**：昨日 AI 视频 RUceq57Cf-M（西语 Ale Wang 食品试吃）、mBSg_NUA8Dg（哥伦比亚 Semana 报道）被远端基底降回 description，已从 inbox/youtube-2026-10-23.json 取回整条追加进今日 JSON 重跑合并恢复，ai 回到 44。
+- 提交 149f8c1 推送成功（连带另一 automation 的 memory 文件）。最终核验：66 视频、44 个 summarySource=ai 全带 aiSummary 与中文标题、今日 6 条全在页、历史 42 条重点噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-23 08:30
 - 抓取成功：96 候选 → 8 视频（7 带字幕、1 塞尔维亚语降级描述），inbox/youtube-2026-10-23.json。
 - AI 处理：6 个 AI 总结+标题热评翻译（西语 Ale Wang 与好友试吃约 20 款 Temu 食品：鸡肉味零食 10 分、10 美元切片肉干量少似鞋底给 8 分 RUceq57Cf-M / 俄语 Natalya_Erbol "0 坚戈免单"包裹开箱带货，热评拆穿不凑单拿不到免费 NciFEvqQOIw——与昨日同条 / 德语 Sturmwaffel 猎奇食品实测近半过期（Takis 7 月到期），肝肠味棉花糖 5 分判不建议买 eVl0ebCfhu4——与昨日同条 / 西语亲子号 Mamá y mia 返校季带货优惠码 kjb6985 iVRwS29seKA / 哥伦比亚 Semana 报道 Shein/Temu/AliExpress 冲击当地：或失 2000 岗位、Temu 月发 220 万包裹、桑坦德 16 家关停 mBSg_NUA8Dg / 阿塞拜疆语 150 马纳特包裹开箱，博主自评部分与图片不符、热评嫌贵 Q8ghWQtRjS8）；1 个无字幕仅翻译（塞尔维亚语 Lord Zeks "XXXL Haul Unboxing"，热评提到 Temu 加长款，保留 rztck187yso）；1 个剔除（u8ENGfm3LzA Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词，同昨日 CW-c3A57niI 性质）。

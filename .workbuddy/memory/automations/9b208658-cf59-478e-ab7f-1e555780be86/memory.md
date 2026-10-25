@@ -348,6 +348,19 @@
 - push 后校验：今日 2 条 AI 全在页面；近期 37 个 AI 视频无降级；35 个噪声 videoId 零回归；页面 68 视频 / ai 共 52 条
 - 流程稳定，无新踩坑
 
+## 2026-10-24 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit ca29dde）
+- 抓取：8 个视频，7 个带字幕（sP9jVTMWAUg 捏捏乐 Shorts TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：6 个（iVRwS29seKA 西语母女开学用品带货码 kjb6985-连续第二天、Q8ghWQtRjS8 阿塞拜疆 150 马纳特开箱-连续第二天-吐槽实物比图片小、4QA_tdL6zyw El Muñe 露营装备-连续第二天、h07kcjuS9tU Brillager 万圣节三套 Cosplay-连续第二天、59VS29m8GqM 英语 17 美元独腿折叠椅-首次试坐当场断裂、riM4iHIvjHo 匈牙利物流纪录片-Temu/AliExpress 包裹从中国到布达佩斯全链路+假货销毁+碳排放）
+- 仅翻译：1 个（sP9jVTMWAUg 捏捏乐 haul 码 khr2933）
+- 剔除噪声：1 个 → exclude:true
+  - np2hXcqW1iU：西语 2.7 小时 Free Fire 直播录像，「CUÑADO YT de TEMU」=山寨俚语，与 Temu 购物无关
+- 合并：update_youtube.py 成功，页面 68 个视频（新增/更新 7）
+- push：commit（aa0e692）→ stash -u → pull --rebase 与远端 bfb1f35（Actions 05:38 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + checkout stash 及 stash^3 文件 + 先 unstage 再 commit afa12ad + push）一次成功
+- push 后校验发现 4QA_tdL6zyw 被本地 update_youtube 降级（aiSummary 是新文本但 summarySource 变回 transcript，同 10-13 已知本地脚本坑）→ 花括号定位单对象替换 summarySource 为 ai，修复 commit ca29dde 推送成功
+- 页面最终：68 个视频，summarySource=ai 共 47 条；今日 6 条 AI 全在页面；40 个噪声 videoId（39 历史 + 今日 1）零回归
+- 流程稳定；stash 恢复顺序（先 checkout 后 unstage）按既有经验执行，本次未把 memory 文件带入 commit
+
 ## 2026-10-23 20:30
 - 状态：成功（[OK]，push 两次成功，最终 commit 3502b7a）
 - 抓取：8 个视频，全部带字幕，耗时约 1 分钟
