@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-25 08:30
+- 抓取成功：96 候选 → 8 视频（7 带字幕、1 捏捏乐短频降级描述，连续第 3 天同条 sP9jVTMWAUg 优惠码 khr2933），inbox/youtube-2026-10-25.json。
+- AI 处理：3 个 AI 总结+标题热评翻译（匈牙利语 Gyetván Csaba 物流纪实：波音 747 货机从中国降落布达佩斯，全程拍卸货/拆托盘/货代分拣/海关查验/罚没品销毁，热评吐槽最后 10 公里丢件+烧鞋浪费 riM4iHIvjHo / 美国夫妻频道 Meetin' the Eatons 17 美元 Temu 单腿便携椅实测，组装顺利可调高度但一坐就断，热评让他们继续当"Temu 测试员" 59VS29m8GqM / 墨西哥 Gloria Ruelas 不到 1 美元不粘锅具套装（可拆手柄省空间+带盖入冰箱），视频末尾植入优惠码属联盟带货，热评提醒材质存疑 TvHokJqgyYY）；1 个无字幕仅翻译（sP9jVTMWAUg）；4 个剔除（np2hXcqW1iU + JkvCzvi0WnI 同频道 3LITE YT Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词×2，连续第 4 天 / _9KGhrv7PjM 波语 TVP3 新闻 "12 lat temu"="12 年前" 词形巧合燃气爆炸报道 / uqSZmqSTCRI 西语农场喜剧短剧 "comprar terrenos en Temu" 玩笑梗词）。
+- push 流程：提交 f20755d 后 rebase 双次冲突（远端 Actions 67769a4）→ abort → backup/main-20261025 → reset --hard 远端 → stash pop 干净恢复 3 个 automation memory → 重跑 update_youtube.py。
+- **第 22 次抓到 Actions 降级**：远端基底把昨日 AI 视频 4QA_tdL6zyw（哥伦比亚 El Muñe 露营装备）与 h07kcjuS9tU（阿根廷 Brillager 万圣节三造型）降回 description，已从 inbox/youtube-2026-10-24.json 取回整条恢复；用今日文件重跑修正 updatedAt；ai 回到 45。
+- 提交 a302cad 推送成功（连带 memory 与 10-24 报告文件）。最终核验：69 视频、45 个 summarySource=ai 全带 aiSummary 与中文标题、今日 4 条全在页、45 条重点噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-24 08:30
 - 抓取成功：96 候选 → 8 视频（7 带字幕、1 捏捏乐短频降级描述），inbox/youtube-2026-10-24.json。
 - AI 处理：5 个 AI 总结+标题热评翻译（西语亲子号 Mamá y mia 返校季带货优惠码 kjb6985：双面彩笔/带灯放大镜/记事本/硅胶手工桌垫 iVRwS29seKA——连续第 2 天同条 / 阿塞拜疆语 mirsabdiary 150 马纳特家居包裹开箱，热评嫌贵 Q8ghWQtRjS8——连续第 2 天同条 / 哥伦比亚 El Muñe 露营装备实测吐槽：铝膜隔热垫薄如纸判不行、声明无合作 4QA_tdL6zyw / 阿根廷 Brillager 万圣节三造型 cos（芭比/病娇模拟器爱野/初音未来），20 万比索优惠码联盟带货 h07kcjuS9tU / 德语 Sturmwaffel 肝肠味棉花糖居然有咸香 5 分、咖喱香肠味 3 分、单件 5 欧判太贵 jmj-U-lAPqw）；1 个无字幕仅翻译（英语捏捏乐短频带码 khr2933 sP9jVTMWAUg）；2 个剔除（u8ENGfm3LzA Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词，连续第 3 天同条 / rX9C6UoH9lw 印尼语 "Titik temu"=相遇点 AI 恋爱短剧，词形巧合）。

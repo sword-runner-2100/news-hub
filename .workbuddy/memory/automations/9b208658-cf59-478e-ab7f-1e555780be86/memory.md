@@ -373,3 +373,15 @@
 - 页面最终：65 个视频，summarySource=ai 共 47 条；36 个噪声 videoId（35 历史 + 今日 1）零回归
 - 校验踩坑：YOUTUBE_DATA 是对象 {"videos":[...]} 不是数组，花括号配对后要取 ['videos']
 - 流程稳定
+
+## 2026-10-25 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 756f820）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：6 个（riM4iHIvjHo 匈牙利物流纪录片-连续第二天、TvHokJqgyYY 西语厨具带货-热评含 PFAS 涂层安全科普、PhZda1WfFzg 英语翻车合集 P2、JtFPBKVUkcE 阿语零欧码开箱、xzkmoXz_sME 西语万圣节 haul 码 AGJ3273、Y1dHBnijPBM 阿塞拜疆语 50 马纳特庭院鱼池实测-与帮工妻子互怼喜剧）
+- 剔除噪声：2 个 → exclude:true
+  - _9KGhrv7PjM：波兰 TVP3 燃气爆炸悲剧新闻，「12 LAT TEMU」=波兰语「12 年前」，词形巧合
+  - uqSZmqSTCRI：西语农场小品（邻居偷土造园），「去 Temu 买地」仅玩梗笑点
+- 合并：update_youtube.py 成功，页面 73 个视频（新增/更新 6）
+- push：commit（8e4ac85）→ stash -u → pull --rebase 与远端 18d789d（Actions 05:52 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash 及 stash^3 文件 checkout 回 + unstage）重新 commit 756f820 push 一次成功
+- push 后校验：今日 6 条 AI 全在页面；近期 54 个历史 AI 视频无降级；42 个噪声 videoId（40 历史 + 今日 2）零回归；页面 73 视频 / ai 共 49 条
+- 流程稳定，无新踩坑
