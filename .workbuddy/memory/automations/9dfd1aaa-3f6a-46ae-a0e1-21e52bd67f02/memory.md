@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-26 08:30
+- 抓取成功：97 候选 → 8 视频（7 带字幕、1 塞尔维亚语降级描述），inbox/youtube-2026-10-26.json。
+- AI 处理：6 个 AI 总结+标题热评翻译（英语健身博主 Jesse James West 7 天实测 Temu 山寨兴奋剂补剂：练前粉有黑色颗粒疑发霉、Jay Cutler 亲回假货判 F 级、尼古丁贴片实测后下架、5-hour energy 拿 A 级，周末药检验证 lUDQWdsTBOk / 英语 Serena Neel 丈夫送 30 多件一星差评产品实测几乎全军覆没（头盔护不住蛋/防水袋渗水/充气鸭三次漏气/无人机全中文按键撞人），字幕阿语自动译文 Wui4aQYB1Xk / 阿塞拜疆语 AYKA 14 提前订 2027 新年装饰（圣诞树），解释博主须提前订让观众来得及买，对比本地树 300-500 马纳特 7fZFxLFRYR8 / 墨西哥 Gloria Ruelas 不到 1 美元不粘锅具套装（可拆手柄+带盖入冰箱），联盟带货 TvHokJqgyYY——连续第 3 天同条 / 英语 Temu 翻车合集第二弹（艾莎横幅印成玛格丽特、亡母纪念摆件印成陌生男、数数教具全乱）PhZda1WfFzg / 西语 RoMax 让粉丝投票花 5000 比索买 Temu 迷惑商品（我的世界墙灯/Fortnite 箱子地毯疑 AI 效果图），娱乐向 npMP1xCV9wE）；1 个无字幕仅翻译（塞尔维亚语 Brkic Nadja 超大 Temu 美妆开箱 pDJVBGzi19E）；1 个剔除（HkuFvdRQL8Y 印尼语探亲 vlog "TEMU KANGEN"=重逢词形巧合，同 EbP-k9kfqBE 先例）。
+- push 流程：**第 23 天首次 pull --rebase 顺利 fast-forward**（远端 Actions 6d5c4bf）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（72 在页，远端基底多 1 条）。
+- **第 23 次抓到 Actions 降级**：昨日晚间 20:35 刷新产生的 3 条 AI 视频 JtFPBKVUkcE / xzkmoXz_sME / Y1dHBnijPBM 被远端基底降回非 ai，已从 inbox/youtube-2026-10-25.json 取回整条恢复，ai 回到 47。
+- 提交 17242da 推送成功（连带 memory 与 10-25 报告文件）。最终核验：72 视频、47 个 summarySource=ai 全带 aiSummary 与中文标题、今日 7 条全在页、43 条重点噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-25 08:30
 - 抓取成功：96 候选 → 8 视频（7 带字幕、1 捏捏乐短频降级描述，连续第 3 天同条 sP9jVTMWAUg 优惠码 khr2933），inbox/youtube-2026-10-25.json。
 - AI 处理：3 个 AI 总结+标题热评翻译（匈牙利语 Gyetván Csaba 物流纪实：波音 747 货机从中国降落布达佩斯，全程拍卸货/拆托盘/货代分拣/海关查验/罚没品销毁，热评吐槽最后 10 公里丢件+烧鞋浪费 riM4iHIvjHo / 美国夫妻频道 Meetin' the Eatons 17 美元 Temu 单腿便携椅实测，组装顺利可调高度但一坐就断，热评让他们继续当"Temu 测试员" 59VS29m8GqM / 墨西哥 Gloria Ruelas 不到 1 美元不粘锅具套装（可拆手柄省空间+带盖入冰箱），视频末尾植入优惠码属联盟带货，热评提醒材质存疑 TvHokJqgyYY）；1 个无字幕仅翻译（sP9jVTMWAUg）；4 个剔除（np2hXcqW1iU + JkvCzvi0WnI 同频道 3LITE YT Free Fire 直播 "CUÑADO YT de TEMU" 主播外号梗词×2，连续第 4 天 / _9KGhrv7PjM 波语 TVP3 新闻 "12 lat temu"="12 年前" 词形巧合燃气爆炸报道 / uqSZmqSTCRI 西语农场喜剧短剧 "comprar terrenos en Temu" 玩笑梗词）。

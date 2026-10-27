@@ -374,6 +374,16 @@
 - 校验踩坑：YOUTUBE_DATA 是对象 {"videos":[...]} 不是数组，花括号配对后要取 ['videos']
 - 流程稳定
 
+## 2026-10-26 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 16468ee）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：8 个零噪声日（Wui4aQYB1Xk Serena 又买一星差评-鹌鹑蛋头盔测试+已怀孕、lUDQWdsTBOk Jesse 7 天实测 Temu 兴奋剂补剂+药检、npMP1xCV9wE RoMax 粉丝替花 5000 比索、7fZFxLFRYR8 阿塞拜疆 Ayka 新年装饰提前订、_pVbrnsfGI0 哈萨克语免费码开箱（字幕转写质量差已注明）、PhZda1WfFzg 翻车合集 P2-连续第二天、FC3IsMlT9Ok Badbishlily 万圣节怪装（第 1000 支视频）、QhlmdjW0YBs 西语零元购码 kge3432）
+- 剔除噪声：0 个
+- 合并：update_youtube.py 成功，页面 75 个视频（新增/更新 8）
+- push：commit（9849a79）→ stash -u → pull --rebase 与远端 4ec260f（Actions 刷新）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash 及 stash^3 文件 checkout 回 + unstage）重新 commit 16468ee push 一次成功
+- push 后校验：今日 8 条 AI 全在页面；41 个历史噪声 videoId 零回归；近期 21 个 AI 视频无降级；页面 75 视频 / ai 共 50 条
+- 流程稳定，无新踩坑
+
 ## 2026-10-25 20:30
 - 状态：成功（[OK]，push 两次成功，最终 commit 756f820）
 - 抓取：8 个视频，全部带字幕，耗时约 1 分钟
