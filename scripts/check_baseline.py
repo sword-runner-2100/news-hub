@@ -69,6 +69,28 @@ def parse_data(html):
     return {"seed": seed, "steam": js_obj("STEAM"), "youtube": js_obj("YOUTUBE")}
 
 
+# YouTube 全量补译后允许保留原文的例外（与 translate_youtube_content.SKIP_TEXTS 一致）
+YT_TEXT_EXCEPTIONS = {
+    "RTX 5090 A $12.000 含 Amazon",                # 中文夹型号 / 品牌 / 价格，非外文内容
+    "Indiayil ninn engnai maniyu cheyyum？",        # 翻译接口明确无法处理，如实留白
+    "Indiayil ninn engnai மானியு cheyyum？",
+}
+
+
+def yt_foreign_text(t):
+    """判定 YouTube 可译字段里是否仍是成段外文；中文夹品牌名 / hashtag 不算。"""
+    t = str(t or "").strip()
+    if not t or t in YT_TEXT_EXCEPTIONS:
+        return False
+    if re.search(r"[\u3040-\u30ff\uac00-\ud7af]", t):
+        return True
+    if len(re.findall(r"[\u4e00-\u9fff]", t)) >= 2:
+        return False
+    s = re.sub(r"#\S+|@\S+|https?://\S+", " ", t)
+    return bool(re.search(
+        r"[A-Za-z\u0400-\u04ff\u3040-\u30ff\u0600-\u06ff\u10a0-\u10ff]{2,}", s))
+
+
 def run_checks(files):
     R = []
 
@@ -121,6 +143,21 @@ def run_checks(files):
                 and "表达正面" not in str(v.get("commentSummary") or "")
                 and "（" not in str(v.get("commentSummary") or "") for v in vids),
             "无结论的条目留空串，页面不渲染")
+        yt_vals = []
+        for v in vids:
+            yt_vals += [v.get("title"), v.get("summary")]
+            yt_vals += [p.get("s") for p in (v.get("summaryPoints") or [])]
+            yt_vals += [c.get("name") for c in (v.get("chapters") or [])]
+            yt_vals += [c.get("text") for c in (v.get("topComments") or [])]
+        remained = [t for t in yt_vals if yt_foreign_text(t)]
+        chk("YouTube 内容摘要 / 要点 / 章节 / 热评全中文",
+            not remained,
+            "%d 个可译字段，外文残留 %d 个%s" %
+            (len(yt_vals), len(remained), ("：" + str(remained[0])[:40]) if remained else ""))
+        diff_title = sum(1 for v in vids if v.get("titleOriginal") != v.get("title"))
+        chk("titleOriginal 保留原标题（不被译文覆盖）",
+            all(v.get("titleOriginal") for v in vids) and diff_title >= 40,
+            "%d/%d 条与译后标题不同" % (diff_title, len(vids)))
         ai = [v for v in vids if v.get("aiSummary")]
         chk("AI 总结字段受来源优先级保护",
             "summary_rank" in uy and "carry_summary(ov, nv)" in uy
@@ -170,6 +207,15 @@ def run_checks(files):
     return R
 
 
+def break_yt_title(h):
+    """故意把 YOUTUBE 块里第一个标题改成英文，验证「全中文」检查能抓到。"""
+    a = "/* <<<YOUTUBE_DATA_START>>> */"
+    i = h.find(a)
+    head, tail = h[:i], h[i:]
+    return head + re.sub(r'("title"\s*:\s*)"[^"]*"',
+                         r'\1"Untranslated English Video Title Here"', tail, count=1)
+
+
 SELF_TESTS = [
     ("破坏 SEED 标记块", lambda h: h.replace("/* <<<SEED_DATA_END>>> */", "/* BROKEN */", 1), "标记块"),
     ("删掉 noReseed 例外", lambda h: h.replace("STATE.noReseed !== String(DATA_VERSION)", "false", 1), "noReseed"),
@@ -181,6 +227,7 @@ SELF_TESTS = [
      lambda h: h.replace("let STATE = readJSON(K.state, {read:{}, star:{}});\nlet ITEMS = loadItems();",
                          "let ITEMS = loadItems();\nlet STATE = readJSON(K.state, {read:{}, star:{}});", 1),
      "STATE 先于"),
+    ("把 YouTube 标题改回外文", break_yt_title, "全中文"),
 ]
 
 

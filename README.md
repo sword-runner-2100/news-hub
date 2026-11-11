@@ -111,6 +111,14 @@ YouTube Data API v3（需要免费的 API key，存仓库 Secret：YOUTUBE_API_K
   热评原文就在下面，所以这里不再用文字复述数字，只留「偏正面 / 偏负面 / 正负掺半」这类定性结论，
   无明显倾向时**整块不渲染**。规则全部来自已有统计字段，不引入任何 AI 推测；
   存量长文案由 `scripts/compact_comment_summaries.py` 清洗（幂等，可重复运行）。
+- **内容全中文**：`title` / `summary` / `summaryPoints[].s` / `chapters[].name` / `topComments[].text`
+  五个字段统一走 `fetch_youtube.py` 的自动语种检测 + 品牌占位符保护翻译链
+  （`aiSummary`、`commentSummary` 本来就是中文；`titleOriginal` 永远保留原标题，卡片可对照原文）。
+  本地 Mac 抓数据时若用 `--no-translate` 会把外文直接带进页面，
+  `scripts/translate_youtube_content.py` 负责把这类存量补译回中文：只做语言转换，
+  **不生成、不改写、不推测**，翻译失败一律保留原文；译文缓存在 gitignored 的
+  `inbox/yt-translation-cache.json`，重复运行不再打接口。中文夹品牌名 / 型号 / hashtag
+  不算外文，明确豁免，避免把译好的中文再翻一遍。
 - **过滤**：时长 < 60 秒的 shorts 默认丢弃（`--min-duration` 可调），标题+描述须含 "Temu"。
 - **配额**：每天约 210 units（搜索 200 + 详情 1 + 评论 8），免费额度 10000 units/天。
 - **合并**：`update_youtube.py` 按 videoId 去重，新数据覆盖旧数据（但高级总结来源不会被低级来源降级），
@@ -138,6 +146,7 @@ scripts/
   dedupe_lib.py                 去重工具（精确键 + 2-gram 相似度），增量与存量共用
   dedupe_news.py                清洗存量重复条目（幂等）
   compact_comment_summaries.py   把存量评论区总结压成一行结论（幂等）
+  translate_youtube_content.py   把存量 YouTube 外文内容补译成中文（幂等、带缓存）
   check_baseline.py             不可回退基线检查 / 自检 / 最小上下文包（只读）
 .github/workflows/refresh.yml   定时任务（10 步）
 ```
@@ -168,6 +177,8 @@ python3 scripts/fetch_steam.py               # 刷新 Steam 数据
 | fetch_news.py | `--max 8` | 每个话题最多保留 N 条 |
 | fetch_news.py | `--no-translate` | 跳过中文翻译 |
 | fetch_steam.py | `--days 7` | 保留最近 N 天 |
+| translate_youtube_content.py | `--dry-run` | 只统计待译量，不请求接口、不改动文件 |
+| translate_youtube_content.py | `--workers 6` | 存量补译并发数（默认 6） |
 
 脚本都是幂等的：数据没变化就不改动文件、不递增 `DATA_VERSION`、不产生提交，并给出提示。
 `inbox/added.json` 按「同一抓取日累加、跨天重置」维护，避免 LinkedIn 那一步覆盖新闻步骤的新增，
@@ -304,13 +315,14 @@ gh secret set WECHAT_WEBHOOK --repo <用户名>/<仓库名> --body "<Webhook 地
 纯逻辑只占几百行。任何重构前先跑：
 
 ```bash
-python3 scripts/check_baseline.py --self-test   # 39 项不变量 + 5 项「故意改坏」自检
+python3 scripts/check_baseline.py --self-test   # 41 项不变量 + 6 项「故意改坏」自检
 python3 scripts/check_baseline.py --map         # 输出不含数据的逻辑骨架，给模型当固定上下文
 ```
 
 覆盖：三个标记块、`DATA_VERSION`、localStorage 键与 STATE 五字段、话题枚举、AppID、
 去重阈值 0.45、官方帖免去重、官方徽章、`loadItems` 补新 / `noReseed` / 复合键防 id 碰撞、
-09:00 / 21:00 排期、导入导出与清空二次确认、AI 总结优先级、幂等语义、评论区总结精简。
+09:00 / 21:00 排期、导入导出与清空二次确认、AI 总结优先级、幂等语义、
+评论区总结精简、YouTube 内容全中文与 `titleOriginal` 原文留存。
 脚本只读、零依赖，**不挂在 Actions 上**，避免误报阻断数据刷新。
 
 > 运行时不引入任何付费 LLM / 新密钥。Hy4 这类模型只在**会话侧改代码**和**离线内容审阅**环节使用，
@@ -319,6 +331,8 @@ python3 scripts/check_baseline.py --map         # 输出不含数据的逻辑骨
 ## 已知限制
 
 - **翻译非 AI**：走免费机器翻译接口，偶尔会有生硬或轻微误译（尤其是双关语）。原文链接始终保留，可点开核对。
+  极少数混合语种碎片（实测 1 条罗马化马拉雅拉姆语）接口在 `sl=auto/ml/ta/en` 下都吐回原文，
+  按「失败保留原文、不编造」如实留白，已在补译脚本与基线检查里显式登记。
 - **YouTube 内容总结分三档**：AI 通读字幕总结（仓库外自动化写入，基于字幕全文）> 字幕摘句（带时间戳可回溯）>
   视频描述摘录；卡片标签会如实标注来源，评论区小结是统计结果而非逐条人工阅读。想看完整内容点卡片进原视频。
 - **字幕在 Actions 上常被拦**：数据中心 IP 抓不到字幕，字幕总结主要靠本地 Mac 抓取后提交，
