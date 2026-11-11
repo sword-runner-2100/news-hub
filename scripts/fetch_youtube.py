@@ -622,24 +622,21 @@ def summarize_video(v, key, min_comments_for_stats=3):
     # 情绪条：中性灰色、正面绿、负面红（统计事实，不是编造）
     top_themes = sorted(themes.items(), key=lambda kv: -kv[1])[:4]
 
-    if total >= min_comments_for_stats:
-        if pct["pos"] >= pct["neg"] + 20:
-            mood = "整体偏正面"
-        elif pct["neg"] >= pct["pos"] + 20:
-            mood = "整体偏负面"
-        elif pct["pos"] < 15 and pct["neg"] < 15:
-            mood = "整体中性"
-        else:
-            mood = "正负掺半"
-        parts = ["热门评论%s：%d%% 表达正面、%d%% 表达负面" % (mood, pct["pos"], pct["neg"])]
-        if top_themes:
-            parts.append("讨论最多的是 " + "、".join(
-                "%s（%d 次）" % (cn, n) for cn, n in top_themes[:2]))
-        comment_summary = "；".join(parts) + "。"
-    elif comments:
-        comment_summary = "评论较少（仅 %d 条），不足以给出可靠的倾向统计。" % len(comments)
+    # 评论区总结只给「一眼结论」。情绪条已经画出正负百分比、主题标签已经列出
+    # 话题与次数、热评原文就在下面，再用文字复述一遍数字就是三倍冗余。
+    # 没有可说的结论时留空串，页面整块不渲染，卡片不占多余的垂直空间。
+    if not comments:
+        comment_summary = "评论区不可用"
+    elif total < min_comments_for_stats:
+        comment_summary = "评论样本少"
+    elif pct["pos"] >= pct["neg"] + 20:
+        comment_summary = "偏正面"
+    elif pct["neg"] >= pct["pos"] + 20:
+        comment_summary = "偏负面"
+    elif pct["pos"] < 15 and pct["neg"] < 15:
+        comment_summary = ""
     else:
-        comment_summary = "该视频评论区不可用（已关闭或无评论）。"
+        comment_summary = "正负掺半"
 
     # 热门评论：点赞排序取前 5，太短的丢掉（没信息量）
     hot = sorted(comments, key=lambda c: -c["likes"])[:5]

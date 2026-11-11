@@ -107,6 +107,10 @@ YouTube Data API v3（需要免费的 API key，存仓库 Secret：YOUTUBE_API_K
 - **AI 总结是会话侧产物**：仓库外的 WorkBuddy 自动化通读字幕全文后写入 `aiSummary`，
   页面按「AI 通读字幕 > 字幕摘句 > 视频描述」优先级显示并如实标注来源。
   云端脚本不产出 AI 总结，也**不会覆盖**已写入的 AI 总结（`update_youtube.py` 按来源等级继承）。
+- **评论区总结只给一句结论**：卡片上的情绪条已显示正负百分比、主题标签已列出话题与次数、
+  热评原文就在下面，所以这里不再用文字复述数字，只留「偏正面 / 偏负面 / 正负掺半」这类定性结论，
+  无明显倾向时**整块不渲染**。规则全部来自已有统计字段，不引入任何 AI 推测；
+  存量长文案由 `scripts/compact_comment_summaries.py` 清洗（幂等，可重复运行）。
 - **过滤**：时长 < 60 秒的 shorts 默认丢弃（`--min-duration` 可调），标题+描述须含 "Temu"。
 - **配额**：每天约 210 units（搜索 200 + 详情 1 + 评论 8），免费额度 10000 units/天。
 - **合并**：`update_youtube.py` 按 videoId 去重，新数据覆盖旧数据（但高级总结来源不会被低级来源降级），
@@ -133,6 +137,7 @@ scripts/
   backfill_translate.py         把存量英文条目批量回译（幂等）
   dedupe_lib.py                 去重工具（精确键 + 2-gram 相似度），增量与存量共用
   dedupe_news.py                清洗存量重复条目（幂等）
+  compact_comment_summaries.py   把存量评论区总结压成一行结论（幂等）
   check_baseline.py             不可回退基线检查 / 自检 / 最小上下文包（只读）
 .github/workflows/refresh.yml   定时任务（10 步）
 ```
@@ -299,13 +304,13 @@ gh secret set WECHAT_WEBHOOK --repo <用户名>/<仓库名> --body "<Webhook 地
 纯逻辑只占几百行。任何重构前先跑：
 
 ```bash
-python3 scripts/check_baseline.py --self-test   # 38 项不变量 + 5 项「故意改坏」自检
+python3 scripts/check_baseline.py --self-test   # 39 项不变量 + 5 项「故意改坏」自检
 python3 scripts/check_baseline.py --map         # 输出不含数据的逻辑骨架，给模型当固定上下文
 ```
 
 覆盖：三个标记块、`DATA_VERSION`、localStorage 键与 STATE 五字段、话题枚举、AppID、
 去重阈值 0.45、官方帖免去重、官方徽章、`loadItems` 补新 / `noReseed` / 复合键防 id 碰撞、
-09:00 / 21:00 排期、导入导出与清空二次确认、AI 总结优先级、幂等语义。
+09:00 / 21:00 排期、导入导出与清空二次确认、AI 总结优先级、幂等语义、评论区总结精简。
 脚本只读、零依赖，**不挂在 Actions 上**，避免误报阻断数据刷新。
 
 > 运行时不引入任何付费 LLM / 新密钥。Hy4 这类模型只在**会话侧改代码**和**离线内容审阅**环节使用，

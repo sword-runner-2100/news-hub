@@ -116,6 +116,11 @@ def run_checks(files):
             sorted(str(g.get("appId")) for g in games) == ["2073620", "2507950"])
         chk("Steam 近 7 天窗口", len(games) == 2 and all(len(g.get("daily", [])) <= 7 for g in games))
         chk("YouTube videoId 唯一", len({v.get("videoId") for v in vids}) == len(vids), "%d 条" % len(vids))
+        chk("评论区总结为精简结论（不重复统计数字）",
+            all(len(str(v.get("commentSummary") or "")) <= 12
+                and "表达正面" not in str(v.get("commentSummary") or "")
+                and "（" not in str(v.get("commentSummary") or "") for v in vids),
+            "无结论的条目留空串，页面不渲染")
         ai = [v for v in vids if v.get("aiSummary")]
         chk("AI 总结字段受来源优先级保护",
             "summary_rank" in uy and "carry_summary(ov, nv)" in uy

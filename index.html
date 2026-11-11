@@ -404,9 +404,15 @@ html.is-mobile .chart svg{height:110px}
   border:1px solid rgba(166,107,255,.25);border-radius:6px;padding:2px 7px;
 }
 .yt-theme b{font-weight:700}
-.yt-csum{
-  font-size:11.5px;color:var(--t2);line-height:1.6;
-  background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+/* 评论区总结压成一行：情绪条与主题标签已把百分比/次数画出来了，
+   这里只留一句定性结论，没有结论时连标签都不渲染，省掉整块垂直空间 */
+.yt-cmtline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:1px 0 6px}
+.yt-cmtlbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;display:flex;align-items:center;gap:5px}
+.yt-cmtlbl::before{content:"";width:3px;height:9px;border-radius:2px;background:var(--acc2);flex:none}
+.yt-cmtmood{
+  font-size:10.5px;line-height:1.4;color:#C9B6FF;
+  background:rgba(166,107,255,.1);border:1px solid rgba(166,107,255,.25);
+  border-radius:999px;padding:2px 8px;
 }
 .yt-hot{display:flex;flex-direction:column;gap:6px}
 .yt-hc{font-size:11.5px;color:var(--t3);line-height:1.6;padding-left:9px;border-left:2px solid var(--border2)}
@@ -454,7 +460,6 @@ html.is-mobile .yt-act{padding:7px 12px;min-height:34px}
 /* 窄屏下长英文标题/热评要能折行，章节标签超长时省略而不是把卡片撑破 */
 html.is-mobile .yt-title a,
 html.is-mobile .yt-sum,
-html.is-mobile .yt-csum,
 html.is-mobile .yt-hc{overflow-wrap:anywhere}
 html.is-mobile .yt-chap{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 /* 更新时间去掉 margin-left:auto，放不下时自然换行，不再被面板右边缘裁掉 */
@@ -5870,7 +5875,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：60% 表达正面、0% 表达负面；讨论最多的是 服装（21 次）、版型（3 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "贾斯蒂娜，永远不要停止戏剧性和愚蠢，你给这位老太太带来了很多快乐❤❤。",
@@ -5921,7 +5926,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "anyone wanna see SUPER GRANDMA?? 👵",
@@ -5972,7 +5977,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Ayka 有没有考虑在 YouTube 开直播🤍",
@@ -6041,7 +6046,7 @@ const YOUTUBE_DATA = {
           "count": 2
         }
       ],
-      "commentSummary": "热门评论整体偏正面：60% 表达正面、15% 表达负面；讨论最多的是 其他平台对比（12 次）、服装（6 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "伟大的视频女士们。我认为人们没有意识到库存照片不属于 Temu 或 Shein 上的卖家。向Temu和Shein提供服装的中国制造商基本上都是拍摄库存照片，而且大多数情况下都没有获得原品牌公司的授权。  然后，他们尝试复制库存照片，因此材料和形状等通常看起来与照片如此不同。他们还大部分使用人造材料。他们非常顽皮，但我仍然从他们那里购买，希望我能幸运😂 ❤xx",
@@ -6092,7 +6097,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 4,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Kak itu hodienya di jual ngk.👍💯☕😂😂",
@@ -6148,7 +6153,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "найповажніший і  корисний товар тут - ВІДРО...",
@@ -6199,7 +6204,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 16,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "揉みごたえあってすぐ戻るの「ゴム」って言うんですよ！",
@@ -6271,7 +6276,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "祝你们成功，你们太棒了❤",
@@ -6323,7 +6328,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "好开心你的三人沙发到了❤不知道你有没有读过一条我写给你丈夫的评论，这已经是第三次写了：你太太值得拥有最大最漂亮最现代的新厨房❤抱抱你，同名人❤",
@@ -6400,7 +6405,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：55% 表达正面、0% 表达负面；讨论最多的是 服装（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "叫你女神都算说轻了，这期视频证明了这一点✨",
@@ -6486,7 +6491,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：10% 表达正面、0% 表达负面；讨论最多的是 推荐（1 次）、物流（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "一把吉他🤪",
@@ -6538,7 +6543,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 5,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "谁觉得 Lena 是个超漂亮的小女孩👇",
@@ -6610,7 +6615,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：5% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "ALEWANG 复活了",
@@ -6662,7 +6667,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 5,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Al Hana 和小宝贝太甜了，我整个人都融化了🙆🥰",
@@ -6771,7 +6776,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：58% 表达正面、8% 表达负面；讨论最多的是 服装（6 次）、开箱（4 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "你好 Claire。秋季美甲贴还能用——冬天是 12 月到 2 月，11 月还算秋天💅",
@@ -6844,7 +6849,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 1,
       "themes": [],
-      "commentSummary": "评论较少（仅 1 条），不足以给出可靠的倾向统计。",
+      "commentSummary": "评论样本少",
       "topComments": [],
       "titleOriginal": "El arbolito de temu",
       "aiSummary": "西语家庭喜剧短剧：妻子从网上订购的「圣诞树」到货，丈夫拆开发现是一棵迷你盆栽，随即爆发争吵——他称妻子为这棵树花了一大笔钱，妻子坚称树是套装、附送装饰且不能退货，还辩解说标价是「美元」。剧情围绕 Temu 订单货不对板的吐槽展开，属夸张搞笑段子，并非真实购物测评。",
@@ -6896,7 +6901,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：0% 表达正面、14% 表达负面；讨论最多的是 骗局（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "注意：这是骗局（无恶意），只是提醒一下。",
@@ -6964,7 +6969,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 1,
       "themes": [],
-      "commentSummary": "评论较少（仅 1 条），不足以给出可靠的倾向统计。",
+      "commentSummary": "评论样本少",
       "topComments": [],
       "titleOriginal": "Temu $0 Squishy Haul 😍 Code: ALT617287 (My Squishy Collection at 25!)",
       "aiSummary": "25 岁博主 Noah Jansen 展示自己的捏捏乐收藏（标题注明用零元码 ALT617287 从 Temu 获得），逐个把玩点评：巨型芒果和桃子内里偏空、按压手感一般；蓝色黄油款太脆、粉色奶酪款疑似变色；椰子油款易脏、磨砂苹果气味重且口感与奶油外形不符。他最满意原版 NeeDoh 的弹性和脆花生款，只嫌它不够大。",
@@ -6995,7 +7000,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：10% 表达正面、5% 表达负面；讨论最多的是 骗局（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Youtubers need to understand its not about builds getting more expensive.\nId rather watch some one rebuild a r35 gtr and make it spit massive flames than rebuilding some expensive aston or lambo",
@@ -7088,7 +7093,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：30% 表达正面、5% 表达负面；讨论最多的是 价格（1 次）、质量（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "God damn, a 20 minute ad....",
@@ -7152,7 +7157,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论正负掺半：15% 表达正面、5% 表达负面；讨论最多的是 物流（1 次）、服装（1 次）。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "Próximamente: Youtuber argentino vende su alma a Cyberghost VPN.",
@@ -7203,7 +7208,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 19,
       "themes": [],
-      "commentSummary": "热门评论整体中性：5% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Aquí los puntuales 😝😝",
@@ -7254,7 +7259,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 3,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "無断転載は法律により罰せられますよ！",
@@ -7302,7 +7307,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：40% 表达正面、0% 表达负面；讨论最多的是 其他平台对比（3 次）、服装（2 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "成为频道会员即可享受福利（早期视频访问和每周商店谈话视频）：\n\n\n请查看新网站，获取衬衫链接、工具推荐等等！\nWWW.FLYNNDOGGWOODWORK.COM\n\n要查看该视频中的任何工具，请访问以下链接：\n\n特色项目： \n- T 恤和大量有趣的木工配件 - \n- Jorgensen 4 Pack of 6\" Bar Clamps - \n- Jorgensen Cabinet Master Clamps - \n- 3D Square - \n- Festool Dust Collection Hose Knockoff - \n- DeWalt Knockoff Jigsaw - \n\nOther Items:\n- Crescent Nite Eye Tape Measure - \n- Woodpeckers Delve Square - \n- DFM小广场 - \n- DFM Carpenter Square - \n- Lexivon Angle Finder - \n- Bow Products FeatherPro - \n- Bow PushPro Mini -  \n- 弓推杆大号 - \n- 弓 GuidePro - \n- Festool Dust Collection Hose - \n- Festool Dust Collector - \n- 费斯托轨道锯 - \n- 费斯托工具 6\" Rotex - \n- DeWalt 20V 5Ah Battery -",
@@ -7353,7 +7358,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 14,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "عندما تشتكي ابنتكم من الزواج لاتغرموهن على البقاء واسندهن 😮",
@@ -7409,7 +7414,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：10% 表达正面、5% 表达负面；讨论最多的是 便宜好物（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "“我们仍然没有渗透”这句话有多少道理😢",
@@ -7460,7 +7465,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体偏正面：30% 表达正面、0% 表达负面。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "问候 CYK 💙 蒂蒂 🐱 和阿斯兰 🐶😍 \n我非常爱你💕🫶🏻🤩你是我的避难所和我的灵感🥹🫶🏻",
@@ -7520,7 +7525,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论正负掺半：10% 表达正面、15% 表达负面；讨论最多的是 其他平台对比（6 次）、骗局（1 次）。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "大家不要这样做，这是一个骗局。袋子上写着“sheine”。\n如果这有帮助的话！\n👇 已编辑：天啊，非常感谢大家，当我发表评论时，我真的得到了 0，我只是觉得看到来自世界各地的人们看到这条评论真是太酷了❤❤",
@@ -7576,7 +7581,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论正负掺半：15% 表达正面、0% 表达负面；讨论最多的是 质量（1 次）。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "Temu 罗德·斯图尔特。很喜欢😂😂😂",
@@ -7661,7 +7666,7 @@ const YOUTUBE_DATA = {
           "count": 2
         }
       ],
-      "commentSummary": "热门评论正负掺半：20% 表达正面、5% 表达负面；讨论最多的是 服装（2 次）、评测（2 次）。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "I feel like theres a group of people who watch the vods the second they're out instead of the streams and Im in that group. Things are so skip able, no more piss breaks",
@@ -7721,7 +7726,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：35% 表达正面、10% 表达负面；讨论最多的是 价格（1 次）、评测（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "你们男孩子会画画！！！哇！ ✌️❤️🎶",
@@ -7777,7 +7782,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：25% 表达正面、0% 表达负面；讨论最多的是 推荐（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Dry Fly 是最好的 YouTuber ⬇️",
@@ -7828,7 +7833,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "上帝赐予喘息的机会，并没有忽视全能上帝所珍视的灵魂",
@@ -7884,7 +7889,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：13% 表达正面、0% 表达负面；讨论最多的是 服装（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "汤姆·珀尔制作迪拜巧克力",
@@ -7944,7 +7949,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：5% 表达正面、0% 表达负面；讨论最多的是 美妆（6 次）、便宜好物（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "在您发表评论之前，如果我们都看到了拉拉的贴纸，那就不需要说出来了！",
@@ -8000,7 +8005,7 @@ const YOUTUBE_DATA = {
           "count": 3
         }
       ],
-      "commentSummary": "热门评论正负掺半：0% 表达正面、15% 表达负面；讨论最多的是 骗局（3 次）。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "在某些情况下，这不是骗局，而是买家不知道如何正确阅读描述，你还必须查看评论。",
@@ -8051,7 +8056,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "📲 Перейдите по ссылке, чтобы скачать приложение Temu: \n🔍 Введите мой код в строку поиска: 【 khb8795 】\n🎁 Получите свой бесплатный подарок!!!\n🔗 Ссылки на товары, представленные в видео:\nКамера видеонаблюдения Full HD 1080P с полноцветным ночным видением, \nУмное мусорное ведро объемом 15 л с сенсорным открыванием на 360 градусов, \nБесконтактный дозатор пенного мыла, \nНовый набор из 3 светильников для подсветки кухонных шкафов с магнитной индукцией, \nВидеодомофон с разрешением 1080p, \nРазветвитель для быстрой зарядки USB-C мощностью 140 Вт,",
@@ -8102,7 +8107,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 18,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、11% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Indiayil ninn engnai 订单 cheyyum？",
@@ -8148,7 +8153,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体偏正面：65% 表达正面、0% 表达负面。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "我喜欢这些视频！这将是一个很棒的狗床！ 😂",
@@ -8199,7 +8204,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 15,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Yaqut 细胞 doz vikot albanan 细胞 细胞 teban",
@@ -8245,7 +8250,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "你老公显然很了解你💙🖤每个人都希望有这样的关系😊",
@@ -8321,7 +8326,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：5% 表达正面、5% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "0:16 litt es peli de hace 2 años jajajaja 🤣🤣🤣",
@@ -8377,7 +8382,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面；讨论最多的是 其他平台对比（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "哈维 新的 GTA 视频发生了什么",
@@ -8433,7 +8438,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：5% 表达正面、5% 表达负面；讨论最多的是 质量（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Spending 500 million dollars is the best commercial for why billionaires should be taxed significantly more. Enough with the tax breaks and tax cuts and tax credits.",
@@ -8518,7 +8523,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：31% 表达正面、6% 表达负面；讨论最多的是 价格（4 次）、其他平台对比（4 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "I refuse to shop on Temu BECAUSE of the “games”.  They think their customers are imbeciles.",
@@ -8569,7 +8574,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体偏正面：50% 表达正面、0% 表达负面。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Hola, Leti. Te lo comento con todo el cariño del mundo porque llevo siguiéndote muchos años y disfruto mucho tu contenido. Me gustaba más cuando hacías tú las miniaturas y no la IA. Imagino que será por ahorrar tiempo, pero estamos en un momento en el que estamos consumiendo demasiado esta tecnología, tanto que ya es muy difícil notar si es real o no. Cada vez que veo una miniatura hecha con IA solo me causa rechazo, no me dan ganas de ver el vídeo aunque sea algo que me interese. Valoro muchísimo más a los creadores de contenido que están intentando no usarla para absolutamente todo como estamos viendo últimamente. Aunque no se quede tan \"limpio\" o  \"llamativo\", se valora el esfuerzo de hacerlo por uno mismo mucho más. No sé, es sólo una reflexión y seguro que no es la opinión de todo el mundo, pero me da mucha pena entrar en youtube en un ratito de desconexión y ver gran parte de las miniaturas hechas con IA.",
@@ -8625,7 +8630,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：10% 表达正面、5% 表达负面；讨论最多的是 物流（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Te compraste toda la TikTok shop amix",
@@ -8676,7 +8681,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 0,
       "themes": [],
-      "commentSummary": "该视频评论区不可用（已关闭或无评论）。",
+      "commentSummary": "评论区不可用",
       "topComments": [],
       "titleOriginal": "Hapšenja u Srbiji pokrenula temu izbornih prevara u BiH: Kako su SNS aktivisti prijavljivali birače?",
       "fetchedAt": "2026-11-06"
@@ -8701,7 +8706,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 11,
       "themes": [],
-      "commentSummary": "热门评论整体中性：9% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Nikako da shvatim zašto žene imaju potrebu objaviti video na temu što sam kupila...😂",
@@ -8747,7 +8752,7 @@ const YOUTUBE_DATA = {
           "count": 7
         }
       ],
-      "commentSummary": "热门评论正负掺半：20% 表达正面、10% 表达负面；讨论最多的是 物流（7 次）。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "很棒的视频。我很佩服那些送货的人，这需要很大的耐心。每天对待不同的人很复杂。😮😮😮",
@@ -8798,7 +8803,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：10% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "无人机回到 Temu 他们会把它卖给下一个人",
@@ -8854,7 +8859,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：30% 表达正面、5% 表达负面；讨论最多的是 价格（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Erm, I actually recognise the first one. I had a nearly identical “block game” handheld when I was a kid.\n\nIn the nineties.",
@@ -8910,7 +8915,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：30% 表达正面、10% 表达负面；讨论最多的是 推荐（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "PSA : I don’t recommend getting fake dumplings. Please read ⬇️⬇️⬇️⬇️ \n\nThey have been giving children chemical burns when popped. In the UK, they recalled all the fakes because of the amount of injuries caused.\n\n“Trading Standards across the UK have issued urgent safety warnings regarding fake or counterfeit squishy bao/dumpling fidget toys (often sold in small plastic or stacked bamboo-style steamer baskets)”\n\nThe Safety Risk\n\n• Toxic Chemicals: Counterfeit versions have been found to contain dangerous, excessive levels of benzene (a known harmful chemical) in their outer layers.\n• Health Symptoms: Exposure can cause skin, eye, and throat irritation, headaches, dizziness, drowsiness, and sickness.\n• Choking & Ingestion Hazards: The soft gel or cream-like fillings inside poorly made or split toys can look edible to young children and pose a severe choking or chemical ingestion risk.\n• Lack of Compliance: These fake toys frequently fail the Toys (Safety) Regulations 2011 and lack proper UKCA or CE safety markings, batch numbers, or traceable manufacturer details",
@@ -8961,7 +8966,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Ciekawy odcinek,  dużo tych band działało bezkarnie, bo współpraciwali z nimi adwokaci,sędziowie, nawet i ktoś z samej policji...za porwania powinny być dożywocia... pozdrawiam ❤",
@@ -9012,7 +9017,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 19,
       "themes": [],
-      "commentSummary": "热门评论整体偏正面：26% 表达正面、0% 表达负面。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Quiero nuestra novela fav",
@@ -9063,7 +9068,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 19,
       "themes": [],
-      "commentSummary": "热门评论正负掺半：16% 表达正面、0% 表达负面。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "But we can’t buy at India 😂",
@@ -9114,7 +9119,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 4,
       "themes": [],
-      "commentSummary": "热门评论整体偏正面：75% 表达正面、0% 表达负面。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Shane Gillis is a CIA Correspondent.",
@@ -9155,7 +9160,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：5% 表达正面、5% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Every copy of deltarune is personalized",
@@ -9206,7 +9211,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "حقو مع الراجل.ليكون هوا صاحب الفعلة عاد خرج",
@@ -9257,7 +9262,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 19,
       "themes": [],
-      "commentSummary": "热门评论整体中性：11% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Me interesa y estoy loca por conseguir squishiss❤",
@@ -9313,7 +9318,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：40% 表达正面、5% 表达负面；讨论最多的是 开箱（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Let's see a survival video 😅 and an other camping video in back yard!!!!  Or maybe a real overnight  pool video ❤",
@@ -9377,7 +9382,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：40% 表达正面、20% 表达负面；讨论最多的是 价格（5 次）、评测（4 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "This says less about the surprising quality of the Temu driver and more about the egregious price tag of the TaylorMade driver",
@@ -9428,7 +9433,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "vice takových vids pleaseee potřebuju, btw řasy jsou topka.",
@@ -9484,7 +9489,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面；讨论最多的是 开箱（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Эхний 1 өдөрт багтсан нь ликэ",
@@ -9540,7 +9545,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：10% 表达正面、0% 表达负面；讨论最多的是 物流（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Haz un vídeo de \"2 meses después con mi setup de temu\" para ver que tal va con el tiempo",
@@ -9608,7 +9613,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：29% 表达正面、0% 表达负面；讨论最多的是 厨具（2 次）、服装（2 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Oh my god.. ur son so cute... Lovely...❤❤",
@@ -9659,7 +9664,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：10% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "😂😂😂😂 Așa, domnule!!👍👍❤️🥰 Exact cu ASTA te așteptam, după ce am văzut defilarea de neamuri proaste pe care s-au grăbit să ne-o arate!😂😂 Ca să fim la curent cu evenimentele din \"lumea bună\" , nu de alta , - cum își fac singuri spaime, ei - despre ei înșiși!!!🙈🙈🤦‍♀️🥴😁 Tu, genial și pe fază,  ca de fiecare dată!!😂😂 Inutil să repet că te iubim, și că, fără tine, \"viața e pustiu\" vb poetului 🤣🤣🤣🤣",
@@ -9715,7 +9720,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：70% 表达正面、0% 表达负面；讨论最多的是 包装（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "Quack! We hope you enjoy this video:) 🐈‍⬛💕",
@@ -9783,7 +9788,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论正负掺半：20% 表达正面、5% 表达负面；讨论最多的是 服装（2 次）、尺码（2 次）。",
+      "commentSummary": "正负掺半",
       "topComments": [
         {
           "text": "Lots of people go off of the images and don't read....",
@@ -9834,7 +9839,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "ウィッグ全然浮いてなくて凄い!!",
@@ -9880,7 +9885,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "İnstada story atan kimi burdayam yarım saatdı gözləyirdime😂",
@@ -9931,7 +9936,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 0,
       "themes": [],
-      "commentSummary": "该视频评论区不可用（已关闭或无评论）。",
+      "commentSummary": "评论区不可用",
       "topComments": [],
       "titleOriginal": "CUÑADO YT de TEMU esta LLEGANDO a GRAN MAESTRO en FREE FIRE !!!",
       "fetchedAt": "2026-11-02"
@@ -9965,7 +9970,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面；讨论最多的是 服装（1 次）、评测（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Szczerze bałabym się jeść jedzenia z temu i jakich kolwiek innych stron internetowych😅 bałabym się że są w jakiś chemikaliach itp.🔥 ✨ twoje poświęcenie❤ na prawdę szanuje😮😅",
@@ -10029,7 +10034,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：65% 表达正面、0% 表达负面；讨论最多的是 开箱（3 次）、数码小物（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "I think the egg cracker is for non-boiled eggs. Put the fresh egg in, push down the tabs, and then holding the tabs down, pull the gadget open. The egg and yolk will drop into a bowl without getting egg on you. :D",
@@ -10080,7 +10085,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "兄弟从拖拉机上得知，无论如何他都会毁掉它，所以便宜买是明智之举。” 😂",
@@ -10131,7 +10136,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、5% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Sono sempre più schifata e non c'è limite allo schifo. La gente perbene deve fare qualcosa di concreto affinché si tolgano (e sono in molti) i gradi, i soldi e la libertà a tutti coloro che hanno omesso, nascosto, mentito e chissà cos'altro che noi non conosciamo",
@@ -10207,7 +10212,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "ゆりあちゃん金髪かわいすんぎぃぃい！！！透明感やばい💕",
@@ -10267,7 +10272,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体偏正面：35% 表达正面、5% 表达负面；讨论最多的是 推荐（1 次）、服装（1 次）。",
+      "commentSummary": "偏正面",
       "topComments": [
         {
           "text": "It's not fair to use two products at the same time. If only one of them is bad and the other is fine, you'll end up feeling bad either way, and you'll end up labeling the second product—the one that's fine—as bad too.",
@@ -10318,7 +10323,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "*HALLOWEEN FERICIT !* 🎃\n_Cum v-ati imbracat de Halloween ?_",
@@ -10369,7 +10374,7 @@ const YOUTUBE_DATA = {
       },
       "sampled": 20,
       "themes": [],
-      "commentSummary": "热门评论整体中性：0% 表达正面、0% 表达负面。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "Mój psychiatra dziękuje ci za nowych pacjentów.",
@@ -10425,7 +10430,7 @@ const YOUTUBE_DATA = {
           "count": 1
         }
       ],
-      "commentSummary": "热门评论整体中性：5% 表达正面、0% 表达负面；讨论最多的是 厨具（1 次）。",
+      "commentSummary": "",
       "topComments": [
         {
           "text": "我什至没有那么早上高中",
@@ -10824,7 +10829,10 @@ function ytCardHTML(v){
         '<span class="yt-sent-l">' + pos + '% 正面 · ' + neg + '% 负面</span>'+
       '</div>'+
       (themes ? '<div class="yt-themes">' + themes + '</div>' : '')+
-      '<div class="yt-csumwrap"><div class="yt-lbl">评论区总结</div><div class="yt-csum">' + esc(v.commentSummary || "") + '</div></div>'+
+      (v.commentSummary || hot
+        ? '<div class="yt-cmtline"><span class="yt-cmtlbl">热评</span>'+
+          (v.commentSummary ? '<span class="yt-cmtmood">'+esc(v.commentSummary)+'</span>' : '')+
+          '</div>' : '')+
       (hot ? '<div class="yt-hot">' + hot + '</div>' : '');
   const read = !!STATE.ytRead[v.videoId];
 
