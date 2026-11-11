@@ -1,5 +1,20 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-10-28 08:30
+- 抓取成功：95 候选 → 8 视频全带字幕，inbox/youtube-2026-10-28.json。
+- AI 处理：6 个 AI 总结+标题热评翻译（德语 Sturmwaffel 实测 Temu 上 Burger King 鸡肉堡味品客 6.33 欧神还原但判不值，热评科普气相色谱调香原理 MtUF02kX79Q / 日语前职业选手 Temu 激安外设打 Fortnite 8 万日元换装，结论不太推荐——与昨日同条 Oaqe01dSlqs / 西语 Beluu y Nahuu 万圣节开箱+优惠码 AGJ3273 联盟带货 oh_6qfjDuYc / 日语博主 Temu 篮球鞋打 1on1，上脚像小学生室内鞋判不推荐买，热评吐槽山寨韦德之道 12 buNXPby9_rE / 德语 Sturmwaffel 印度 Oreo 惊奇蛋哆啦A梦玩具口味 1 分判不值 QnPhPH813EA / 高尔夫 Gary Martin Temu 朱雀 800 换 AutoFlex 高端杆身后弹道改善、杆头出色值得升级 7JuRbg0FT6k）；0 个无字幕；2 个剔除（lNAjcB2Sr6g 西语 Roblox 游戏视频 "chambeadores de Temu"="Temu 打工人"外号梗词 / y-HbGgi5ujw 波语 "Dzięki temu"="因此"指示代词词形巧合租房合同故事，同 "12 lat temu" 先例）。
+- push 流程：**第 25 天 rebase 冲突，abort 重试仍冲突**（远端 Actions 2747ba1）→ 沿用重建方案：backup/main-20261028 → reset --hard 远端 → stash 干净恢复 → 重跑 update_youtube.py（74 在页，远端基底多 4 条）。
+- **第 25 次抓到 Actions 降级**：远端基底把昨日 5 条 AI 视频 lUDQWdsTBOk / Wui4aQYB1Xk / npMP1xCV9wE / 7fZFxLFRYR8 / _pVbrnsfGI0 降回 description，已从 inbox/youtube-2026-10-27.json 取回整条恢复，ai 回到 47。
+- 提交 383f8e8 推送成功。最终核验：74 视频、47 个 summarySource=ai 全带 aiSummary 与中文标题、今日 6 条全在页、昨日 8 条完好（7 ai + oVmUPx6P5wo 本就是 description）、历史噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+- 教训提醒：rebase 冲突重试失败后再跑 `git rebase --abort` 会因已 abort 而报 no rebase in progress，`&&` 链会断——先确认 rebase 状态再继续重建步骤。
+
+## 2026-10-27 08:30
+- 抓取成功：100 候选 → 8 视频（7 带字幕、1 塞尔维亚语数码实测降级描述），inbox/youtube-2026-10-27.json。
+- AI 处理：7 个 AI 总结+标题热评翻译（英语健身博主 Jesse James West Temu 兴奋剂补剂实测——与昨日同条，正常重处理 lUDQWdsTBOk / 英语 Serena Neel 一星差评产品第二轮——与昨日同条 Wui4aQYB1Xk / 西语 RoMax 粉丝投票花 5000 比索买迷惑商品——与昨日同条 npMP1xCV9wE / 阿塞拜疆语 AYKA 14 提前订 2027 新年装饰——与昨日同条 7fZFxLFRYR8 / 哈萨克语 Aruna&Elzhas 免费薅东西开箱+优惠码 khe8795 带货，字幕 ASR 转写质量差已注明 _pVbrnsfGI0 / 英语 Badbishlily 万圣节最怪变装服试穿，蒙娜丽莎画像服意外出彩 FC3IsMlT9Ok / 日语前职业选手用 Temu 激安外设打 Fortnite，8 万日元装备换超便宜套装，结论不太推荐 Oaqe01dSlqs）；1 个无字幕仅翻译（塞尔维亚语 Bajtbox 20 件 Temu 数码实测 oVmUPx6P5wo）；0 个剔除（8 条均与 Temu 相关）。
+- push 流程：**第 24 天连续第二次 rebase 顺利 fast-forward**（远端 Actions d841b73）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（74 在页，远端基底多 2 条）。
+- 昨日 6 条 AI 视频零降级（lUDQWdsTBOk/Wui4aQYB1Xk/7fZFxLFRYR8/TvHokJqgyYY/PhZda1WfFzg/npMP1xCV9wE 全完好）。
+- 提交 849628d 推送成功（连带 10-26 memory 与报告文件）。最终核验：74 视频、48 个 summarySource=ai 全带 aiSummary 与中文标题、今日 8 条全在页、51 条重点噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-26 08:30
 - 抓取成功：97 候选 → 8 视频（7 带字幕、1 塞尔维亚语降级描述），inbox/youtube-2026-10-26.json。
 - AI 处理：6 个 AI 总结+标题热评翻译（英语健身博主 Jesse James West 7 天实测 Temu 山寨兴奋剂补剂：练前粉有黑色颗粒疑发霉、Jay Cutler 亲回假货判 F 级、尼古丁贴片实测后下架、5-hour energy 拿 A 级，周末药检验证 lUDQWdsTBOk / 英语 Serena Neel 丈夫送 30 多件一星差评产品实测几乎全军覆没（头盔护不住蛋/防水袋渗水/充气鸭三次漏气/无人机全中文按键撞人），字幕阿语自动译文 Wui4aQYB1Xk / 阿塞拜疆语 AYKA 14 提前订 2027 新年装饰（圣诞树），解释博主须提前订让观众来得及买，对比本地树 300-500 马纳特 7fZFxLFRYR8 / 墨西哥 Gloria Ruelas 不到 1 美元不粘锅具套装（可拆手柄+带盖入冰箱），联盟带货 TvHokJqgyYY——连续第 3 天同条 / 英语 Temu 翻车合集第二弹（艾莎横幅印成玛格丽特、亡母纪念摆件印成陌生男、数数教具全乱）PhZda1WfFzg / 西语 RoMax 让粉丝投票花 5000 比索买 Temu 迷惑商品（我的世界墙灯/Fortnite 箱子地毯疑 AI 效果图），娱乐向 npMP1xCV9wE）；1 个无字幕仅翻译（塞尔维亚语 Brkic Nadja 超大 Temu 美妆开箱 pDJVBGzi19E）；1 个剔除（HkuFvdRQL8Y 印尼语探亲 vlog "TEMU KANGEN"=重逢词形巧合，同 EbP-k9kfqBE 先例）。

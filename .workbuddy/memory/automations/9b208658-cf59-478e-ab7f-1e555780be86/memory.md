@@ -384,7 +384,15 @@
 - push 后校验：今日 8 条 AI 全在页面；41 个历史噪声 videoId 零回归；近期 21 个 AI 视频无降级；页面 75 视频 / ai 共 50 条
 - 流程稳定，无新踩坑
 
-## 2026-10-25 20:30
+## 2026-10-27 20:30
+- 状态：**抓取失败（[FAIL]），未执行任何后续步骤，未 push**（按预案第 5 条）
+- 抓取：连续 3 次尝试（含等待 60s 后重试）全部失败，YouTube 搜索 API 两次排序均 `<urlopen error timed out>`
+- 根因：本机代理 MacPacketTunnel 在 127.0.0.1:1082 监听但上游隧道死亡——googleapis.com / youtube.com / github.com 全部超时或 SSL_ERROR_SYSCALL，国内直连（baidu 200）正常；属代理软件故障，非脚本/配额问题
+- 影响：今晚无新抓取数据、无 AI 总结、未合并、未 push；inbox/youtube-2026-10-27.json 是今晨 08:35 运行产出（commit 849628d 已推送），本地与远端 main 0/0 无差异，页面数据停留在今晨版本
+- 恢复条件：代理/VPN 恢复后，下次运行会正常抓取并做 48 小时窗口补抓，无需人工补数据
+- 提示：若用户看到本报告，可检查 MacPacketTunnel（或所用代理软件）节点是否掉线
+
+
 - 状态：成功（[OK]，push 两次成功，最终 commit 756f820）
 - 抓取：8 个视频，全部带字幕，耗时约 1 分钟
 - AI 总结：6 个（riM4iHIvjHo 匈牙利物流纪录片-连续第二天、TvHokJqgyYY 西语厨具带货-热评含 PFAS 涂层安全科普、PhZda1WfFzg 英语翻车合集 P2、JtFPBKVUkcE 阿语零欧码开箱、xzkmoXz_sME 西语万圣节 haul 码 AGJ3273、Y1dHBnijPBM 阿塞拜疆语 50 马纳特庭院鱼池实测-与帮工妻子互怼喜剧）
@@ -395,3 +403,16 @@
 - push：commit（8e4ac85）→ stash -u → pull --rebase 与远端 18d789d（Actions 05:52 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 恢复 update 后备份 + stash 及 stash^3 文件 checkout 回 + unstage）重新 commit 756f820 push 一次成功
 - push 后校验：今日 6 条 AI 全在页面；近期 54 个历史 AI 视频无降级；42 个噪声 videoId（40 历史 + 今日 2）零回归；页面 73 视频 / ai 共 49 条
 - 流程稳定，无新踩坑
+
+## 2026-11-11 10:30
+- 状态：成功但**中途发生基线回退事故，已修复**，最终 commit 27fb603，push 三次
+- 抓取：首次 SSL 握手超时 [FAIL]，立即重试一次成功；8 个视频，5 个带字幕（gGfevbujppg/yFP9PjVXJjU/C9IcBKizPX4/Ez6ZoY6-LK4/sMk17KAYMfg），3 个无字幕降级
+- AI 总结：5 个（ALECCHI 西语试吃 Temu 食品-秘鲁语磕巴转写、Clare Walch 英语 11 月大采购-40%折扣+试穿褒贬、El rey y la jefa 西语圣诞树翻车短剧-字幕被自动译成阿语-已注明非真实测评、Mama Bed 捷克语零元码 KFJ9757 圣诞好物-热评骂 scam、Noah Jansen 零元捏捏乐码 ALT617287）
+- 仅翻译：2 个（j7Fahr218Zo 塞语 Temu 新用户礼+晒娃评论、jrSuWCXWOJ4 塞语咖啡机开箱）
+- 剔除噪声：1 个 → exclude:true
+  - Y2_HVDp6XU0：塞语「TEMU 选举投票穿搭」95 秒短视频，Temu=山寨俚语玩梗，无字幕无热评
+- **重大事故**：本地仓库停留在 383f8e8（约 10-28），而远端被 Actions 每日刷新了 14 天（10-28~11-10 期间本地自动化未运行，automation memory 也中断）；稳妥法 reset --hard origin/main 后用**旧基线的备份**覆盖 index.html，把页面回退到 7 个视频、丢失远端 69 个视频数据，第一次 push（5c0ff29）推上去了
+- 修复：git show 43fda53:index.html 恢复远端 69 视频基线 → 重跑 update_youtube.py（76 个视频）→ 从 756f820（10-28 最后 AI 版本）回补，仅 Le69FvqUNFk/PhZda1WfFzg 两条能回补（其余 69 个是云端期间新抓的，AI 总结本就不存在）→ commit 27fb603 push 成功
+- 页面最终：76 个视频，summarySource=ai 共 7 条（今日 5 + 回补 2）；41 个噪声 videoId（40 历史 + 今日 1）零回归；云端期间 69 个视频全部无 AI 总结（14 天无本地运行的空窗，无法凭空补写，如实保留 description）
+- 关键教训：**稳妥法的备份必须与远端基线同源**。reset --hard origin/main 之后绝不能用 reset 之前备份的 index.html 覆盖——正确顺序应是：先 commit 本地改动 → pull/rebase 冲突时 abort → reset --hard origin/main → 直接重跑 update_youtube.py 重放当日 inbox JSON（不需要备份文件）；update_youtube 是幂等合并，重放即可还原本地新增内容，远端新数据自动保留
+- 经验：若本地仓库落后远端多天（memory 中断期），第一步应先 `git fetch && git rev-list --count HEAD..origin/main` 检查落后幅度，落后多时直接跳过「备份恢复」改用「远端为底+重放 inbox」
