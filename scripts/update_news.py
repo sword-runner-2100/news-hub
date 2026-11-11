@@ -26,10 +26,12 @@
     - 按 url（无 url 则按 title+topic）去重，已存在的不重复写入
     - 自动清理超过 --keep-days 天的历史（默认 180 天，0 表示不清理）
     - 每次改动前自动备份 index.html 到 backups/（保留最近 10 份）
-    - 更新 DATA_VERSION 为当前时间戳，页面据此判断是否有新内容
+    - 仅在数据确实变化时更新 DATA_VERSION 为当前时间戳；无变化不写文件（幂等）
+    - inbox/added.json 按「同一抓取日累加、跨天重置」维护，供微信早报读取
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -79,7 +81,12 @@ def normalize(item, fallback_date):
     ident = str(item.get("id") or "").strip()
     if not ident:
         key = url if url else (topic + "|" + title)
-        ident = topic + "-" + re.sub(r"[^0-9a-zA-Z]", "", (fallback_date or "")) + "-" + slugify(key)
+        # Bing News 的 apiclick 链接前 60 字符完全相同，slugify 截断后不同新闻会
+        # 撞成同一个 id（历史数据里已有 4 组、9 条）。追加完整 key 的短哈希保证唯一。
+        # 已有条目靠 url 去重，不会因规则变化被重复入库，历史 id 保持不变。
+        digest = hashlib.sha1(key.encode("utf-8")).hexdigest()[:8]
+        ident = (topic + "-" + re.sub(r"[^0-9a-zA-Z]", "", (fallback_date or ""))
+                 + "-" + slugify(key) + "-" + digest)
     pub = str(item.get("pubDate") or "").strip()
     if pub:
         m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", pub)
@@ -197,11 +204,29 @@ def main():
 
     # 把本次真正新增的条目单独存一份，供 push_wechat.py 使用 ——
     # 否则推送脚本得自己去比对新旧全量数据才能知道该发哪几条。
-    if added_items:
-        os.makedirs(os.path.join(ROOT, "inbox"), exist_ok=True)
-        with open(os.path.join(ROOT, "inbox", "added.json"), "w", encoding="utf-8") as f:
-            json.dump({"date": fetch_date, "items": added_items},
-                      f, ensure_ascii=False, indent=2)
+    # 同一次 workflow 里 update_news.py 会被调多次（新闻 → LinkedIn）。
+    # 以前每次都全量覆盖 added.json，后一步会把前一步的新增抹掉，早报漏发；
+    # 完全不写又会残留上一轮的文件，早报重发旧条目。改成同日累加、跨天重置。
+    inbox_dir = os.path.join(ROOT, "inbox")
+    os.makedirs(inbox_dir, exist_ok=True)
+    added_path = os.path.join(inbox_dir, "added.json")
+    carried = []
+    try:
+        with open(added_path, "r", encoding="utf-8") as f:
+            prev = json.load(f)
+        if isinstance(prev, dict) and str(prev.get("date") or "") == fetch_date:
+            carried = [i for i in (prev.get("items") or []) if isinstance(i, dict)]
+    except (OSError, ValueError):
+        carried = []
+    seen, combined = set(), []
+    for it in carried + added_items:
+        k = (it.get("url") or "") or (it.get("id") or "") or (it.get("title") or "")
+        if k in seen:
+            continue
+        seen.add(k)
+        combined.append(it)
+    with open(added_path, "w", encoding="utf-8") as f:
+        json.dump({"date": fetch_date, "items": combined}, f, ensure_ascii=False, indent=2)
 
     if dup_title:
         print("     标题去重：拦下 %d 条（同一新闻换了链接 / 译法不同，被反复抓到）" % dup_title)
@@ -218,6 +243,21 @@ def main():
         pruned = before - len(merged)
 
     merged.sort(key=lambda i: (str(i.get("date") or ""), str(i.get("topic") or "")), reverse=True)
+
+    # 幂等：没有新增、没有清理、条目内容也没变时，绝不重写 index.html，
+    # 也不递增 DATA_VERSION（否则每天两轮空跑都会产生一次无意义的提交与页面刷新）。
+    # 比较时按 id 规范化，忽略数组顺序差异。
+    if added == 0 and pruned == 0:
+        def canon(lst):
+            clean = [i for i in lst if isinstance(i, dict)]
+            clean.sort(key=lambda x: str(x.get("id") or ""))
+            return json.dumps(clean, sort_keys=True, ensure_ascii=False)
+        if canon(seed) == canon(merged):
+            m = re.search(r'const\s+DATA_VERSION\s*=\s*"([^"]*)"', html[s:e])
+            print("[OK] 没有检测到变化，页面未改动（保持 DATA_VERSION %s）"
+                  % (m.group(1) if m else "?"))
+            print("     本次无新增 / 无清理 / 总计 %d 条" % len(merged))
+            return
 
     version = datetime.now(CST).strftime("%Y-%m-%dT%H:%M")
     body = json.dumps(merged, ensure_ascii=False, indent=2)

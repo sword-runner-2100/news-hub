@@ -16,6 +16,9 @@
     - 新视频 fetchedAt = 抓取日，页面上出现在当天的分组块里（像新闻时间线按天一块）
     - 在榜视频：数据字段（播放/评论等）持续更新，但保留首次上榜日，分组位置不挪窝
     - 只保留 fetchedAt 在近 RETAIN_DAYS 天内的，最多 MAX_VIDEOS 条
+    - 内容总结按来源优先级继承：AI 通读字幕 > 字幕摘句 > 视频描述。
+      AI 总结由仓库外的 WorkBuddy 自动化写入 index.html，云端抓取脚本不产出它，
+      合并时若被新一轮的 description 覆盖，每次 Actions 刷新都会丢失（历史反复踩坑）。
     - 数据没变化就不改动文件（幂等）
     - 每次改动前自动备份 index.html 到 backups/（保留最近 10 份）
 """
@@ -36,6 +39,32 @@ END_MARK = "/* <<<YOUTUBE_DATA_END>>> */"
 CST = timezone(timedelta(hours=8))
 RETAIN_DAYS = 10        # 旧视频保留窗口：首次上榜日算起的自然日数
 MAX_VIDEOS = 96         # 页面最多展示的视频数（每天最多 8 个新上榜 × 10 天窗口）
+
+# 内容总结的来源优先级。aiSummary 由仓库外自动化注入，云端脚本永远抓不到，
+# 因此它必须是最高优先级，且不能被任何低级来源覆盖。
+SUMMARY_FIELDS = ("aiSummary", "summary", "summarySource", "summaryPoints")
+
+
+def summary_rank(v):
+    """内容总结的来源等级，数字越大越不该被本轮抓取结果覆盖。"""
+    if not isinstance(v, dict):
+        return 0
+    if v.get("aiSummary"):
+        return 3
+    if v.get("summarySource") == "ai" and v.get("summary"):
+        return 3
+    if v.get("summarySource") == "transcript" and v.get("summaryPoints"):
+        return 2
+    return 1
+
+
+def carry_summary(ov, nv):
+    """旧条目的总结质量更高时，把总结字段整体继承到新抓来的条目上。"""
+    if summary_rank(ov) <= summary_rank(nv):
+        return
+    for f in SUMMARY_FIELDS:
+        if f in ov:
+            nv[f] = ov[f]
 
 
 def die(msg):
@@ -186,14 +215,10 @@ def main():
         else:
             # 在榜视频：数据字段取最新，但保留首次上榜日，页面上不挪窝
             nv["fetchedAt"] = ov.get("fetchedAt") or today
-            # 字幕总结是稀缺增强：新一轮没抓到字幕（description）时，
-            # 保留已有的字幕版总结（transcript），不让低级来源覆盖高级来源
-            if (nv.get("summarySource") != "transcript"
-                    and ov.get("summarySource") == "transcript"
-                    and ov.get("summaryPoints")):
-                nv["summarySource"] = "transcript"
-                nv["summaryPoints"] = ov["summaryPoints"]
-                nv["summary"] = ov.get("summary", "")
+            # AI 通读字幕的总结 > 字幕摘句 > 视频描述。高级总结只在
+            # 仓库外由 WorkBuddy 自动化产出，云端每轮抓取拿不到，必须继承，
+            # 否则每次 Actions 刷新都会把 AI 总结降级回 description。
+            carry_summary(ov, nv)
             nv_first = ov.get("fetchedAt")
             nv_new = dict(nv)
             if json.dumps(ov, sort_keys=True, ensure_ascii=False) != \
