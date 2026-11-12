@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-11-11 10:39（中断 13 天后恢复）
+- **注意：本次与上次运行间隔 13 天**（上次 2026-10-28，期间 automation 未运行），页面 AI 总结从 47 掉到 7（今日新加 4 后 11），历史 AI 总结随 10 天保留窗口自然过期、云端 Actions 只能产 description 摘要，属正常损耗，未做历史恢复（任务范围仅今日）。
+- 抓取成功：97 候选 → 8 视频（6 带字幕、2 降级描述），inbox/youtube-2026-11-11.json。
+- AI 处理：4 个 AI 总结+标题热评翻译（英语 Chris Slix "I HAVE TO SELL MY ENTIRE TEMU CAR COLLECTION"——十年豪车收藏（含 Temu 配件改装保时捷 GT2 RS）请专家估值、权衡卖车换更大改装资金，与 10-14 IzsGMxNIdac 同系列 ZGV6HPWKwfU / 格鲁吉亚语 QIMERA 与 Nini 开箱 Temu 包裹：吊小人桌游/迷你玩具/帽子/巧克力，附 300 拉里新人券码，一件车造型物品质量差不推荐 NKJxCikxZrI / Anna Marisax Temu 时装试穿：露背裙 10 分、长裙自带支撑，几乎全好评+-fashion321 八折码联盟带货，阿语自动译文字幕 CwSlZ4LM2NQ / 西语 ThePersonTube 骑行装备开箱：T 形内六角扳手组/1 万流明前灯/Coospo 支架/山地车把/SPD 转换片，评价正面带货，阿语自动译文字幕 DQKp8GScGs0）；2 个无字幕仅翻译（波黑 BosnianHomeVlog 家居服饰 haul，热评全粉丝寒暄 jyoaICEL5LI / 日语 coupo_ndeal 捏捏乐 ASMR 短频 alc607836 码带货，热评科普"橡胶感/水感"术语 DnbPnXAGHW0）；2 个剔除（e-_Q7ojxX_c 印尼语 "temu kangen"=重逢，pontianak 女鬼喜剧短剧，同 EbP-k9kfqBE 先例 / ZZ8ZS4BKcDI 泰语 "TDS จาก Temu"=Google Play 山寨 Tower Defense Simulator 游戏测评，Temu 为"山寨"梗词，热评 "Tds temu? LMAO" 佐证）。
+- push 流程：本地落后检查——origin/main 与 main 无分叉（另有今早其他 automation 的 2 个本地提交 5c0ff29/27fb603 已在链上），无 rebase 需要，直接提交 4645499 推送成功（连带 memory 与 10-27/10-28 报告文件）。
+- 最终核验：78 视频、11 个 summarySource=ai 全带 aiSummary 与中文标题、今日 6 条全在页、9+ 条重点历史噪声零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-10-28 08:30
 - 抓取成功：95 候选 → 8 视频全带字幕，inbox/youtube-2026-10-28.json。
 - AI 处理：6 个 AI 总结+标题热评翻译（德语 Sturmwaffel 实测 Temu 上 Burger King 鸡肉堡味品客 6.33 欧神还原但判不值，热评科普气相色谱调香原理 MtUF02kX79Q / 日语前职业选手 Temu 激安外设打 Fortnite 8 万日元换装，结论不太推荐——与昨日同条 Oaqe01dSlqs / 西语 Beluu y Nahuu 万圣节开箱+优惠码 AGJ3273 联盟带货 oh_6qfjDuYc / 日语博主 Temu 篮球鞋打 1on1，上脚像小学生室内鞋判不推荐买，热评吐槽山寨韦德之道 12 buNXPby9_rE / 德语 Sturmwaffel 印度 Oreo 惊奇蛋哆啦A梦玩具口味 1 分判不值 QnPhPH813EA / 高尔夫 Gary Martin Temu 朱雀 800 换 AutoFlex 高端杆身后弹道改善、杆头出色值得升级 7JuRbg0FT6k）；0 个无字幕；2 个剔除（lNAjcB2Sr6g 西语 Roblox 游戏视频 "chambeadores de Temu"="Temu 打工人"外号梗词 / y-HbGgi5ujw 波语 "Dzięki temu"="因此"指示代词词形巧合租房合同故事，同 "12 lat temu" 先例）。

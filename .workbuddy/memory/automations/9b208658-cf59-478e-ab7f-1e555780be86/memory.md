@@ -416,3 +416,14 @@
 - 页面最终：76 个视频，summarySource=ai 共 7 条（今日 5 + 回补 2）；41 个噪声 videoId（40 历史 + 今日 1）零回归；云端期间 69 个视频全部无 AI 总结（14 天无本地运行的空窗，无法凭空补写，如实保留 description）
 - 关键教训：**稳妥法的备份必须与远端基线同源**。reset --hard origin/main 之后绝不能用 reset 之前备份的 index.html 覆盖——正确顺序应是：先 commit 本地改动 → pull/rebase 冲突时 abort → reset --hard origin/main → 直接重跑 update_youtube.py 重放当日 inbox JSON（不需要备份文件）；update_youtube 是幂等合并，重放即可还原本地新增内容，远端新数据自动保留
 - 经验：若本地仓库落后远端多天（memory 中断期），第一步应先 `git fetch && git rev-list --count HEAD..origin/main` 检查落后幅度，落后多时直接跳过「备份恢复」改用「远端为底+重放 inbox」
+
+## 2026-11-11 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 8d1e65d，无冲突未触发稳妥法；pull --rebase 前先 fetch 确认 behind:0）
+- 抓取：8 个视频，6 个带字幕（DnbPnXAGHW0 日语捏捏乐、jyoaICEL5LI 波黑语 haul 均 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：6 个（7k6-LXT8k8A 荷语超能力搞笑短剧-已注明非真实测评、ZGV6HPWKwfU Chris Slix 考虑卖掉 8 辆 Temu 改装车收藏-三家经销商估值/事故车先掉 20-30%、C4XD8wtei_8 乌克兰语 20 件厨房用品实测-开心果手指套 1 分/滤水嘴溢出、NKJxCikxZrI 格鲁吉亚语与 Nini 互拆包裹带货、CwSlZ4LM2NQ Anna Marisax 阿语赞助试穿-质量好于实体店、gGfevbujppg ALECCHI 试吃 Temu 食品-反应形式已注明，与今晨同一视频沿用更新）
+- 仅翻译：1 个（jyoaICEL5LI 波黑语抱枕床品 haul，无字幕只译标题热评）
+- 剔除噪声：1 个 → exclude:true
+  - DnbPnXAGHW0：日语捏捏乐 Shorts（码 alc607836），56 赞热评证实是无授权搬运外国博主视频的引流号（同 bZQbYZzC_FE 先例）
+- 合并：update_youtube.py 成功，页面 80 个视频（新增/更新 8）
+- push 后校验：今日 6 条 AI 全在页面；42 个噪声 videoId（41 历史 + 今日 1）零回归；页面 ai 共 12 条
+- 流程稳定，无新踩坑
