@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-11-12 08:46
+- 抓取成功：8 视频（7 带字幕、1 塞尔维亚语带货短频降级描述），inbox/youtube-2026-11-12.json。
+- AI 处理：5 个 AI 总结+标题热评翻译（荷兰语 Peter 虚构搞笑动画"Temu 超级英雄"——买超能力货不对板/满分超能力是扔拖鞋的超级妈妈，纯虚构已注明 7k6-LXT8k8A / 乌克兰语 Неїжко 实测妻子订的 20 件厨房用品+专用垃圾桶扔废品，吐槽广告弹窗与凑单套路 C4XD8wtei_8 / 西语区 Alecchi+ react Temu 食品试吃（葡语字幕自动转写），罐头 spam 争议+保质期仅一周惊讶，热评欢呼 Ale Wang 复活回归直播 gGfevbujppg / 英语猎奇 Temu 商品吐槽合集（阿语自动译文），娱乐向已注明 7Zf7gkUeKRQ / 俄语夫妇服装鞋试穿：开衫袖口偏紧、鞋劝别较真、睡衣走线潦草，按码表选码基本合身 88rzfIfnljU）；1 个无字幕仅翻译（塞尔维亚语新用户礼物带货短频 j7Fahr218Zo）；2 个剔除（B7DG4r95oCk 西语 Roblox FAILROOMS 游戏实况"BACKROOMS pero de TEMU"=山寨梗词 / KZeFLkAoQMY Roblox Steal a Brainrot 短视频"MILLONARIO DE TEMU"=山寨梗词，同 Dannita de Temu 先例）。
+- push 流程：远端领先 1 个 Actions 提交（5a41521），stash -u 后 rebase fast-forward；stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（81 在页）。
+- **又抓到 Actions 带回历史噪声**：e-_Q7ojxX_c（印尼语 "temu kangen" 女鬼喜剧短剧，昨日刚剔）再次被远端基底带回，追加 exclude 补丁剔除，最终 80 在页。IzsGMxNIdac（10-14 Chris Slix）出页属 10 天保留窗口自然过期，非丢失。
+- 提交 f3396b0 推送成功。最终核验：80 视频、14 个 ai 全带 aiSummary 与中文标题、今日 6 条全在页、58 条重点噪声清单零混入。临时脚本已删除；scripts/ 与 .env.local 未动。另注意到 stash@{1}（10-21 遗留旧 stash）仍在，可择机清理。
+
 ## 2026-11-11 10:39（中断 13 天后恢复）
 - **注意：本次与上次运行间隔 13 天**（上次 2026-10-28，期间 automation 未运行），页面 AI 总结从 47 掉到 7（今日新加 4 后 11），历史 AI 总结随 10 天保留窗口自然过期、云端 Actions 只能产 description 摘要，属正常损耗，未做历史恢复（任务范围仅今日）。
 - 抓取成功：97 候选 → 8 视频（6 带字幕、2 降级描述），inbox/youtube-2026-11-11.json。

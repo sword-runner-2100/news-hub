@@ -427,3 +427,17 @@
 - 合并：update_youtube.py 成功，页面 80 个视频（新增/更新 8）
 - push 后校验：今日 6 条 AI 全在页面；42 个噪声 videoId（41 历史 + 今日 1）零回归；页面 ai 共 12 条
 - 流程稳定，无新踩坑
+
+## 2026-11-12 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 35083b7）
+- 抓取：8 个视频，7 个带字幕（j7Fahr218Zo 塞语新用户礼码 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：5 个（7k6-LXT8k8A Temu 超级英雄荷语搞笑短剧-连续第二天-虚构创作已注明、C4XD8wtei_8 Неїжко 乌克兰语 20 件厨房用品-连续第三天-垃圾桶装废品形式、gGfevbujppg ALECCHI 试吃 Temu 食品-连续第三天-字幕被自动译成葡语、88rzfIfnljU 俄语夫妇服饰内衣试穿-开衫袖子偏紧/睡衣缝线粗糙、9agAv51oIu8 Carly 英语 designer dupes haul-好评居多）
+- 仅翻译：1 个（j7Fahr218Zo 塞语 Temu 新用户礼码 dzg3262 推广短视频）
+- 剔除噪声：2 个 → exclude:true
+  - 2BJC49DuZx8：波兰语政论节目（TV Republika 失去牌照），「1,5 temu」=波兰语「1.5 年前」，词形巧合
+  - umNjifGtzNw：波兰语名人假新闻（Karol Strasburger「悲惨结局」），「3 minuty temu」=「3 分钟前」，热评均在骂谣言
+- 合并：update_youtube.py 成功，页面 80 个视频（新增/更新 8）
+- push：commit（069ca03）→ stash -u → pull --rebase 与远端 ec60c82（Actions 08:08 UTC 刷新）冲突 → abort 后稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash 文件 checkout 回 + unstage + 重新 commit 1e8a054 + push）一次成功
+- push 后校验发现两处云端回归：PhZda1WfFzg（10-26 翻车合集 P2）AI 总结被降级 description、昨日噪声 DnbPnXAGHW0（捏捏乐搬运号）被加回 → 从 756f820 提取 PhZda1WfFzg 的 AI 四字段回补 + 删除噪声，修复 commit 35083b7 推送成功
+- 页面最终：78 个视频，summarySource=ai 共 16 条；今日 5 条 AI + 回补 1 条全在页面；43 个噪声 videoId（41 历史 + 今日 2）零回归
+- 流程稳定，无新踩坑
