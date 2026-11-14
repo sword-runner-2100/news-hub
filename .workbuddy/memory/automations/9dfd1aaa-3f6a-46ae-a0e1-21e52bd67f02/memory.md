@@ -1,5 +1,11 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-11-13 08:35
+- 抓取成功：99 候选 → 8 视频（7 带字幕、1 塞尔维亚语新用户礼物带货短频降级描述），inbox/youtube-2026-11-13.json。
+- AI 处理：5 个 AI 总结+标题热评翻译（泰语营销策略师分析 Temu 泰国失败原因：低价+促销+游戏化三招但缺需求生态、九成份额在 Shopee/Lazada/TikTok，热评吐槽促销像骗局订自行车只到 6 寸模型 fmhus50RlSg / 英语猎奇 Temu 商品吐槽合集（阿语自动译文）娱乐向，与昨日同条正常重处理 7Zf7gkUeKRQ / 西语 Alecchi+Kino 试吃约 20 款 Temu 食品（葡语自动转写），鸡肉味零食 10 分、10 美元牛肉切片量少判不值，热评欢呼 Ale Wang 复活，与昨日同条 gGfevbujppg / 英语 Carly Elizabeth 开箱试穿（阿语自动译文）：Hugo Boss 内裤 3 条 13.82 镑、粉底 11.76 镑对比 60 镑同款外观一致、价保找回 7.68 镑，联盟带货 9agAv51oIu8 / 波兰 ArsMedia 战术夹克答疑：外层吸水不渗漏、3 件仅 1 件拉链坏、附优惠码带货 pqnbzA6ZWK4）；1 个无字幕仅翻译（塞尔维亚语新用户礼物带货短频 zYEiHL-CkiA）；2 个剔除（B7DG4r95oCk 西语 Roblox FAILROOMS 山寨梗词，昨日已剔再次抓回 / Cvt6X4z3YaU 法语 2027 总统大选讽刺"casting Temu"=山寨梗词，内容与平台无关）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions e0449fa）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（72 在页）。基底无降级、无噪声带回，一次通过。
+- 提交 4545b5b 推送成功（连带 3 个 memory 与 4 个 reports 文件）。最终核验：72 视频、18 个 ai 全带 aiSummary 与中文标题、今日 6 条全在页、昨日 6 条完好（5 ai + j7Fahr218Zo 本就是 description）、55 条重点噪声清单零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-11-12 08:46
 - 抓取成功：8 视频（7 带字幕、1 塞尔维亚语带货短频降级描述），inbox/youtube-2026-11-12.json。
 - AI 处理：5 个 AI 总结+标题热评翻译（荷兰语 Peter 虚构搞笑动画"Temu 超级英雄"——买超能力货不对板/满分超能力是扔拖鞋的超级妈妈，纯虚构已注明 7k6-LXT8k8A / 乌克兰语 Неїжко 实测妻子订的 20 件厨房用品+专用垃圾桶扔废品，吐槽广告弹窗与凑单套路 C4XD8wtei_8 / 西语区 Alecchi+ react Temu 食品试吃（葡语字幕自动转写），罐头 spam 争议+保质期仅一周惊讶，热评欢呼 Ale Wang 复活回归直播 gGfevbujppg / 英语猎奇 Temu 商品吐槽合集（阿语自动译文），娱乐向已注明 7Zf7gkUeKRQ / 俄语夫妇服装鞋试穿：开衫袖口偏紧、鞋劝别较真、睡衣走线潦草，按码表选码基本合身 88rzfIfnljU）；1 个无字幕仅翻译（塞尔维亚语新用户礼物带货短频 j7Fahr218Zo）；2 个剔除（B7DG4r95oCk 西语 Roblox FAILROOMS 游戏实况"BACKROOMS pero de TEMU"=山寨梗词 / KZeFLkAoQMY Roblox Steal a Brainrot 短视频"MILLONARIO DE TEMU"=山寨梗词，同 Dannita de Temu 先例）。

@@ -428,6 +428,19 @@
 - push 后校验：今日 6 条 AI 全在页面；42 个噪声 videoId（41 历史 + 今日 1）零回归；页面 ai 共 12 条
 - 流程稳定，无新踩坑
 
+## 2026-11-13 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 12afb10）
+- 抓取：8 个视频，6 个带字幕（Cvt6X4z3YaU 法语 NoTranscriptFound、zYEiHL-CkiA 塞语 TranscriptsDisabled 均降级描述摘录），耗时约 5.5 分钟
+- AI 总结：4 个（fmhus50RlSg 泰语营销策略师分析 Temu 在泰国失败原因-低价不等于值/Shopee+Lazada+TikTok Shop 占 92%/切换成本高、7Zf7gkUeKRQ 英语邪门 Temu 商品反应搞笑视频-字幕被自动译成阿语、9agAv51oIu8 Carly 开箱试穿-连续第二天- Hugo Boss 内裤 13.82 镑/改价退差找回 7.68 镑、pqnbzA6ZWK4 波兰 ArsMedia 战术夹克答疑-三件仅一件拉链坏仍推荐-含广告码）
+- 仅翻译：1 个（zYEiHL-CkiA 塞语 Temu 新用户礼推广）
+- 剔除噪声：3 个 → exclude:true
+  - B7DG4r95oCk 与 p2H6zax07YQ：西语「BACKROOMS pero de TEMU/FAILROOMS」游戏实况（两个频道同款 Backrooms 山寨玩梗游戏）
+  - Cvt6X4z3YaU：法语 2027 总统大选讽刺节目，「Casting Temu」=山寨玩梗
+- 合并：update_youtube.py 成功，页面 72 个视频（远端基线重放后新增/更新 8）
+- push：commit（f8a1ffb）→ stash -u → pull --rebase 与远端 9aa4901（Actions 07:45 UTC 刷新）冲突 → abort 后稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash 文件 checkout 回 + unstage memory/reports + 重新 commit 12afb10 + push）一次成功
+- push 后校验：今日 4 条 AI 全在页面；页面 ai 共 18 条且均有 aiSummary；47 个噪声 videoId（44 历史 + 今日 3）零回归
+- 流程稳定，无新踩坑
+
 ## 2026-11-12 20:30
 - 状态：成功（[OK]，push 两次成功，最终 commit 35083b7）
 - 抓取：8 个视频，7 个带字幕（j7Fahr218Zo 塞语新用户礼码 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
