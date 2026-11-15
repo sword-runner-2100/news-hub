@@ -441,6 +441,19 @@
 - push 后校验：今日 4 条 AI 全在页面；页面 ai 共 18 条且均有 aiSummary；47 个噪声 videoId（44 历史 + 今日 3）零回归
 - 流程稳定，无新踩坑
 
+## 2026-11-14 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 4d91fbe）
+- 抓取：8 个视频，7 个带字幕（zYEiHL-CkiA 塞语新用户礼码 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：5 个（fmhus50RlSg 泰语营销策略师分析 Temu 泰国失败-连续第二天-直连工厂模式/切换成本高/热评吐槽套路像骗局、9YhU6-z8ZdA TechSource 500 美元 Temu 全套游戏装备-惊喜多于翻车 1440p 能搭出来、AVjjUAlzew4 Greg Doucette 点评 Jesse 实测 Temu 健身补剂-大牌不上 Temu/L-肉碱口服差/GLP 须正规药房、pWenXZ58fJU 日语 Shorts 试吃 Temu 生鲜-扇贝鲔鱼超预期-热评指乐天同款店铺国内发货+商单质疑、431qmc2CHOQ 西语捏捏乐零元购开箱-面包香味等超预期-实为带货码）
+- 仅翻译：1 个（zYEiHL-CkiA 塞语 Temu 新用户礼-连续第二天）
+- 剔除噪声：2 个 → exclude:true
+  - 9fDZN1D_c3U：「Temu Steph Curry」NBA 篮球视频（Jef 聊 Podziemski），Temu=山寨俚语玩梗
+  - p2H6zax07YQ：西语 BACKROOMS FAILROOMS 游戏实况（连续第二天，昨日已剔除）
+- 合并：update_youtube.py 成功，页面 74 个视频（远端基线重放后新增/更新 8）
+- push：commit（8503401）→ stash -u → pull --rebase 与远端 b4d125e（Actions 07:31 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash checkout 回 + unstage + 重新 commit 4d91fbe + push）一次成功
+- push 后校验：今日 5 条 AI 全在页面；49 个噪声 videoId（47 历史 + 今日 2）零回归；页面 ai 共 23 条且近期 AI 无降级
+- 流程稳定，无新踩坑
+
 ## 2026-11-12 20:30
 - 状态：成功（[OK]，push 两次成功，最终 commit 35083b7）
 - 抓取：8 个视频，7 个带字幕（j7Fahr218Zo 塞语新用户礼码 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟

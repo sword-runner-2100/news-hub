@@ -1,5 +1,11 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-11-14 08:36
+- 抓取成功：96 候选 → 8 视频（7 带字幕、1 塞尔维亚语新用户礼物带货短频降级描述，连续第 2 天同条 zYEiHL-CkiA），inbox/youtube-2026-11-14.json。
+- AI 处理：5 个 AI 总结+标题热评翻译（泰语营销策略师分析 Temu 泰国失败原因——连续第 2 天同条正常重处理 fmhus50RlSg / 日语 60 秒短频试吃 Temu 生鲜刺身，比预想甜、口感扎实、腥味轻、略有人工感，ASR 质量差已注明 pWenXZ58fJU / 英语 TechSource 500 美元 Temu 游戏外设装机，品质惊喜好于预期、含黑五券包推广已注明 9YhU6-z8ZdA / 英语 Greg Doucette 点评 Jesse James West Temu 补剂实测——Cutler 等不会在 Temu 卖货见同名必假货、口服 L-肉碱需注射、GLP 要走正规药房 AVjjUAlzew4 / 阿语优惠码 kff9652 工具带货：显微镜/点焊机/电烙铁/电动螺丝刀/工具箱等，热评拆穿需凑 30 美元单 CfPL4OpYRmU）；1 个无字幕仅翻译（塞尔维亚语新用户礼物带货短频 zYEiHL-CkiA，连续第 2 天）；2 个剔除（9fDZN1D_c3U "Temu Steph Curry"=NBA 球员 Brandon Podziemski 山寨外号梗词、纯篮球内容 / p2H6zax07YQ 西语 Roblox "BACKROOMS pero de TEMU" FAILROOMS 游戏实况，同昨日 B7DG4r95oCk 性质）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions 2256722，基底 72→73 净增 1）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（73 在页）。基底无降级、无噪声带回，一次通过。
+- 提交 de39dae 推送成功（连带 3 个 memory 文件）。最终核验：73 视频、22 个 ai 全带 aiSummary 与中文标题（昨日 18→今日 22，部分旧条目按 10 天窗口出页属正常）、今日 6 条全在页、昨日 AI 在页无降级、重点历史噪声清单零混入。注意：基底新条目里 SUDq7QIX594（N1 BiH 波黑选举报道，标题含 "temu" 疑词形巧合）为 Actions 此前带入的历史存量，今日清单未含、未列入已知噪声清单，可择机复核。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-11-13 08:35
 - 抓取成功：99 候选 → 8 视频（7 带字幕、1 塞尔维亚语新用户礼物带货短频降级描述），inbox/youtube-2026-11-13.json。
 - AI 处理：5 个 AI 总结+标题热评翻译（泰语营销策略师分析 Temu 泰国失败原因：低价+促销+游戏化三招但缺需求生态、九成份额在 Shopee/Lazada/TikTok，热评吐槽促销像骗局订自行车只到 6 寸模型 fmhus50RlSg / 英语猎奇 Temu 商品吐槽合集（阿语自动译文）娱乐向，与昨日同条正常重处理 7Zf7gkUeKRQ / 西语 Alecchi+Kino 试吃约 20 款 Temu 食品（葡语自动转写），鸡肉味零食 10 分、10 美元牛肉切片量少判不值，热评欢呼 Ale Wang 复活，与昨日同条 gGfevbujppg / 英语 Carly Elizabeth 开箱试穿（阿语自动译文）：Hugo Boss 内裤 3 条 13.82 镑、粉底 11.76 镑对比 60 镑同款外观一致、价保找回 7.68 镑，联盟带货 9agAv51oIu8 / 波兰 ArsMedia 战术夹克答疑：外层吸水不渗漏、3 件仅 1 件拉链坏、附优惠码带货 pqnbzA6ZWK4）；1 个无字幕仅翻译（塞尔维亚语新用户礼物带货短频 zYEiHL-CkiA）；2 个剔除（B7DG4r95oCk 西语 Roblox FAILROOMS 山寨梗词，昨日已剔再次抓回 / Cvt6X4z3YaU 法语 2027 总统大选讽刺"casting Temu"=山寨梗词，内容与平台无关）。
