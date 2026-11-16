@@ -467,3 +467,16 @@
 - push 后校验发现两处云端回归：PhZda1WfFzg（10-26 翻车合集 P2）AI 总结被降级 description、昨日噪声 DnbPnXAGHW0（捏捏乐搬运号）被加回 → 从 756f820 提取 PhZda1WfFzg 的 AI 四字段回补 + 删除噪声，修复 commit 35083b7 推送成功
 - 页面最终：78 个视频，summarySource=ai 共 16 条；今日 5 条 AI + 回补 1 条全在页面；43 个噪声 videoId（41 历史 + 今日 2）零回归
 - 流程稳定，无新踩坑
+
+## 2026-11-15 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 977e657）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：5 个（9YhU6-z8ZdA TechSource 游戏装备-连续第二天-沿用昨日总结、AVjjUAlzew4 Greg Doucette 补剂点评-连续第二天-沿用、431qmc2CHOQ 西语捏捏乐零元购-连续第二天-沿用、mwqof57ztNA Ale Wang 试吃 Temu 食品续集-Kinno 因被骂缺席-Lonely God 米圈好评/鸭爪差评/蜡笔小新饼干最爱-字幕自动译成阿语、Z2Dg6fIMOvE 296 美元充气狩猎小屋-容 4 人/修补包补玩具枪弹洞/计划夜宿猎鸭-字幕自动译成阿语）
+- 剔除噪声：3 个 → exclude:true
+  - 9fDZN1D_c3U：「Temu Steph Curry」NBA 视频（连续第二天，昨日已剔除）
+  - YdU5oGKMiSQ：哥伦比亚「Temu 白宫」政治讽刺（阿韦拉多假白宫+空壳公司捐款洗钱指控），Temu=山寨俚语
+  - DtZoqHfKSTw：法语「TEMU 版 Zack D Films」反应视频，山寨玩梗（同 U59LwDHDB-E/XEOORQGckI4 先例）
+- 合并：首次 update 后 commit b42c28a → stash -u → pull --rebase 与远端 e7d71cc（Actions 07:44 UTC）冲突 → 稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash 文件 checkout 回 + reset + 只 add index.html）重新 commit 977e657 push 一次成功
+- 注意：本次 stash 命令里的 `git rebase --abort` 在复合命令中先于 reset 执行导致一次 exit 128 噪声报错，实际 rebase 已被上一条命令中止，状态检查后正常走稳妥法
+- push 后校验：今日 5 条 AI 全在页面；48 个噪声 videoId 零回归；页面 70 视频 / ai 共 26 条
+- 流程稳定，无新踩坑

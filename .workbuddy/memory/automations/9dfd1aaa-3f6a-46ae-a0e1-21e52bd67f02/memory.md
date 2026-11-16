@@ -286,3 +286,10 @@
 - **第 11 次抓到 Actions 带回历史噪声**：A7yGA-VTRbI（3.7 小时日语闲聊直播）再次被远端基底带回，剔除补丁后 68 在页。
 - 提交 731fab4 推送成功。最终核验：68 视频、50 个 summarySource=ai 全带 aiSummary、今日 6 条全在页、20 条重点噪声零混入（A7yGA-VTRbI 已剔）。核对清单笔误提醒：昨日 Mohi Toys 正确 ID 是 CPFa2_oa-Ls、Noraafitt 视频是 x_AT0ctikNI（kev5423 是优惠码不是 videoId）。
 - 临时脚本与临时补丁已删除（写回脚本含条目数/顺序/统计 assert）；scripts/ 与 .env.local 未动。备份分支 backup/main-20261014 保留。
+
+## 2026-11-15 08:35
+- 抓取成功：99 候选 → 8 视频全带字幕，inbox/youtube-2026-11-15.json。
+- AI 处理：6 个 AI 总结+标题热评翻译（西语 Sophia Marchan 新用户零元购捏捏乐开箱：面包款有面包香整体惊喜，联盟带货、阿语自动转写字幕已注明 431qmc2CHOQ / 英语 TechSource 500 美元 Temu 电竞桌面装机，逐类挑最便宜不牺牲质量、品质好于预期、黑五券跨单叠加推广已注明 9YhU6-z8ZdA——连续第 2 天同条 / 法语 HugoDécrypte 每日新闻：头条 Shein/Temu 法国访问量下滑+欧盟监管环保社会争议，后续含 11·14 动员、乌入北约、美停飞、微软故障，Temu 为议题之一非测评已注明 o_Tu9RWe1As / 英语 Greg Doucette 点评 Jesse James West Temu 补剂实测，Cutler 等不会在 Temu 卖货见同名必假货、口服 L-肉碱需注射、GLP 走正规药房 AVjjUAlzew4——连续第 2 天 / 日语 60 秒短频试吃 Temu 生鲜：比预想甜肉质扎实腥味轻略有人工感，ASR 质量差已注明 pWenXZ58fJU——连续第 3 天 / 阿语优惠码 kff9652 工具带货：显微镜/点焊机/电烙铁/机械臂/电动螺丝刀/机械键盘/工具箱，热评拆穿需凑最低消费 CfPL4OpYRmU——连续第 2 天）；0 个无字幕；2 个剔除（9fDZN1D_c3U "Temu Steph Curry"=NBA 球员 Podziemski 山寨外号梗词纯篮球内容，连续第 3 天 / YdU5oGKMiSQ 哥伦比亚"山寨白宫"政治报道，Temu 为贬称梗词与平台无关）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions 79e2a45）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（69 在页）。
+- **昨日疑似噪声今日确认并剔除**：SUDq7QIX594（N1 BiH 波黑选举舞弊报道）被远端基底带回，核验标题"波黑temu选举舞弊"中 temu 为波语指示代词 "na tim izborima"（那些选举）机器翻译残留，与平台无关，exclude 补丁剔除后 68 在页。
+- 提交 1640c66 推送成功（连带 3 个 staged memory 文件）。最终核验：68 视频、24 个 ai 全带 aiSummary 与中文标题、标记零不一致、今日 6 条全在页、昨日 AI 无降级、62 条重点噪声清单零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
