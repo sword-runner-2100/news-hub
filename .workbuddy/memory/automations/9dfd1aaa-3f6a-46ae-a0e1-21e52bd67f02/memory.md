@@ -1,5 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-11-16 08:50
+- 抓取成功：98 候选 → 8 视频（4 带字幕、4 降级描述：波黑家居 vlog ZUCqdsDctDM / brieffnews 捏捏乐码带货 ALR741870 A4urcAcU1k0 / Noah Jansen 捏捏乐码带货 ALC607836 V-szpc34p8Y / Rose Salvatore 捏捏乐码带货 ALC607836 q8KqcBNfJqs），inbox/youtube-2026-11-16.json。
+- AI 处理：4 个 AI 总结+标题热评翻译（西语 Ale Wang 二度试吃 Temu 食品：番茄味 Lonely God 米脆+小新焦糖饼干好吃、柠檬鸭爪带冻又辣判差，搭档 Kinno 因挨评缺席、纠正上期生产日期乌龙，阿语自动译文 mwqof57ztNA / 英语 Rip 'n Stik 296 美元充气狩猎小屋挑战夜宿猎鸭，用弩误射穿帐篷现补，阿语自动译文娱乐向 Z2Dg6fIMOvE / 格鲁吉亚 NanoNeko 600 拉里捏捏乐对决 Temu vs TopToys 各 300：Temu 批次踩雷居多——死鸡配色硬石头胶水味，可颂珠珠款惊喜，未拆留抽奖 fT5wjAMTOqY / 英语 Shadiversity Temu 弓弩实测品质意外好、同源代工省中间商，300 美元券包促销属商业合作已注明 iP02UvjdpI4）；4 个无字幕仅翻译；0 个剔除（8 条均与 Temu 相关，捏捏乐码带货 3 条按往例保留）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions 1095378）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（71 在页）。
+- **再次抓到 Actions 带回历史噪声**：9fDZN1D_c3U（"Temu Steph Curry" 山寨梗词，连续第 4 天）被远端基底带回，exclude 补丁剔除后 70 在页。
+- 提交 6e3f258 推送成功（连带 3 个 staged memory 文件）。最终核验：70 视频、27 个 ai 全带 aiSummary 与中文标题、标记零不一致、今日 8 条全在页、昨日 AI 无降级、58 条重点噪声清单零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-11-14 08:36
 - 抓取成功：96 候选 → 8 视频（7 带字幕、1 塞尔维亚语新用户礼物带货短频降级描述，连续第 2 天同条 zYEiHL-CkiA），inbox/youtube-2026-11-14.json。
 - AI 处理：5 个 AI 总结+标题热评翻译（泰语营销策略师分析 Temu 泰国失败原因——连续第 2 天同条正常重处理 fmhus50RlSg / 日语 60 秒短频试吃 Temu 生鲜刺身，比预想甜、口感扎实、腥味轻、略有人工感，ASR 质量差已注明 pWenXZ58fJU / 英语 TechSource 500 美元 Temu 游戏外设装机，品质惊喜好于预期、含黑五券包推广已注明 9YhU6-z8ZdA / 英语 Greg Doucette 点评 Jesse James West Temu 补剂实测——Cutler 等不会在 Temu 卖货见同名必假货、口服 L-肉碱需注射、GLP 要走正规药房 AVjjUAlzew4 / 阿语优惠码 kff9652 工具带货：显微镜/点焊机/电烙铁/电动螺丝刀/工具箱等，热评拆穿需凑 30 美元单 CfPL4OpYRmU）；1 个无字幕仅翻译（塞尔维亚语新用户礼物带货短频 zYEiHL-CkiA，连续第 2 天）；2 个剔除（9fDZN1D_c3U "Temu Steph Curry"=NBA 球员 Brandon Podziemski 山寨外号梗词、纯篮球内容 / p2H6zax07YQ 西语 Roblox "BACKROOMS pero de TEMU" FAILROOMS 游戏实况，同昨日 B7DG4r95oCk 性质）。
