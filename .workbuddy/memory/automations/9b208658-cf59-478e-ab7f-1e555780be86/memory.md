@@ -480,3 +480,17 @@
 - 注意：本次 stash 命令里的 `git rebase --abort` 在复合命令中先于 reset 执行导致一次 exit 128 噪声报错，实际 rebase 已被上一条命令中止，状态检查后正常走稳妥法
 - push 后校验：今日 5 条 AI 全在页面；48 个噪声 videoId 零回归；页面 70 视频 / ai 共 26 条
 - 流程稳定，无新踩坑
+
+## 2026-11-16 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit d98ef38）
+- 抓取：8 个视频，6 个带字幕（ZUCqdsDctDM 波黑语 Emina、A4urcAcU1k0 捏捏乐 Shorts 均 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：5 个（mwqof57ztNA Ale Wang 试吃 Temu 食品续集-连续第二天-Kinno 被骂缺席+Lonely God 脆圈好评+热评喊 Fricho 回归、tc20gttQwMM 阿根廷理发师 Temu 搭理发店-咖啡机好评+Temu 刚登陆阿根廷+赞助送测、o6XxmL4LW1I 墨西哥博主 3500 比索买全部山寨手机对比原机-OPPO 复刻版差 33 倍价+迷你 iPhone 实为电子宠物机、Z2Dg6fIMOvE Rip 'n Stik 296 美元充气狩猎小屋-连续第二天-朝新帐篷开枪打洞+屋顶渗漏+热评批枪械安全、fT5wjAMTOqY 格鲁吉亚 NanoNeko 600 拉里捏捏乐 Temu vs TopToys 对决-Temu 小鸡款化工味差评）
+- 仅翻译：1 个（ZUCqdsDctDM 波黑语 Emina 家居惊喜开箱，无字幕只译标题热评，热评有观众不信 Temu 只信实体店）
+- 剔除噪声：2 个 → exclude:true
+  - BUmviu82gT4：西语工地喜剧短剧，工人被黑色防水涂料粘住变「Temu 版毒液」，山寨玩梗
+  - A4urcAcU1k0：捏捏乐 ASMR 引流号（brieffnews 频道名与内容不符），带 40% off 推广码，热评指货购自 Five Below 并骂 scammer（同 bZQbYZzC_FE/DnbPnXAGHW0 先例）
+- 合并：update_youtube.py 成功，页面 71 个视频（新增/更新 7）
+- push：commit（eb9785e）→ stash -u → pull --rebase 与远端 0cba275（Actions 07:50 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash checkout 回 + reset + 只 add index.html）重新 commit 2e808fe push 一次成功
+- push 后校验发现云端把昨日噪声 DtZoqHfKSTw（法语 TEMU 版 Zack D Films 玩梗）重新加回 → JSON 删除后 commit d98ef38 推送成功
+- 页面最终：70 个视频，summarySource=ai 共 29 条且均有 aiSummary；54 个噪声 videoId（52 历史 + 今日 2）零回归；今日 5 条 AI 全在页面
+- 流程稳定，无新踩坑
