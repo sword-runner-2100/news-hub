@@ -1,5 +1,16 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-11-18 08:45
+- **抓取失败，未 push**：两次运行 fetch_youtube.py 均在搜索阶段失败——`[SKIP] 搜索失败（order=viewCount/date）：<urlopen error timed out>` + `[FAIL] YouTube 搜索没有返回任何结果`，各耗时 6m41s。
+- 根因：本机到 Google 系域名（googleapis.com / youtube.com）全部阻断（DNS 正常解析 172.217.x.x 但 TCP 不通，curl 超时），且当前无任何代理在运行（系统代理 HTTPEnable=0、常见本地代理端口 7890/1087/8118/10809/6152 全部连接拒绝、无 clash/mihomo 类进程）。GitHub/国内站点可达正常。昨日 08:51 能跑通说明平时有代理/VPN，今晨未开启。
+- 未产生 inbox 文件，未做 AI 处理，未合并，未提交。scripts/ 与 .env.local 未动。恢复方法：用户开代理后手动重跑或等下次定时触发。云端 GitHub Actions 9:00/21:00 照常跑，页面数据不会缺，只是缺本地 AI 字幕总结。
+
+## 2026-11-17 08:51
+- 抓取成功：93 候选 → 8 视频（7 带字幕、1 波黑家居 vlog ZUCqdsDctDM 降级描述——连续第 2 天同条），inbox/youtube-2026-11-17.json。
+- AI 处理：5 个 AI 总结+标题热评翻译（德语 Mohi Toys Amazon vs Temu 捏捏乐同款对比：Temu 更便宜个别款气味刺鼻，逐轮打分多数轮 Temu 占优 zOFMV3nqHoI / 西语 Gael_barber 用 Temu 搭理发店：咖啡机好评+按摩枪+面膜等，Temu 刚登陆阿根廷联盟带货、阿语自动转写已注明 tc20gttQwMM / 西语买光 Temu 山寨手机对比原版：3500 比索 vs 15 万比索、外观还原高拍照差距悬殊 o6XxmL4LW1I / 西语 86 秒优惠码 kkr6388 带货短剧如实注明 c9JSKx9dBV0 / 捷语 Vítek 最便宜遥控车实测：206 克朗飞行车没遥控器只会乱转、机器狗缺陷轮自转关不掉 9_TlEZicWZw）；1 个无字幕仅翻译（ZUCqdsDctDM）；2 个剔除（jE2w4jxhAXw 西语短剧 "Casimiro el kai bil de temu"="Temu 兵"山寨外号梗词纯喜剧、8dHbH48Aqwo 波语 "Rok temu"="一年前"玉米收成实测词形巧合）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions 58986ab）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（66 在页）。
+- 提交 780e7e6 推送成功。核验：66 视频、32 个 ai 全带 aiSummary 与中文标题、昨日 4 条 AI 无降级、今日 6 条全在页、剔除 2 条已出页、重点噪声清单零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-11-16 08:50
 - 抓取成功：98 候选 → 8 视频（4 带字幕、4 降级描述：波黑家居 vlog ZUCqdsDctDM / brieffnews 捏捏乐码带货 ALR741870 A4urcAcU1k0 / Noah Jansen 捏捏乐码带货 ALC607836 V-szpc34p8Y / Rose Salvatore 捏捏乐码带货 ALC607836 q8KqcBNfJqs），inbox/youtube-2026-11-16.json。
 - AI 处理：4 个 AI 总结+标题热评翻译（西语 Ale Wang 二度试吃 Temu 食品：番茄味 Lonely God 米脆+小新焦糖饼干好吃、柠檬鸭爪带冻又辣判差，搭档 Kinno 因挨评缺席、纠正上期生产日期乌龙，阿语自动译文 mwqof57ztNA / 英语 Rip 'n Stik 296 美元充气狩猎小屋挑战夜宿猎鸭，用弩误射穿帐篷现补，阿语自动译文娱乐向 Z2Dg6fIMOvE / 格鲁吉亚 NanoNeko 600 拉里捏捏乐对决 Temu vs TopToys 各 300：Temu 批次踩雷居多——死鸡配色硬石头胶水味，可颂珠珠款惊喜，未拆留抽奖 fT5wjAMTOqY / 英语 Shadiversity Temu 弓弩实测品质意外好、同源代工省中间商，300 美元券包促销属商业合作已注明 iP02UvjdpI4）；4 个无字幕仅翻译；0 个剔除（8 条均与 Temu 相关，捏捏乐码带货 3 条按往例保留）。

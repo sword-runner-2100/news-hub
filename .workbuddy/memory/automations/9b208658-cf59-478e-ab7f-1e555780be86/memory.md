@@ -482,8 +482,7 @@
 - 流程稳定，无新踩坑
 
 ## 2026-11-16 20:30
-- 状态：成功（[OK]，push 两次成功，最终 commit d98ef38）
-- 抓取：8 个视频，6 个带字幕（ZUCqdsDctDM 波黑语 Emina、A4urcAcU1k0 捏捏乐 Shorts 均 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- 状态：成功（[OK]，push 两次成功，最终 commit d98ef38）- 抓取：8 个视频，6 个带字幕（ZUCqdsDctDM 波黑语 Emina、A4urcAcU1k0 捏捏乐 Shorts 均 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
 - AI 总结：5 个（mwqof57ztNA Ale Wang 试吃 Temu 食品续集-连续第二天-Kinno 被骂缺席+Lonely God 脆圈好评+热评喊 Fricho 回归、tc20gttQwMM 阿根廷理发师 Temu 搭理发店-咖啡机好评+Temu 刚登陆阿根廷+赞助送测、o6XxmL4LW1I 墨西哥博主 3500 比索买全部山寨手机对比原机-OPPO 复刻版差 33 倍价+迷你 iPhone 实为电子宠物机、Z2Dg6fIMOvE Rip 'n Stik 296 美元充气狩猎小屋-连续第二天-朝新帐篷开枪打洞+屋顶渗漏+热评批枪械安全、fT5wjAMTOqY 格鲁吉亚 NanoNeko 600 拉里捏捏乐 Temu vs TopToys 对决-Temu 小鸡款化工味差评）
 - 仅翻译：1 个（ZUCqdsDctDM 波黑语 Emina 家居惊喜开箱，无字幕只译标题热评，热评有观众不信 Temu 只信实体店）
 - 剔除噪声：2 个 → exclude:true
@@ -493,4 +492,26 @@
 - push：commit（eb9785e）→ stash -u → pull --rebase 与远端 0cba275（Actions 07:50 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash checkout 回 + reset + 只 add index.html）重新 commit 2e808fe push 一次成功
 - push 后校验发现云端把昨日噪声 DtZoqHfKSTw（法语 TEMU 版 Zack D Films 玩梗）重新加回 → JSON 删除后 commit d98ef38 推送成功
 - 页面最终：70 个视频，summarySource=ai 共 29 条且均有 aiSummary；54 个噪声 videoId（52 历史 + 今日 2）零回归；今日 5 条 AI 全在页面
+- 流程稳定，无新踩坑
+
+## 2026-11-19 01:33
+- 状态：成功（[OK]，push 一次成功，最终 commit 41a7c96，无冲突未触发稳妥法）
+- 背景：本地基线停在 ee8e532（11-17），落后远端 2 个 commit（11-18 两天本地未运行，仅云端 Actions 跑）；本地 index.html 无未提交改动 → 采用简化流程：stash -u → 快进 pull → 重放 inbox → 只 add index.html → push → stash pop + reset
+- 抓取：8 个视频，7 个带字幕（IhyJ1i439e4 波黑语 TranscriptsDisabled 降级描述摘录），耗时约 1 分钟
+- AI 总结：7 个（OCBh8kFHgz0 Chris Slix 再修 Temu 迈凯伦-连续沿用更新-装座椅/换电池/排查保险丝盒/IG 抽奖送车、FyX1F6v7DtA 在华博主 15 美元网购生鲜-已注明「中国 Temu」系戏称、uJmDb3p_0ss 西语实测 9.9 美元 iPhone 18 广告-平板运动相机真免单但须 1 美元买无人机激活、yz9JyXNgLuE 乌尔都语家庭 vlog-已注明主体为家庭日常、r6D_H5sKBXE 法语 MatiFamily 全家穿搭带货码 khk9692、pyOrPpz059U 西语 24 小时纯 Temu 露营-自动帐篷实测真弹开、KJuzbZLnuqE 泰卢固语零元购家居带货）
+- 仅翻译：1 个（IhyJ1i439e4 波黑语靴子开箱，热评夸家庭温馨）
+- 剔除噪声：0 个（8 条全是真实 Temu 内容）
+- 合并：update_youtube.py 成功，页面 67 个视频（新增/更新 8）
+- push 后校验：今日 7 条 AI 全在页面且 aiSummary 完好；52 个历史噪声 videoId 零回归；页面 ai 共 40 条（11-17 的 34 + 今日 7，其中 OCBh8kFHgz0 为沿用更新计 1 次，另约 1 条属 10 天滚动窗口自然淘汰）；ai 条目均有 aiSummary
+- 流程稳定，无新踩坑
+
+## 2026-11-17 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit ee8e532）
+- 抓取：8 个视频，7 个带字幕（ZUCqdsDctDM 波黑语 Emina TranscriptsDisabled 降级描述摘录，连续第二天）；详情拉取有瞬时 [SKIP] 超时提示但不影响选片，耗时约 1 分钟
+- AI 总结：7 个（zOFMV3nqHoI Mohi Toys 德语 Amazon vs Temu 捏捏乐盲测-Temu 更便宜倾向 Temu、o6XxmL4LW1I 山寨手机对比-连续第二天沿用更新、tc20gttQwMM 阿根廷理发师搭理发店-连续第二天-字幕自动译成阿语、OCBh8kFHgz0 Chris Slix 副频道再修 Temu 迈凯伦-装座椅/换电池/查保险丝盒/宣布 IG 抽奖送车、9_TlEZicWZw 捷克语最便宜遥控车合集-飞行车没遥控器只会转圈、c9JSKx9dBV0 西语夫妻零元码 kkr6388 短剧带货、yMC32-AU2Ns 英语试吃 Temu 评分最低食品-皮皮虾像虫子/迪拜巧克力味百事难喝）
+- 仅翻译：1 个（ZUCqdsDctDM 波黑语家居开箱，热评多在批评其公开家庭生活）
+- 剔除噪声：0 个（8 条全是真实 Temu 内容）
+- 合并：update_youtube.py 成功，页面 69 个视频（新增/更新 8）
+- push：commit（4138c1c）→ stash -u → pull --rebase 与远端 db2f790（Actions 08:58 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash 文件 checkout 回 + reset + 只 add index.html）重新 commit ee8e532 push 一次成功
+- push 后校验：今日 7 条 AI 全在页面；54 个历史噪声 videoId 零回归；页面 69 视频 / ai 共 34 条且均有 aiSummary
 - 流程稳定，无新踩坑
