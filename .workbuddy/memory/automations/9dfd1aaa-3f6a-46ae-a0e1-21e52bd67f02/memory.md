@@ -311,3 +311,9 @@
 - push 流程：stash -u 后 rebase fast-forward（远端 Actions 79e2a45）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（69 在页）。
 - **昨日疑似噪声今日确认并剔除**：SUDq7QIX594（N1 BiH 波黑选举舞弊报道）被远端基底带回，核验标题"波黑temu选举舞弊"中 temu 为波语指示代词 "na tim izborima"（那些选举）机器翻译残留，与平台无关，exclude 补丁剔除后 68 在页。
 - 提交 1640c66 推送成功（连带 3 个 staged memory 文件）。最终核验：68 视频、24 个 ai 全带 aiSummary 与中文标题、标记零不一致、今日 6 条全在页、昨日 AI 无降级、62 条重点噪声清单零混入。临时脚本已删除；scripts/ 与 .env.local 未动。
+
+## 2026-11-19 13:00
+- 抓取成功（本日网络正常，仅 order=viewCount 搜索一次超时降级）：50 候选 → 8 视频全带字幕，inbox/youtube-2026-11-19.json。
+- AI 处理：7 个 AI 总结+标题热评翻译（英语 Toasty Bros 290 美元 Temu"游戏本"实测：实为旧商务本配老 Quadro 级独显，跑堡垒之夜/求生之路跌破 30 帧、延迟大，结论名不副实 7JLhupTGtjY / 孟加拉语 78 秒捏捏乐 0 元码 KES8939 引流，热评拆穿盗用内容推虚假码已注明 leOWfexAdvQ / 阿语 CraftyGirl Temu 赞助圣诞采购开箱：300 美元黑五券包+药盒/毛衣/树状装饰，做工夸像 Hobby Lobby J9TnLfcd5zM / 英语 0 元购商品健身房议价挑战目标 100 美元翻倍达成约 200 美元，码 koe2545 FMJphFBYQFU / 西语 Wara Temu 免费赠品开箱：项链/瑞克莫蒂壳/转接器/刮舌器/PS 手柄套，引导新用户领码 FXQSYF4eP0Q / 西语圣诞充气雪人实测：标题带 Temu 但字幕实为 Mercado Libre 875 比索下单，蹭标签已注明 pYe4TCuG1OM / 阿语转写哥伦比亚 Temu 最便宜鞋 2.5 万比索 vs 亚马逊 6 万：Temu 款薄软无橡胶底像"变装拖鞋"、胶水味重拼写错误 New Fashion，亚马逊款有足弓支撑适合运动 kEjDn9ldrfc）；0 个无字幕；1 个剔除（kxDNpIdvtWE Levy Rincón 哥伦比亚全国大罢工政治评论，"tigre de Temu"为总统贬称梗词，内容是食品增值税抗议与 Temu 平台无关）。
+- push 流程遇坑同 11-15：工作区 memory 文件未暂存挡住 rebase → stash push → pull fast-forward（远端 Actions 4feef5b，+261 行）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（77 在页，新增/更新 7 个）。
+- 提交 a872cad 推送成功（连带 3 个 staged automation memory 文件）。临时脚本 /tmp/yt_ai_process_1119.py 已删除；scripts/ 与 .env.local 未动。
