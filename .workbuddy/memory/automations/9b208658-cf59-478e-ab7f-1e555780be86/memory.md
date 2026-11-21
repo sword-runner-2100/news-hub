@@ -515,3 +515,18 @@
 - push：commit（4138c1c）→ stash -u → pull --rebase 与远端 db2f790（Actions 08:58 UTC）冲突 → abort 后稳妥法（reset --hard origin/main + 重跑 update_youtube.py 重放 inbox + stash 文件 checkout 回 + reset + 只 add index.html）重新 commit ee8e532 push 一次成功
 - push 后校验：今日 7 条 AI 全在页面；54 个历史噪声 videoId 零回归；页面 69 视频 / ai 共 34 条且均有 aiSummary
 - 流程稳定，无新踩坑
+
+## 2026-11-20 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 89930d0，无冲突未触发稳妥法）
+- 背景与流程优化：今天 14:43 已有一轮完整运行并推送（55cac2f/66fb915），本次 20:30 定时档照常执行；本地落后远端 1 个 commit（e62ccea，Actions 16:18 数据刷新）且 index.html 干净 → 采用最简流程：**先处理 inbox JSON → reset --hard origin/main（安全，index 无未提交改动）→ update_youtube.py 重放 → 只 add index.html → commit + push**，全程无 rebase、无 stash、无冲突，比旧稳妥法更简
+- 抓取：[OK]，8 个视频，全部带字幕，耗时约 1.5 分钟；48 小时窗口滚动，与 14:43 批次只有 3 个重合（4FwDjqpCurw/efveCLYLXZo/7JLhupTGtjY），5 个新面孔
+- AI 总结：4 个（4FwDjqpCurw 在 Temu 买假金条-摆拍短剧-与 14:43 同视频沿用页面既有总结、efveCLYLXZo Jonas Winkler 专业级夹钳-沿用、7JLhupTGtjY 290 美元游戏本-沿用、BfOvtFlhoqI 新-Civilian Tactical 实测 Temu 翻转射击靶-.22 能翻边缘变形/9mm 一枪击碎-只能配小威力弹）
+- 重复视频处理技巧：翻新抓取会覆盖 inbox，但同视频可直接从 index.html 的 YOUTUBE_DATA 提取既有 aiSummary/title/热评译文复用，不必重写
+- 剔除噪声：4 个 → exclude:true
+  - AnUSgbAwsE0：阿语宗教男子杀子犯罪故事，temu 仅 hashtag（14:43 已剔除，同 videoId 再次入选）
+  - kxDNpIdvtWE：哥伦比亚 Levy Rincón 政治评论（号召 11-19 全国大罢工反税改），「Tigre de Temu」是总统绰号玩梗（14:43 已剔除）
+  - -kBMSoCMfWQ：Baki 漫画 72 话解说，「El Dorian de Temu」=山寨俚语
+  - 8h-k1uDk71k：Gmod SCP-173 Nextbot 躲猫猫游戏视频，「SCP-173 FROM TEMU」=山寨玩梗
+- 合并：update_youtube.py 成功，页面 80 个视频（新增/更新 6）
+- push 后校验：今日 4 条 AI 全在页面且均有 aiSummary；57 个噪声 videoId（55 历史/14:43 + 今日 2 新）零回归；近期 39 个 AI 视频无降级（11 个 10-13~10-16 的 AI 视频超出 10 天滚动窗口自然淘汰属正常）；页面 ai 共 53 条
+- 流程稳定；经验补充：当晚定时档若 inbox 已被 14:43 处理过，重抓是正常行为（48h 窗口滚动出新视频），重放即可，不必视为重复触发跳过
