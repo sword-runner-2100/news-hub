@@ -530,3 +530,14 @@
 - 合并：update_youtube.py 成功，页面 80 个视频（新增/更新 6）
 - push 后校验：今日 4 条 AI 全在页面且均有 aiSummary；57 个噪声 videoId（55 历史/14:43 + 今日 2 新）零回归；近期 39 个 AI 视频无降级（11 个 10-13~10-16 的 AI 视频超出 10 天滚动窗口自然淘汰属正常）；页面 ai 共 53 条
 - 流程稳定；经验补充：当晚定时档若 inbox 已被 14:43 处理过，重抓是正常行为（48h 窗口滚动出新视频），重放即可，不必视为重复触发跳过
+
+## 2026-11-21 20:30
+- 状态：成功（[OK]，push 两次成功，最终 commit 1c14c24；本地落后远端 1 commit → reset --hard origin/main 后重放 inbox，全程无冲突）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟；详情拉取有瞬时 [SKIP] 超时提示但不影响选片
+- AI 总结：6 个（axwpX_OTfzE James Charles 全脸 Temu 畅销彩妆-字幕被自动译成阿语-大牌入驻+美国仓 4 天达-刷具好评粉扑差评、Za-4PrX-8Ag 马拉雅拉姆语圣诞礼物零元购码 kge6462、bmSgnntcD3I 罗语 27 寸 165Hz 曲面显示器带货码-500 列伊券、pnJqz-qaCb4 日语双 11 劣质品盘点-1+1=3 计算器/买 1 双到 4 双鞋/XO 白兰地酒驾谣言、FvfswO_DBV4 罗语 Temu 新增货到付款+开箱码 KGE2585、cn984jlvDBw 僧伽罗语 4 万卢比生日 haul-床品答疑+scam 店铺提醒）
+- 剔除噪声：2 个 → exclude:true
+  - AnUSgbAwsE0：阿语宗教男子杀子犯罪故事，temu 仅 hashtag（11-20 已剔除，同 videoId 再次入选）
+  - kbBsBZG3xr4：捏捏乐 haul（码 ALC607836），热评证实造假搬运引流号（同 bZQbYZzC_FE/DnbPnXAGHW0/A4urcAcU1k0 先例）
+- push 后校验：今日 6 条 AI 全在页面；近期 11 个 AI 视频无降级；发现云端把 11-20 剔除的噪声 kxDNpIdvtWE（哥伦比亚政治评论）重新加回 → JSON 删除，修复 commit 1c14c24 推送成功
+- 页面最终：80 个视频，summarySource=ai 共 58 条；58 个噪声 videoId 零回归
+- 流程稳定，无新踩坑
