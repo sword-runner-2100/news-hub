@@ -531,6 +531,31 @@
 - push 后校验：今日 4 条 AI 全在页面且均有 aiSummary；57 个噪声 videoId（55 历史/14:43 + 今日 2 新）零回归；近期 39 个 AI 视频无降级（11 个 10-13~10-16 的 AI 视频超出 10 天滚动窗口自然淘汰属正常）；页面 ai 共 53 条
 - 流程稳定；经验补充：当晚定时档若 inbox 已被 14:43 处理过，重抓是正常行为（48h 窗口滚动出新视频），重放即可，不必视为重复触发跳过
 
+## 2026-11-22 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit cf51ab1；本地落后远端 1 commit → stash 无关文件后 reset --hard origin/main 重放 inbox，全程无冲突）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：7 个，其中 4 个新写 + 3 个复用昨日总结
+  - 新写：hK1Su-IKAL4 FaZe Rug 只用 Temu 食材做海鲜大锅煮-字幕被译成孟加拉语-热评吐槽厨艺+怀念 Sherman、j_4qcYAOD4g Grind Hard Plumbing Co 升级 Temu 碎木机清山路-两倍价中国产机开箱好评-字幕被译成阿语、yPGXCGDXpwQ 波语虚构搞笑短剧 Temu 妈妈-已注明非真实购物测评、wa6S8xI_ONE 日语 1.2 万日元买 NEC 翻新笔记本-2015 年出厂 11 年机龄-热评指这类翻新机亚马逊也常见
+  - 复用：axwpX_OTfzE James Charles 彩妆、Za-4PrX-8Ag 马拉雅拉姆语圣诞带货、cn984jlvDBw 僧伽罗语生日 haul（均为昨日同 videoId，直接从 YOUTUBE_DATA 提取四字段复用）
+- 剔除噪声：1 个 → exclude:true
+  - YurzaX1BCNo：西语政治时评节目「EL TEMU DEL AMOR PROGRE」评进步派约会 App，Temu=山寨比喻，与购物无关
+- push 后校验：今日 7 条 AI 全在页面且均有 aiSummary；58 个噪声 videoId 零回归（ZUCqdsDctDM 为校验名单误收录，实为 11-16 保留的合法视频）；页面 68 视频 / ai 共 51 条
+- 流程稳定，无新踩坑
+
+## 2026-11-24 02:00
+- 状态：成功（[OK]，push 两次成功，最终 commit dc33a20；本地落后远端 2 commit → commit → stash -u → pull --rebase 冲突 → abort → reset --hard origin/main 重放 inbox → 只 add index.html → push）
+- 抓取：8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：6 个，其中 1 个复用 + 5 个新写
+  - 复用：hK1Su-IKAL4 FaZe Rug 海鲜大锅煮（11-22 同视频，从 YOUTUBE_DATA 提取 aiSummary/title 复用，热评为新一轮已重新翻译，头评是请求做 DHgate 测评）
+  - 新写：6Y6z2TnYacE 泰卢固语 Sandhya 家庭囤货带货码 KEQ3553-热评批「别推广有毒产品」、x9Qqj6sHNvc Sturmwaffel Temu 新零食实测-草莓米葵花籽化学味/发现过期商品指违法、VUCDMDPVHTM 巴西博主 Temu 魔法鱼卵孵化实验-显微镜见眼/年度鱼繁殖企划、Lhcp6qitvS0 Sam Pilgrim 14 件山地车配件-拖拽绳好评+100 镑券码、BwoPoOQzi-E Justina 派对礼服期待与现实-黑金 Midi 裙开衩偏险
+- 剔除噪声：2 个 → exclude:true
+  - 5q2BCi1XuNA：西语 Roblox Murder Mystery「my temu copy」，山寨玩梗
+  - n1vZqhMTxsI：西语 BACKROOMS FAILROOMS 游戏实况（Chuy Mine 频道，同 B7DG4r95oCk/p2H6zax07YQ 系列先例）
+- 合并：update_youtube.py 首跑 67 个（新增/更新 6），重放后 70 个
+- push 后校验：今日 6 条 AI 全在页面；近期 41 个 AI 视频无降级；62 个噪声 videoId（61 历史 + 今日 2）中发现云端把 11-22 剔除的 YurzaX1BCNo（西语政治时评）重新加回 → 删除，修复 commit dc33a20 推送成功
+- 页面最终：69 个视频，summarySource=ai 共 51 条
+- 流程稳定，无新踩坑
+
 ## 2026-11-21 20:30
 - 状态：成功（[OK]，push 两次成功，最终 commit 1c14c24；本地落后远端 1 commit → reset --hard origin/main 后重放 inbox，全程无冲突）
 - 抓取：8 个视频，全部带字幕，耗时约 1 分钟；详情拉取有瞬时 [SKIP] 超时提示但不影响选片
