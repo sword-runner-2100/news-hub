@@ -1,6 +1,12 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
-## 2026-11-18 08:45
+## 2026-11-25 08:50
+- 抓取成功：94 候选 → 8 视频全带字幕（其中 ttaOJC2jDUg 实际 transcript 为空、summarySource=description），inbox/youtube-2026-11-25.json。
+- AI 处理：4 个 AI 总结+标题热评翻译（僧伽罗语博主 Temu 家居美妆小件：卷发棒嫌造型假但留着、法式发夹牢靠、香水分装瓶、硅胶模具想回购，ASR 质量差已注明 n4XjqzwOah8 / 德语 RUBIX 15 欧 Temu 鼠标垫对比自家 RZ：Temu 包装廉价发错图案 2mm 打滑翘边、RZ 4mm 做工好黑五 30 欧，实为自家品牌推广已注明 AHD_KzbIR0g / 阿语居埃及阿尔及利亚博主厨房收纳+儿童房动物主题开箱、末尾引导先输码再下单联盟带货 98ugBpkEXqg / 罗马尼亚少女 Ariana 开箱 Temu 重生娃娃：出生证明/毯子/体温计/裙子，另给 Barbie 买迷你鞋+神秘盒 9WGofllu36g）；1 个无字幕仅翻译（Rose Salvatore 捏捏乐 0 元码 ALT617287 带货 ttaOJC2jDUg）；3 个剔除（K4aN4Q3kIzw 西语 RTVE 政论 "Braveheart de Temu"=政客贬称梗词、同 Temu Steph Curry/山寨白宫先例，字幕是阿语自动转写政治辩论 / k_skc2rNiTM 波语 VR 玩 "GTA VI z TEMU" 山寨游戏实况、同 11-24 YTtgpTVWuDo 先例 / DpgsNS3WxqE "TEMU Kylian Mbappe" 足球游戏球员贬称梗词、同 Temu Steph Curry 先例）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions 2ec644f）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（74 在页，新增/更新 6 个）。
+- 提交 58b2b49 推送成功（连带 3 个 staged memory 文件）。最终核验：74 视频、54 个 ai 全带 aiSummary 与中文标题、标记零不一致、今日 5 条全在页、11-24 前日 AI 无降级、噪声零混入。核验清单教训：本次误把 ZUCqdsDctDM（11-17 保留的波黑家居 vlog）和 x8iYmHLbeOs（11-24 刚修复中文标题的日语 AI 视频）当噪声误报一轮，均已复核为正经条目——摘录清单时只抄明确"剔除"的 ID。临时脚本 /tmp/yt_ai_process_1125.py 已删除；scripts/ 与 .env.local 未动。
+
+## 2026-11-24 08:44
 - **抓取失败，未 push**：两次运行 fetch_youtube.py 均在搜索阶段失败——`[SKIP] 搜索失败（order=viewCount/date）：<urlopen error timed out>` + `[FAIL] YouTube 搜索没有返回任何结果`，各耗时 6m41s。
 - 根因：本机到 Google 系域名（googleapis.com / youtube.com）全部阻断（DNS 正常解析 172.217.x.x 但 TCP 不通，curl 超时），且当前无任何代理在运行（系统代理 HTTPEnable=0、常见本地代理端口 7890/1087/8118/10809/6152 全部连接拒绝、无 clash/mihomo 类进程）。GitHub/国内站点可达正常。昨日 08:51 能跑通说明平时有代理/VPN，今晨未开启。
 - 未产生 inbox 文件，未做 AI 处理，未合并，未提交。scripts/ 与 .env.local 未动。恢复方法：用户开代理后手动重跑或等下次定时触发。云端 GitHub Actions 9:00/21:00 照常跑，页面数据不会缺，只是缺本地 AI 字幕总结。
