@@ -318,6 +318,13 @@
 - push 流程遇坑同 11-15：工作区 memory 文件未暂存挡住 rebase → stash push → pull fast-forward（远端 Actions 4feef5b，+261 行）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（77 在页，新增/更新 7 个）。
 - 提交 a872cad 推送成功（连带 3 个 staged automation memory 文件）。临时脚本 /tmp/yt_ai_process_1119.py 已删除；scripts/ 与 .env.local 未动。
 
+## 2026-11-24 08:44
+- 抓取成功：97 候选 → 8 视频全带字幕，inbox/youtube-2026-11-24.json。
+- AI 处理：6 个 AI 总结+标题热评翻译（德语 Sturmwaffel Temu 新食品实测：草莓味葵花籽香精味重、发现过期商品指出在德国违法、牧场蘸酱接近正宗美式 x9Qqj6sHNvc / 英语 Sam Pilgrim 14 件平价山地车配件：7 镑拖车绳好评、8.5 镑迷你打气筒应急用、100 镑券码联盟带货，阿语自动译文 Lhcp6qitvS0 / 英语 Justina 派对裙期待 vs 现实：24 欧金绣黑裙贴合但开衩偏高、整体偏正面，热评赞其以普通人身材对比 AI 模特，阿语自动译文 BwoPoOQzi-E / 西语 60 秒 BTS 粉丝 Temu 投影仪天花板投影带货短频 5Uslxk4TiDQ / 希腊语 Kakos Xamos 开箱：先吐槽税费 3→5 欧客服踢皮球一个月，后实测电动切菜刀/假胡子/真空泵/防风伞/篮球网兜+任天堂授权周边 hLBtHwHz_CE / 乌克兰语 #ad 冬裙试穿带货码 alc641826 解锁 4000₴ 券包，热评不买账，如实注明推广 S1N0-fn4xHM）；0 个无字幕；2 个剔除（n1vZqhMTxsI 西语 Roblox "BACKROOMS pero de TEMU (FAILROOMS)" 游戏实况山寨梗词，同 11-12 已剔 B7DG4r95oCk 性质 / YTtgpTVWuDo 蒙古语 GTA 风格游戏视频 "GTA VI ordered from Temu" 劣质山寨梗词，同 "TEMU GTA 6" 先例，ASR 乱码）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions 20c7fa9）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（74 在页，新增/更新 7 个）。
+- **修复 5 条历史 AI 条目缺中文标题**：bmSgnntcD3I（11-22 Ady Ursu 显示器带货）/ pnJqz-qaCb4（日语双 11 劣质品盘点）/ x8iYmHLbeOs（日语一番赏抓娃娃+Temu 展示柜）/ Gjl99XLVVDI（AYKA 14 新年礼物 vlog）/ ZeAU4A0HQ94（巴西葡语年末开箱）均带 aiSummary 但 title=原文（疑 Actions 基底带回旧版本），已按摘要补中文标题。
+- 提交 d18ef1b 推送成功（连带 3 个 staged memory 文件）。最终核验：74 视频、54 个 ai 全带 aiSummary 与中文标题、标记零不一致、今日 6 条全在页、11-22 前日 AI 无降级、今日剔除 2 条与历史噪声清单（9fDZN1D_c3U/SUDq7QIX594/e-_Q7ojxX_c/YdU5oGKMiSQ/jE2w4jxhAXw/8dHbH48Aqwo/kxDNpIdvtWE/YurzaX1BCNo）零混入。临时脚本 /tmp/yt_ai_process_1124.py 已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-11-22 08:39
 - 抓取成功：99 候选 → 8 视频全带字幕，inbox/youtube-2026-11-22.json。
 - AI 处理：7 个 AI 总结+标题热评翻译（英语 James Charles 用 Temu 最畅销化妆品画全脸——Temu 赞助+码 James300、NYX 妆前乳/气垫粉底好评、15 美元刷具套装超值但附带海绵差，阿语自动译文 axwpX_OTfzE / 英语 Grind Hard Plumbing Co 碎木机续测：最便宜机 6h22m 皮带脱轨报废、两倍价中国机钢材/液压/齿全面更好、4-5 千美元 vs 名牌 3.8 万判物有所值 j_4qcYAOD4g / 英语 FaZe Rug 只用 Temu 食材做海鲜煮：真有雪蟹腿+Kirkland 虾+海蜇头、一周到货、德文·布克评委桥段，孟加拉语自动译文 hK1Su-IKAL4 / 马拉雅拉姆语圣诞礼物带货码 kge6462 纯推广已注明 Za-4PrX-8Ag / 日语 1.2 万日元"日本制造 NEC"笔记本实为 2015 年 13 年前旧机：4GB 内存电池不充、被人提前配置、HDD 换 SSD 掩饰卡顿、Win11 疑固件 OEM 密钥激活违规，英语自动译文 wa6S8xI_ONE / 罗马尼亚语 Ady Ursu 电竞显示器 500 列伊券带货广告已注明 bmSgnntcD3I / 僧伽罗语 4 万卢比生日囤货：鞋 37/38、黑 T 恤面料好比本地便宜、末尾试穿 cn984jlvDBw）；0 个无字幕；1 个剔除（YurzaX1BCNo 西语 Juan Soto Ivars 时政评论"进步派恋爱界的 Temu"，Temu 为山寨比喻梗词与平台无关）。

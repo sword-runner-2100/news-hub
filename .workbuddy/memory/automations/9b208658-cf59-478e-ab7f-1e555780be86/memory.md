@@ -566,3 +566,16 @@
 - push 后校验：今日 6 条 AI 全在页面；近期 11 个 AI 视频无降级；发现云端把 11-20 剔除的噪声 kxDNpIdvtWE（哥伦比亚政治评论）重新加回 → JSON 删除，修复 commit 1c14c24 推送成功
 - 页面最终：80 个视频，summarySource=ai 共 58 条；58 个噪声 videoId 零回归
 - 流程稳定，无新踩坑
+
+## 2026-11-24 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 0e7e13d；本地落后远端 1 commit → commit → stash -u → pull --rebase 冲突 → abort → reset --hard origin/main 重放 inbox → 只 add index.html → push）
+- 抓取：[OK]，8 个视频，全部带字幕；但首次运行卡死 33 分钟——进程阻塞在无超时的 SSL_read（连接 localhost:3095 死代理隧道，socket 仍 ESTABLISHED；同 10-27 代理故障模式，但当时 1082 端口 curl 实测正常、3095 拒连，推测脚本某请求走了死路径）；kill 后立即重试一次成功（用 python -u 重定向日志文件监控进度，tail 管道缓冲看不到中间输出）
+- AI 总结：7 个，其中 3 个复用 + 4 个新写
+  - 复用（11-24 凌晨档同 videoId，从 YOUTUBE_DATA 提取 aiSummary/title 复用，热评同文本沿用既有译文、likes 取本轮）：x9Qqj6sHNvc Sturmwaffel 新零食实测、BwoPoOQzi-E Justina 派对裙、Lhcp6qitvS0 Sam Pilgrim 山地车配件
+  - 新写：n4XjqzwOah8 斯里兰卡语小件 haul（文胸垫假体感/法式小夹/香水分装瓶，热评为僧伽罗语口语转写按大意翻译）、S1N0-fn4xHM 乌克兰广告冬裙试穿带货码 alc641826-热评吐槽廉价+照片版型不符、AHD_KzbIR0g 德语 15 欧 Temu 鼠标垫 vs RZ 对比-Temu 垫 2mm 翘边打滑货不对版-结尾带 rzgaming.de 推广已注明属竞品广告、dKQW3p1Gtc0 Temu 翻车合集 P7-山寨 Calvin Klein/5 码像童装/玩具尺寸摄像头/订门挡收到整扇门
+- 剔除噪声：1 个 → exclude:true
+  - n1vZqhMTxsI：西语 BACKROOMS FAILROOMS 游戏实况（Chuy Mine，11-24 凌晨档已剔，48h 窗口再次入选）
+- 合并：update_youtube.py 首跑 77 个，重放后 78 个；页面 videos 数组实际 77
+- push 后校验：今日 7 条 AI 全在页面且均有 aiSummary；62 个噪声 videoId 零回归；页面 ai 共 57 条，近期 16 个 AI 视频无降级
+- 新经验：抓取脚本卡死时先 sample 进程看栈（SSL_read 无超时阻塞）+ lsof 看连接目标即可定性代理问题，kill 重试比干等高效；监控长时间脚本用 python -u 重定向文件而非 tail 管道
+- 流程稳定
