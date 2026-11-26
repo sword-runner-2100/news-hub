@@ -579,3 +579,19 @@
 - push 后校验：今日 7 条 AI 全在页面且均有 aiSummary；62 个噪声 videoId 零回归；页面 ai 共 57 条，近期 16 个 AI 视频无降级
 - 新经验：抓取脚本卡死时先 sample 进程看栈（SSL_read 无超时阻塞）+ lsof 看连接目标即可定性代理问题，kill 重试比干等高效；监控长时间脚本用 python -u 重定向文件而非 tail 管道
 - 流程稳定
+
+## 2026-11-25 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 22d175e；本地落后远端 1 commit → commit → stash -u → pull --rebase 冲突 → abort → reset --hard origin/main 重放 inbox → 只 add index.html → push）
+- 抓取：[OK]，8 个视频，全部带字幕，耗时约 1 分钟
+- AI 总结：3 个，其中 1 个复用 + 2 个新写
+  - 复用：AHD_KzbIR0g 德语 15 欧 Temu 鼠标垫 vs RZ 对比（11-24 同视频，从 YOUTUBE_DATA 提取 aiSummary/title/译文复用，likes 取本轮）
+  - 新写：98ugBpkEXqg 阿尔及利亚语开箱带货-冰箱收纳盒+儿童房动物装饰+结尾提示先输码、UGbEs3gCpBk 英语黑五全场 1 美元推广码 KFZ8568-热评吐槽其接 Temu 商单「本该嘲讽大公司却替它们打工」
+- 仅翻译：1 个（ttaOJC2jDUg 捏捏乐零元购码 ALT617287 无字幕，只译标题热评）
+- 剔除噪声：4 个 → exclude:true
+  - Zatq18Uytyo：西语搞笑小品，女方拒绝在 Temu/Shein/Amazon 快拍晒男友，Temu 仅作荒诞平台玩梗
+  - K4aN4Q3kIzw：西语 RTVE 政治辩论，「Braveheart de Temu」=山寨俚语
+  - k_skc2rNiTM：波兰语 VR 玩「GTA VI z TEMU」山寨游戏实况，与购物无关
+  - DpgsNS3WxqE：「TEMU Kylian Mbappe」足球游戏视频，山寨玩梗
+- 合并：update_youtube.py 重放后页面 76 个视频（新增/更新 7）
+- push 后校验：今日 3 条 AI 全在页面且均有 aiSummary；翻译-only 条目正常；66 个噪声 videoId（62 历史 + 今日 4，去重后）零回归；近期 10 个 AI 视频无降级；页面 ai 共 55 条
+- 流程稳定，无新踩坑
