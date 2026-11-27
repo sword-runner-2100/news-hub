@@ -595,3 +595,15 @@
 - 合并：update_youtube.py 重放后页面 76 个视频（新增/更新 7）
 - push 后校验：今日 3 条 AI 全在页面且均有 aiSummary；翻译-only 条目正常；66 个噪声 videoId（62 历史 + 今日 4，去重后）零回归；近期 10 个 AI 视频无降级；页面 ai 共 55 条
 - 流程稳定，无新踩坑
+
+## 2026-11-26 20:30
+- 状态：成功（[OK]，push 一次成功，最终 commit 9dd1576；本地落后远端 1 commit → commit → stash -u → pull --rebase 冲突 → abort → reset --hard origin/main 重放 inbox → 只 add index.html → push）
+- 抓取：[OK]，8 个视频，全部带字幕，耗时约 1.5 分钟（后台运行+日志重定向，无卡死）
+- AI 总结：7 个，其中 1 个复用 + 6 个新写
+  - 复用：UGbEs3gCpBk 英语黑五 1 美元推广码 KFZ8568（11-25 同 videoId，从 YOUTUBE_DATA 提取 aiSummary/title 复用，热评沿用译文、likes 取本轮）
+  - 新写：w4atv2kC3OU 俄语年度收官开箱-3D 打印置物架/吸盘挂钩/香薰松果-提醒卖家图显大-字幕自动译成英语、LEivAVx_7SA 阿根廷无购汇额度硬买五大平台-包裹均正常送达-Temu 三件分三包未卡额度、_eApDsBhkz0 西语 Skishies 玩具罐零元购码 khc3877-热评质疑零元购实际自费-字幕自动译成阿语、fXjaeNmRCd8 澳洲印地语零元购带货码-Barbie 床单/排灯节夜灯-字幕自动译成阿语、gTFhMXM1I0U Sturmwaffel 实测 Temu 土耳其烤肉味牛肉干-鸡肉款更好但 25 克 2 欧偏贵-两款各 6 分、izPOZem2xqs 日语 Labubu+捏捏乐爆买-海贼王联名抽到萨博/罗-券码 khj8629-无热评
+- 剔除噪声：1 个 → exclude:true
+  - Zatq18Uytyo：西语搞笑小品，女方拒绝在 Temu/Shein/Amazon 快拍晒男友，Temu 仅作荒诞平台玩梗（11-25 已剔，48h 窗口再次入选）
+- 合并：update_youtube.py 首跑 85 个，重放后 85 个（新增/更新 8）
+- push 后校验：今日 7 条 AI 全在页面且均有 aiSummary；67 个噪声 videoId（66 历史 + 今日 1，去重后）零回归；页面 85 视频 / ai 共 62 条
+- 流程稳定，无新踩坑

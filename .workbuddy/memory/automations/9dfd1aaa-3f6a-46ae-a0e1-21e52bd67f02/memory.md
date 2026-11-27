@@ -1,5 +1,11 @@
 # Automation 9dfd1aaa 执行记录（每日 YouTube Temu 抓取 + AI 总结）
 
+## 2026-11-26 08:37
+- 抓取成功：98 候选 → 8 视频全带字幕，inbox/youtube-2026-11-26.json。
+- AI 处理：8 个 AI 总结+标题热评翻译、0 个剔除（8 条均与 Temu 相关）（罗马尼亚 Ariana 重生娃娃开箱 9WGofllu36g——与 11-25 同条正常重处理 / 英语黑五 1 美元码 kfz8568 赞助推广短频、热评吐槽恰饭已注明 UGbEs3gCpBk / 俄语 YES-YES 新年开箱：3D 打印置物架/窗贴/灯串吸盘/多口充电器、英文自动译文字幕 w4atv2kC3OU / 德语 Sturmwaffel Döner 牛肉干 6 分判太贵 gTFhMXM1I0U / 希腊情侣 Pirikompilia 三件数码：音箱/激光测距仪 11 分/补光灯、码 kgt4656 带货 WnefsTLeYvs / 英语 Alma Ngur 餐厅布置 Temu+Shein 家居 vlog ecmfBwSb6Ew / 德语 Sturmwaffel Snickers Pods 到货即过期 2026-07 判退货 5 分 YCaqtjUBnv4 / 德语 Sturmwaffel 香肠雪茄无烟熏味 3 分 zFPud7t1U2M）。
+- push 流程：stash -u 后 rebase fast-forward（远端 Actions bd466c4）→ stash pop 时 index.html 冲突 → checkout HEAD 取远端基底 + drop stash → 重跑 update_youtube.py（82 在页）。
+- 提交 039e873 推送成功（连带 2 个 staged memory 文件）。最终核验：82 视频、58 个 ai 全带 aiSummary 与中文标题、今日 8 条全在页、昨日 4 条 AI 无降级、22 条重点噪声清单零混入。临时脚本 /tmp/yt_ai_process_1126.py 已删除；scripts/ 与 .env.local 未动。
+
 ## 2026-11-25 08:50
 - 抓取成功：94 候选 → 8 视频全带字幕（其中 ttaOJC2jDUg 实际 transcript 为空、summarySource=description），inbox/youtube-2026-11-25.json。
 - AI 处理：4 个 AI 总结+标题热评翻译（僧伽罗语博主 Temu 家居美妆小件：卷发棒嫌造型假但留着、法式发夹牢靠、香水分装瓶、硅胶模具想回购，ASR 质量差已注明 n4XjqzwOah8 / 德语 RUBIX 15 欧 Temu 鼠标垫对比自家 RZ：Temu 包装廉价发错图案 2mm 打滑翘边、RZ 4mm 做工好黑五 30 欧，实为自家品牌推广已注明 AHD_KzbIR0g / 阿语居埃及阿尔及利亚博主厨房收纳+儿童房动物主题开箱、末尾引导先输码再下单联盟带货 98ugBpkEXqg / 罗马尼亚少女 Ariana 开箱 Temu 重生娃娃：出生证明/毯子/体温计/裙子，另给 Barbie 买迷你鞋+神秘盒 9WGofllu36g）；1 个无字幕仅翻译（Rose Salvatore 捏捏乐 0 元码 ALT617287 带货 ttaOJC2jDUg）；3 个剔除（K4aN4Q3kIzw 西语 RTVE 政论 "Braveheart de Temu"=政客贬称梗词、同 Temu Steph Curry/山寨白宫先例，字幕是阿语自动转写政治辩论 / k_skc2rNiTM 波语 VR 玩 "GTA VI z TEMU" 山寨游戏实况、同 11-24 YTtgpTVWuDo 先例 / DpgsNS3WxqE "TEMU Kylian Mbappe" 足球游戏球员贬称梗词、同 Temu Steph Curry 先例）。
